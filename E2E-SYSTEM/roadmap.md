@@ -1,8 +1,8 @@
 # ROADMAP — INTELLIGENT SYSTEMS INTEGRATION ENGINEERING
 
-**Bản đầy đủ v2.0 · 14/09/2026**
+**Bản đầy đủ · 14/09/2026 · hiệu chỉnh cho tình huống đã đi làm**
 **Domain gốc:** End-to-End Intelligent Systems Engineering
-**Trạng thái:** hoàn chỉnh — không nhánh nào bị nén, không mục nào cần zoom thêm
+**Trạng thái:** hoàn chỉnh — 38 lĩnh vực, không nhánh nào bị nén, không mục nào cần zoom thêm
 
 ---
 
@@ -30,58 +30,109 @@
 | A | Bill of materials — phần cứng theo phase |
 | B | Ngân sách giờ chi tiết |
 | C | Master checklist — toàn bộ checkpoint |
+| D | Bản đồ công việc ↔ roadmap · giờ quy đổi |
 
 ---
 
-# 0. GIẢ ĐỊNH ĐÃ CHỐT
+# 0. GIẢ ĐỊNH ĐÃ CHỐT VÀ TÌNH HUỐNG THỰC TẾ
 
-| Giả định | Giá trị | Trạng thái |
+| Hạng mục | Giá trị | Trạng thái |
 |---|---|---|
-| Điểm xuất phát | Zero | Giả định |
-| Thời gian | **25–30 h/tuần** → ~1.320 h/năm → **~6.600 h trong 5 năm** | **Đã xác nhận: không phải ràng buộc** |
-| Phần cứng | **Có mua, ngân sách mở** | **Đã xác nhận** |
-| Ngôn ngữ | Đọc tài liệu kỹ thuật tiếng Anh | Giả định |
-| Máy tính | PC/laptop bình thường, không GPU rời mạnh | Giả định — **xem 0.2** |
-| Tài nguyên | Free-first, chấp nhận trả phí khi khó thay thế | Giả định |
-| Vị trí | Hà Nội, Việt Nam | Đã biết |
+| **Nghề nghiệp** | Kỹ sư tự động hóa, **đang thử việc** — IPC E&C, tổng thầu EPC năng lượng và công nghiệp | **ĐÃ XÁC NHẬN** |
+| **Nội dung công việc** | Giai đoạn tìm hiểu. Hệ sinh thái hỗn hợp, nhiều **Siemens và ABB** | **ĐÃ XÁC NHẬN** |
+| **Mô hình công ty** | Tổng thầu EPC: thiết kế → mua sắm → thi công → chạy thử → bàn giao. **Không làm O&M dài hạn** | **ĐÃ XÁC NHẬN** |
+| **Đích đến** | **Liên ngành** — không giới hạn ở năng lượng, không thuần một mảng nào | **ĐÃ XÁC NHẬN** |
+| Điểm xuất phát | Zero ở nhánh phần mềm/CS; **mới bắt đầu** ở nhánh tự động hóa | Suy ra từ "đang thử việc" |
+| Thời gian tự học | **12–18 h/tuần** ngoài công việc → ~720 h/năm → **~3.600 h / 5 năm** | Ước tính, cần xác nhận |
+| Giờ công việc quy đổi | **~2.100 h / 5 năm** ở các nhánh cụ thể — xem **Phụ lục D** | Ước tính |
+| Phần cứng | Có mua, ngân sách mở | **ĐÃ XÁC NHẬN** |
+| Vị trí | Hà Nội | |
 
-## 0.1 — Điều gì đã đổi khi hai ràng buộc được gỡ
+---
 
-Việc bạn xác nhận **có phần cứng** và **thời gian không phải vấn đề** không chỉ làm roadmap nhanh hơn. Nó đổi ba thứ ở tầng kiến trúc:
+## 0.1 — Nguyên tắc biên tập của bản v3
 
-**(1) Spine hardware trở thành spine thật, không phải nhánh phụ.**
-Ở bản v1, C6 (embedded) và C7 (sensing) phải giữ ở mức thiểu số vì rủi ro không có thiết bị. Giờ cả hai lên mức core đầy đủ, và mục tiêu của C6 nâng từ Advanced lên **Advanced→Expert**. Điều này kéo theo S2 (điện tử) và S3 (control theory) tăng độ sâu, và A1 (robotics) từ adjacent lên ranh giới adjacent–supporting.
+Bản v3 giữ **nguyên vẹn phạm vi** của v2: 38 lĩnh vực, 12 nhánh core, 8 supporting, 6 adjacent, 9 peripheral.
 
-**(2) Mức Expert trở nên khả thi — ở 2–3 nhánh, không phải ở tất cả.**
-6.600 h so với 3.600–4.500 h của bản v1 là gấp rưỡi. Theo thang §3, Expert nghĩa là *tự implement lại được các thành phần cốt lõi*. Với ngân sách này, Expert khả thi ở đúng 2–3 nhánh. Chọn nhánh nào là quyết định ở §11, không phải quyết định ngẫu nhiên.
+**Tình huống nghề nghiệp đổi ba thứ, và chỉ ba thứ:**
 
-**(3) Mốc đi làm dịch sớm lên, không muộn đi.**
-Trực giác sai ở đây: nhiều giờ hơn ⇒ học được nhiều hơn trước khi đi làm ⇒ nên đi làm muộn hơn. Sai. Nhiều giờ hơn nghĩa là bạn đạt ngưỡng tuyển được **sớm hơn**, và vì kinh nghiệm tổ chức là thứ duy nhất không tự học được (§2.3), bạn nên thu hoạch nó sớm hơn. Mốc dịch từ tháng 18 xuống **tháng 12–15**.
+| Đổi | Không đổi |
+|---|---|
+| **Trình tự** — học gì trước, học gì sau | **Phạm vi** — vẫn đủ 38 lĩnh vực |
+| **Phân bổ giờ** — nhánh nào tốn giờ tự học, nhánh nào công việc trả hộ | **Nhãn** core/supporting/adjacent/peripheral |
+| **Chi phí** — một số nhánh rẻ đi đáng kể | **Gradient độ sâu** theo khoảng cách tới root |
 
-## 0.2 — Ràng buộc duy nhất còn lại: GPU
+**Lý do giữ nguyên nhãn:** tiêu chí gán nhãn ở §1.3a là *khoảng cách tới vòng lặp*. Tiêu chí đó là thuộc tính của **domain**, không phải của **người học**. Việc bạn đi làm ở ngành năng lượng không làm cho control theory gần vòng lặp hơn — nó chỉ làm cho việc học control theory **rẻ hơn** với bạn. Hai thứ đó khác nhau, và lẫn lộn chúng là cách nhanh nhất để biến một roadmap liên ngành thành một roadmap chuyên ngành mà không ai để ý.
 
-Đây giờ là ràng buộc thật sự duy nhất. Ba lựa chọn, xếp theo khuyến nghị:
+**Cái được thêm vào** là kiến thức trước đây bị thiếu chứ không phải kiến thức được ưu ái: giao thức công nghiệp (C5.16), PLC/DCS như mô hình tính toán (C6.16), điều khiển quá trình công nghiệp (S3.8), mô hình ISA-95/Purdue (C12.15), an toàn OT theo IEC 62443 (S4.9). Đây là **lỗ hổng độ phủ của v2**, và chúng đáng được thêm vào kể cả nếu bạn làm nghề khác.
 
-| Phương án | Chi phí | Phù hợp khi | Đánh đổi |
-|---|---|---|---|
-| **Thuê theo giờ** (Vast.ai, RunPod, Lambda) | ~0,2–0,6 USD/h lớp T4/A10; ~1,5–3 USD/h lớp A100/H100 | **Khuyến nghị cho Phase 1–3** | Không có máy để nghịch lúc 2h sáng; phải có kỷ luật bật/tắt |
-| **Mua GPU tiêu dùng** (RTX 4090/5090 hoặc tương đương, ≥24GB VRAM) | ~40–70tr VND | Phase 4+, khi bạn chạy inference workload liên tục | Vốn chết; lỗi thời trong 3 năm; nhưng VRAM là thứ bạn cần, không phải FLOPS |
-| **Free tier** (Colab, Kaggle) | 0 | Phase 1–2, học khái niệm | Timeout, không reproducible, không dùng được cho bất cứ thứ gì nghiêm túc |
+---
 
-**[Recommendation]** Thuê theo giờ suốt Phase 1–3. Cân nhắc mua ở đầu Phase 4, và **chỉ khi** bạn đã đo được rằng chi phí thuê hàng tháng của bạn vượt 1/24 giá máy. Trước mốc đó, mua GPU là mua sự tiện lợi chứ không phải mua năng lực.
+## 0.2 — Điều gì đổi so với v2
 
-Lưu ý kiến trúc [Inference]: ràng buộc GPU đẩy bạn về phía **inference, quantization, serving, tối ưu** thay vì **training quy mô lớn**. Với domain này, đó là hướng đúng — không phải sự thỏa hiệp. Giá trị thị trường của người biết đưa model vào hệ thống cao hơn và bền hơn giá trị của người biết train model, ở mọi mức trừ đỉnh của các phòng lab frontier.
+### (1) Ngân sách tự học giảm 45%, nhưng ngân sách hiệu dụng chỉ giảm 13%
 
-## 0.3 — Giả định nào còn lại có thể sai và sẽ đổi kiến trúc
+| | v2 (chưa đi làm) | v3 (đã đi làm) |
+|---|---|---|
+| Tự học | 6.600 h | **3.600 h** |
+| Công việc quy đổi | 0 | **~2.100 h** |
+| **Hiệu dụng** | **6.600 h** | **~5.700 h** |
+
+Giờ công việc quy đổi tập trung vào đúng những nhánh **đắt nhất khi tự học**: C7 (cần thiết bị và hiện tượng vật lý thật), S2 (cần mạch và tải thật), S3 (cần đối tượng điều khiển thật), C12 (cần hệ thống thật và người khác phản biện). Nên phân bố thực tế tốt hơn con số tổng gợi ý.
+
+### (2) Mức Expert tụt từ 2–3 nhánh xuống 1–2 nhánh
+
+Và ứng viên đổi. Ở v2 tôi dự kiến C6 hoặc C8. Giờ:
+
+| Ứng viên | Lập luận |
+|---|---|
+| **C8 · ML & inference systems** | Nhánh tốn giờ tự học lớn nhất, công việc không cho gì, và là cung `learn/infer` mà cả công việc lẫn ngành OT đều đang thiếu |
+| **C12 · Systems architecture** | Nhánh tổng hợp; công việc cho **thực hành** (tích hợp đa nhà thầu, commissioning xuyên tầng), tự học cho **từ vựng và khung** |
+| C1 · Programming | Khả thi nhưng ít khác biệt hóa hơn hai cái trên |
+
+**[Recommendation]** Chưa chốt bây giờ. Điểm rẽ nhánh ở §11.4 dịch sang **tháng 24–30**, sau khi bạn đã qua ít nhất một chu kỳ dự án EPC đầy đủ.
+
+### (3) Khuyến nghị mạnh nhất của v2 đã hết hiệu lực
+
+§2.3 của v2 dành nhiều chỗ lập luận cho *"đi làm từ tháng 12–15, không đợi học xong"*. **Vô nghĩa với bạn.** §11.2 của v2 — *"vào bằng software/infra, khác biệt hóa bằng edge + AI systems"* — cũng vậy: chiến lược đó tồn tại để giải bài toán "làm sao có việc", và bài toán đó đã xong.
+
+Thay bằng §2.3 mới: **cái gì công việc cho, cái gì công việc không cho, và cái không cho phải mua ở đâu.**
+
+### (4) Cung `observe → adapt` trở thành lỗ hổng nghiêm trọng, và nguồn bù đắp duy nhất là project cá nhân
+
+Đây là hệ quả của việc công ty **không làm O&M dài hạn**. Phân tích đầy đủ ở §2.3.
+
+Hệ quả cụ thể: yêu cầu "**chạy 30 ngày ngoài thực địa**" của P3 và "**90 ngày vận hành**" của P6 chuyển từ *nên có* thành **không thương lượng**. Ở v2 chúng là bài tập; ở v3 chúng là nguồn kinh nghiệm vận hành dài hạn duy nhất bạn có.
+
+### (5) Timeline giãn ra
+
+3.600 h ở 15 h/tuần × 48 tuần = đúng 5 năm cho phần tự học. Nhưng vì phải chờ công việc cấp kinh nghiệm ở một số nhánh, và vì giai đoạn thi công EPC có thể ăn hết năng lượng theo đợt, **kỳ vọng thực tế là 5–6,5 năm** thay vì 5 năm.
+
+---
+
+## 0.3 — Ràng buộc còn lại
+
+| Ràng buộc | Mức độ | Xử lý |
+|---|---|---|
+| **Năng lượng sau giờ làm** | **Cao nhất** | Ràng buộc thật sự của v3, không phải tiền cũng không phải thiết bị. Xem §14.6 về nhịp độ |
+| **Đợt thi công công trường** | Cao, theo chu kỳ | Có giai đoạn tự học sẽ về gần 0. Thiết kế roadmap chịu được điều đó: dùng khối dài ngày nghỉ, và chấp nhận tháng mất |
+| GPU | Trung bình | Thuê theo giờ suốt Phase 1–3 (~0,2–0,6 USD/h lớp T4/A10). Chỉ mua khi chi phí thuê tháng vượt 1/24 giá máy |
+| Truy cập dữ liệu vận hành thật | **Cao** | Công ty không làm O&M. Xem §2.3 về cách bù |
+
+**[Recommendation] về năng lượng:** đừng cố giữ 15 h/tuần đều đặn. Thiết kế theo **tuần tốt và tuần xấu**: tuần tốt 20–25 h, tuần xấu 5 h. Trung bình vẫn ra 15. Cố ép đều là cách bỏ cuộc phổ biến nhất của người vừa đi làm vừa tự học.
+
+---
+
+## 0.4 — Giả định còn lại có thể sai
 
 | Giả định | Nếu sai thì đổi gì |
 |---|---|
-| Bạn bắt đầu từ zero thật | Nếu đã biết lập trình ở mức Intermediate, bỏ Phase 0 và nửa đầu Phase 1 → tiết kiệm ~400–600 h, mốc đi làm dịch xuống tháng 8–10 |
-| Mục tiêu là đi làm / xây sản phẩm | Nếu mục tiêu là nghiên cứu, §11 sai hoàn toàn: trọng số dịch sang C8+C3+S1, bỏ C6/C7, và bạn cần bằng cấp chứ không cần roadmap này |
-| 25–30 h/tuần bền được trong 5 năm | Nếu tụt xuống dưới 15 h/tuần trong ≥3 tháng, quay lại kiến trúc v1 (thu hẹp spine), đừng kéo dài timeline |
-| Sức khỏe thể chất đủ cho debug phần cứng hàng giờ | Nếu không, C6/C7 hạ mục tiêu và spine dịch sang SC-A (§11) |
+| 12–18 h/tuần bền được | Nếu thực tế dưới 8 h/tuần trong ≥3 tháng: **thu hẹp phạm vi** theo thứ tự ở Phụ lục B.7, đừng kéo dài timeline |
+| Qua thử việc và ở lại ≥2 năm | Nếu đổi việc sớm, xem lại §11.6 — mô hình công ty mới quyết định nhánh nào được trả hộ |
+| Công việc sẽ cấp kiến thức OT theo thời gian | Nếu 12 tháng đầu chỉ làm giấy tờ và giám sát nhà thầu phụ, giờ quy đổi ở Phụ lục D phải cắt mạnh, và ngân sách tự học phải gánh thêm C7/S2/S3 |
+| Bạn thật sự muốn liên ngành, không phải chuyên sâu | Nếu sau 2 năm bạn thấy mình muốn chuyên sâu một mảng, roadmap này vẫn dùng được — chỉ cần đọc §11.5 và đổi trọng số |
+| Sức khỏe đủ cho công trường + tự học | Nếu không: giảm project phần cứng, tăng nhánh làm được trên laptop (C1, C2, C8, C10) |
 
----
 
 # 1. DOMAIN NORMALIZATION
 
@@ -166,69 +217,140 @@ Tự mình đưa được một hệ thống từ ý tưởng tới vận hành,
 
 Và điều kiện bao trùm: **khi một thành phần hỏng, bạn biết ngay nó hỏng, biết vì sao, và hệ thống không hỏng theo.**
 
-## 2.2 — Hiệu chỉnh với ngân sách 6.600 h
+**North Star này không đổi theo tình huống nghề nghiệp.** Nó mô tả một năng lực, không mô tả một ngành.
 
-**[Inference]** Tham chiếu: chương trình kỹ sư 4 năm + 3 năm đi làm ≈ 11.000–13.000 h *có cấu trúc, có mentor, có hệ thống production thật để làm hỏng*. Bạn có ~50–55% ngân sách đó, và ban đầu không có ba thứ vừa kể — nhưng roadmap này chèn "đi làm" từ tháng 12–15, nên bạn sẽ có chúng trong ~3,5–4 năm cuối.
+---
 
-### Khả năng cao ĐẠT được sau 5 năm
+## 2.2 — Hiệu chỉnh với ngân sách ~5.700 h hiệu dụng
 
-| Mức | Số nhánh | Nhánh nào (dự kiến, phụ thuộc spine §11) |
+**[Inference]** Tham chiếu: chương trình kỹ sư 4 năm + 3 năm đi làm ≈ 11.000–13.000 h *có cấu trúc, có mentor, có hệ thống production thật*. Bạn có ~45–50% ngân sách đó — nhưng **có hai trong ba thứ vừa kể ngay từ đầu**: cấu trúc (dự án EPC có deadline và nghiệm thu) và hệ thống thật (nhà máy đang được xây và chạy thử). Thứ còn thiếu là mentor cho nhánh phần mềm, và hệ thống *vận hành dài hạn*.
+
+### Khả năng cao ĐẠT được sau 5–6 năm
+
+| Mức | Số nhánh | Nhánh nào (dự kiến — chốt ở §11.4, tháng 24–30) |
 |---|---|---|
-| **Expert** — tự implement lại core components, đánh giá được thiết kế người khác, dạy lại được | **2–3** | C6 (embedded) hoặc C8 (ML systems), + C1 (programming), + C12 (architecture) ở mức chạm |
-| **Advanced** — thiết kế được giải pháp, chẩn đoán được lỗi không điển hình | **7–9** | C3, C4, C5, C9, C10, C11 và phần còn lại của C6/C7/C8 |
-| **Intermediate** | 4–6 | Supporting branches: S1, S2, S4, S5 |
-| **Working / Basic** | phần còn lại | S3, S6, S7, S8, adjacent |
+| **Expert** — tự implement lại core components, đánh giá được thiết kế người khác, dạy lại được | **1–2** | C8 (ML & inference systems) hoặc C12 (systems architecture) |
+| **Advanced** | **6–8** | C1, C5, C7, C10, C12, S3 và 2–3 trong nhóm C3/C4/C6/C9/C11 |
+| **Intermediate** | 8–10 | Phần còn lại của core, cộng S1, S2, S4, S5, S6 |
+| **Working / Basic** | phần còn lại | S7, S8, adjacent |
 
 Năng lực tổng hợp dự kiến:
-- Thiết kế và vận hành được hệ end-to-end quy mô trung bình từ đầu đến cuối, một mình
-- **Debug xuyên tầng** — năng lực hiếm và là điểm bán hàng thật của bạn
-- Đọc, phê bình và cải thiện được thiết kế của người khác
-- Học một công nghệ mới trong nhánh đã quen trong vài ngày, không vài tháng
+- Thiết kế và vận hành được hệ end-to-end quy mô trung bình, một mình
+- **Debug xuyên tầng** — và ở bạn là xuyên cả tầng OT lẫn tầng IT, điều rất ít người làm được
+- Đọc, phê bình và cải thiện được thiết kế của người khác ở cả hai thế giới
 - Ước lượng được chi phí và độ trễ của một kiến trúc **trước khi** xây
+- Dịch được bài toán từ ngôn ngữ ngành này sang ngôn ngữ ngành kia — **đây là năng lực liên ngành thật sự, và nó hiếm**
 
-### Khả năng cao CHƯA đạt được — kể cả với 6.600 h
+### Khả năng cao CHƯA đạt được
 
 | Chưa đạt | Vì sao |
 |---|---|
-| Viết kernel/OS component dùng được trong production | Cần 3–5 năm làm toàn thời gian đúng việc đó; không phải vấn đề số giờ mà là vấn đề loại giờ |
-| Thiết kế PCB nhiều lớp cho tín hiệu tốc độ cao | Cần thiết bị đo chuyên dụng (VNA, scope băng thông cao) và vòng lặp fab thật |
-| Train foundation model từ đầu | Cần compute ở mức triệu đô; không phải giới hạn kỹ năng |
-| Vận hành hệ phân tán quy mô nghìn node | Không tự tạo ra được; chỉ có ở tổ chức đủ lớn |
-| Chịu trách nhiệm cho hệ safety-critical **được chứng nhận** | Cần quy trình tổ chức, chứng chỉ, và bảo hiểm trách nhiệm — không phải kiến thức |
+| Expert ở >2 nhánh | Ngân sách tự học 3.600 h không đủ cho ba nhánh cùng lúc |
+| Viết kernel/OS component dùng được trong production | Cần 3–5 năm toàn thời gian đúng việc đó |
+| Thiết kế PCB nhiều lớp cho tín hiệu tốc độ cao | Cần thiết bị đo chuyên dụng và vòng lặp fab |
+| Train foundation model từ đầu | Cần compute ở mức triệu đô |
+| Vận hành hệ phân tán quy mô nghìn node | Không tự tạo ra được |
+| **Chịu trách nhiệm cho hệ safety-critical được chứng nhận** | Cần quy trình tổ chức, chứng chỉ, bảo hiểm trách nhiệm — không phải kiến thức. Bạn sẽ **tiếp xúc** với nó ở công việc nhưng ở vai trò khác |
 | Chuyên gia đầu ngành ở bất kỳ nhánh nào | 5 năm là nhiều với một người, ít với một lĩnh vực |
 
-### Điểm mù duy nhất không thể tự học
+---
 
-Kinh nghiệm vận hành hệ production dưới tải thật, với người dùng thật, trong tổ chức thật, với ràng buộc ngân sách và deadline thật. Không project cá nhân nào thay thế được — vì project cá nhân không có: người khác phụ thuộc vào bạn, di sản code bạn không viết, yêu cầu mâu thuẫn từ nhiều bên, và hậu quả khi sai.
+## 2.3 — Công việc cho gì và không cho gì
 
-**Hệ quả kiến trúc:** roadmap này chèn "đi làm" vào Phase 2 như một **thành phần bắt buộc**, không phải phần thưởng sau khi học xong. Xem §9.
+Đây là mục thay thế cho "tại sao nên đi làm sớm" của v2. Bài toán đó đã xong; bài toán mới là **dùng công việc đúng cách**.
 
-## 2.3 — Tại sao "đi làm sớm" là khuyến nghị mạnh nhất trong tài liệu này
+### (a) Công việc cho — và cho ở chất lượng tự học không đạt được
 
-**[Recommendation, độ tin cậy: cao về hướng, trung bình về mốc thời gian cụ thể]**
+| Cái được | Nhánh | Vì sao tự học không thay được |
+|---|---|---|
+| **Hiện tượng vật lý ở quy mô thật** | C7, S2 | Nhiễu điện từ từ inverter, sụt áp trên đường dây dài, trôi cảm biến sau 6 tháng ngoài trời — không tái tạo được trên bàn |
+| **Đối tượng điều khiển thật** | S3 | Điều khiển một lò, một turbine, một hệ phát điện có quán tính và có hậu quả. PID trên mô phỏng không dạy được cảm giác này |
+| **Tích hợp đa nhà thầu, đa vendor** | C12.3 | Interface contract giữa hai hệ do hai công ty khác nhau làm, mỗi bên hiểu spec một kiểu — đây là **bài học đắt nhất của systems integration** và chỉ có ở công việc |
+| **Commissioning — debug xuyên tầng dưới áp lực** | C11, C12.5 | Triệu chứng ở tầng SCADA, nguyên nhân ở đấu dây. Tìm ra trong 4 giờ vì có người đang chờ |
+| **An toàn như ràng buộc thật** | S6, A5 | Không phải chương sách. Là thứ có người ký tên chịu trách nhiệm |
+| **Ràng buộc tổ chức** | S8, A4 | Deadline, ngân sách, nhà thầu phụ trễ, thay đổi thiết kế giữa chừng |
+| **Bề rộng** | C12, A4 | **EPC là lợi thế ít người nhận ra:** bạn thấy 10 nhà máy khác nhau trong 3 năm, thay vì 1 nhà máy trong 10 năm. Với đích liên ngành, đây là mô hình phơi nhiễm gần như lý tưởng |
 
-Lập luận:
+### (b) Công việc KHÔNG cho — và đây là toàn bộ ngân sách tự học của bạn
 
-1. **Kiến thức tự học và kiến thức tổ chức là hai loại khác nhau**, không thay thế được cho nhau. Người học 5 năm rồi đi làm có 5 năm loại A, 0 loại B. Người học 1 năm rồi đi làm 4 năm có ~1,5 năm loại A (vì vẫn học ngoài giờ) và 4 năm loại B. Loại B khan hiếm hơn.
-2. **Vòng phản hồi của việc đi làm chặt hơn nhiều.** Code của bạn bị review bởi người có động cơ tìm lỗi. Thiết kế của bạn gặp yêu cầu bạn không lường trước. Sự cố xảy ra lúc 3h sáng.
-3. **Thị trường 2026 cho tín hiệu rõ** [Fact]: cửa entry-level AI rất hẹp — khoảng 2,5% tin tuyển AI engineer nhắm vào 0–2 năm kinh nghiệm — trong khi backend/infrastructure vẫn là nhóm tuyển đông nhất theo số lượng thô. Càng đợi lâu để vào, bạn càng phải cạnh tranh ở nhóm "kinh nghiệm giữa" mà không có kinh nghiệm.
-4. **Rủi ro của việc đi làm sớm là rủi ro có thể đảo ngược.** Nếu công việc không tốt, bạn nghỉ. Nếu bạn học 4 năm rồi mới ra và thị trường đã đổi, bạn không lấy lại được 4 năm đó.
+| Không được | Nhánh | Hệ quả |
+|---|---|---|
+| Lập trình ở mức kỹ sư phần mềm | C1 | ST/ladder/FBD **không** thay được C và Python ở mức Advanced. Mô hình tư duy khác hẳn |
+| Thuật toán và cấu trúc dữ liệu | C2 | Không có gì |
+| Kiến trúc máy tính | C3 | Không có gì |
+| Hệ điều hành và concurrency | C4 | Khái niệm real-time có giao, phần còn lại không |
+| Machine learning và inference systems | C8 | **Không có gì — và đây là cung `learn/infer` của vòng lặp** |
+| Data engineering hiện đại | C9 | Historian SCADA ≠ Kafka/Parquet/time-series store hiện đại |
+| Hệ phân tán và cloud | C10 | Gần như không có gì |
+| Observability tầng phần mềm | C11 | **Bẫy:** alarm management trong SCADA giải quyết cùng vấn đề mệt mỏi cảnh báo nhưng bằng từ vựng và công cụ khác hoàn toàn. Đừng nhầm cái bạn biết với cái roadmap yêu cầu |
+| Thực hành phần mềm hiện đại | C1.10, C1.12, S5 | Git, CI, test tự động, code review, packaging — văn hóa OT bảo thủ với những thứ này, và có lý do chính đáng (vòng đời 20 năm, an toàn) |
 
-**Phản biện mạnh nhất chống lại khuyến nghị này** (tôi nêu để bạn tự cân): đi làm sớm có thể khóa bạn vào một nhánh hẹp và làm cạn năng lượng cho việc học nền. Đây là rủi ro thật. Cách phòng ngừa: chọn công việc theo tiêu chí *bạn học được gì* thay vì *lương bao nhiêu* trong 2 năm đầu, và bảo vệ ít nhất 10 h/tuần cho việc học ngoài công việc.
+### (c) Lỗ hổng nghiêm trọng nhất: cung `observe → adapt`
+
+Công ty là **tổng thầu EPC, không làm O&M dài hạn**. Chu trình là thiết kế → thi công → chạy thử → bàn giao → rời đi.
+
+Hệ quả, nói thẳng:
+
+```
+CUNG CỦA VÒNG LẶP        CÔNG VIỆC CHO?
+─────────────────────────────────────────
+sense                    ✓ mạnh
+transport                ✓ mạnh (giao thức OT)
+store                    ~ một phần (historian)
+learn                    ✗ không
+infer                    ✗ không
+decide                   ✓ nhưng dựa trên luật cứng
+act                      ✓ mạnh
+observe                  ~ chỉ tới lúc bàn giao
+adapt                    ✗ không
+```
+
+Bạn sẽ có **kinh nghiệm commissioning xuất sắc** và **không có kinh nghiệm vận hành dài hạn**. Đó là hai thứ khác nhau: cái đầu dạy bạn làm cho hệ chạy được; cái sau dạy bạn điều gì xảy ra với một hệ sau 18 tháng khi cảm biến trôi, khi phân phối dữ liệu dịch chuyển, khi người vận hành bắt đầu bỏ qua cảnh báo.
+
+**Ba nguồn bù đắp, xếp theo mức khả thi:**
+
+| Nguồn | Khả thi | Cách làm |
+|---|---|---|
+| **Project cá nhân vận hành dài** | **Cao — và là nguồn chính** | P3 chạy 30 ngày, P6 chạy 90 ngày. Ở v2 đây là bài tập; ở v3 đây là **nguồn kinh nghiệm vận hành duy nhất của bạn**. Không thương lượng |
+| Xin tham gia giai đoạn bảo hành/khắc phục sau bàn giao | Trung bình | Nhà thầu EPC thường có nghĩa vụ bảo hành. Đó là cửa sổ hẹp vào giai đoạn vận hành — xin vào |
+| Đổi sang nơi có vận hành | Thấp bây giờ, cân nhắc ở năm 3–5 | Xem §11.6. Không phải quyết định của hôm nay |
+
+**[Recommendation]** Đừng coi lỗ hổng này là lý do để rời công việc. EPC cho bạn bề rộng mà nơi vận hành không cho. Hãy coi nó là **đặc tả yêu cầu cho project cá nhân**: cái gì công việc không dạy, project phải dạy.
+
+### (d) Hệ sinh thái Siemens/ABB — cách không bị khóa
+
+Bạn sẽ học TIA Portal, STEP 7, có thể PCS 7, và phía ABB là 800xA hoặc AC500. Những thứ này **có giá trị trong ngành và gần như không chuyển nhượng ra ngoài ngành**.
+
+Thói quen rẻ, giá trị cộng dồn rất lớn: **với mỗi tính năng vendor bạn học, hỏi "khái niệm trung lập bên dưới là gì?"**
+
+| Bạn thấy ở công việc | Khái niệm bên dưới | Nhánh |
+|---|---|---|
+| Scan cycle của PLC | Vòng lặp tất định, WCET, jitter | C4.10, C6.16 |
+| Organization Block / ngắt chu kỳ | ISR, lập lịch rate-monotonic | C4.2, C6.2 |
+| Hardware config, GSD/GSDML | Mô tả thiết bị, device tree | C4.12, C6.1 |
+| Profinet IRT | Mạng thời gian thực, đồng bộ đồng hồ | C5.3, C7.9 |
+| Faceplate, alarm class trong SCADA | Thiết kế cảnh báo, triệu chứng vs nguyên nhân | C11.11, A3 |
+| Redundancy S7-400H / 800xA | Dự phòng nóng, split-brain, fencing | S6.3, C10.4 |
+| Historian và trend | Lưu trữ chuỗi thời gian, downsampling | C9.5 |
+
+Đây chính là §1.1 của prompt gốc — *nguyên lý trước công cụ* — áp vào đời sống hằng ngày. Làm được điều này thì 5 năm ở Siemens/ABB trở thành 5 năm học systems engineering. Không làm được thì nó là 5 năm học một phần mềm.
+
+---
 
 ## 2.4 — Bối cảnh thị trường (Fact, 9/2026 — sẽ cũ)
 
-| Dữ kiện | Hàm ý cho roadmap |
+Bạn đã có việc nên phần này đổi vai trò: không còn là chiến lược vào cửa, mà là **bối cảnh cho quyết định ở năm 3–5**.
+
+| Dữ kiện | Hàm ý cho bạn |
 |---|---|
-| Entry-level AI engineer: ~2,5% tin tuyển nhắm 0–2 năm | Đừng thiết kế roadmap với giả định "học AI xong xin việc AI" |
-| Backend/infrastructure vẫn đông nhất theo số lượng thô | Đây là cửa vào thực tế của bạn |
-| Agentic systems và forward-deployed engineering tăng nhanh nhất | Cả hai thưởng cho năng lực **tích hợp** hơn năng lực **modeling** — trùng với main root đã chuẩn hóa |
-| Python xuất hiện trong ~61% tin tuyển AI engineering; cloud ~55%; foundation models ~51%; CI/CD ~34%; RAG ~32% | Nhà tuyển dụng muốn người làm được xuyên stack, không phải chuyên gia một tầng |
-| "Prompt engineer" đang biến mất khỏi danh sách chức danh | Đừng đầu tư vào thứ đang là chức danh; đầu tư vào thứ đang là năng lực |
+| Entry-level AI engineer: ~2,5% tin tuyển nhắm 0–2 năm | Bạn đã tránh được cửa hẹp này. Khi bạn quay lại thị trường, bạn sẽ có 3–5 năm kinh nghiệm kỹ thuật thật |
+| Backend/infrastructure vẫn đông nhất theo số lượng thô | Vẫn là mạng lưới an toàn nếu bạn muốn chuyển hẳn sang phần mềm |
+| Agentic systems và forward-deployed engineering tăng nhanh nhất | Cả hai thưởng cho năng lực **tích hợp** hơn **modeling** — trùng với cả main root lẫn nghề hiện tại của bạn |
+| Python ~61% tin tuyển AI engineering; cloud ~55%; CI/CD ~34% | Đây chính xác là danh sách công việc **không** cho bạn. Xác nhận ngân sách tự học nên đổ vào đâu |
+| "Prompt engineer" đang biến mất khỏi chức danh | Đừng đầu tư vào thứ đang là chức danh; đầu tư vào thứ đang là năng lực |
 
-**Kết luận [Recommendation]:** vào bằng software/infra, khác biệt hóa bằng edge + AI systems. Chi tiết ở §11.
+**[Inference, độ tin cậy trung bình]** Hội tụ IT/OT là chỗ khan hiếm người có thật, và nó không phải hiện tượng riêng của năng lượng — nó xuất hiện ở sản xuất, hạ tầng, giao thông, nước, tòa nhà. Với đích **liên ngành** của bạn, vị trí hiện tại là một điểm đứng tốt chứ không phải một cái hộp: người biết cả hai thế giới có thể đi sang bất kỳ ngành nào có tài sản vật lý. Người chỉ biết một thế giới thì không.
 
----
 
 # 3. KNOWLEDGE UNIVERSE — SWEEP 38 LĨNH VỰC
 
@@ -314,6 +436,58 @@ Với main root này, **không họ nào rơi vào "không liên quan" hoàn to�
 Chi tiết từng nhánh ở **Phụ lục B**.
 
 ---
+
+## 3.5 — Bản đồ: lĩnh vực nào công việc cấp, lĩnh vực nào phải tự mua
+
+**Bảng này KHÔNG đổi nhãn ở §3.1 và §3.2.** Nhãn phản ánh khoảng cách tới vòng lặp — thuộc tính của domain. Bảng này phản ánh **chi phí thu nhận** — thuộc tính của hoàn cảnh bạn. Hai trục độc lập.
+
+| Lĩnh vực | Nhãn (không đổi) | Công việc cấp | Phải tự mua |
+|---|---|---|---|
+| 1 Mathematics | core | — | **Toàn bộ** |
+| 2 Physics & natural science | supporting | Điện, nhiệt, năng lượng ở mức ứng dụng | Sóng/tín hiệu ở mức toán |
+| 3 Electronics & circuits | core | **Phần lớn** — mạch thật, tủ thật, đo thật | Điện tử số mức MCU |
+| 4 Computer architecture | core | — | **Toàn bộ** |
+| 5 Embedded & firmware | core | Tư duy thời gian thực, I/O, tất định (qua PLC) | Firmware MCU, bare-metal, RTOS, OTA |
+| 6 Control & signal processing | core/supporting | **Control: phần lớn** | **DSP: toàn bộ** |
+| 7 Robotics / mechatronics | supporting | Một phần (actuation, an toàn máy) | Perception, planning, SLAM |
+| 8 Programming languages & runtimes | core | Rất ít (ST/ladder ≠ C/Python) | **Gần như toàn bộ** |
+| 9 Data structures & algorithms | core | — | **Toàn bộ** |
+| 10 Software engineering | core | — | **Toàn bộ** |
+| 11 OS & concurrency | core | Khái niệm real-time | Phần còn lại |
+| 12 Networking | core | **Giao thức công nghiệp** | TCP/IP, HTTP, mạng cloud |
+| 13 Distributed systems | core | — | **Toàn bộ** |
+| 14 Databases & storage | core | Historian ở mức người dùng | **Gần như toàn bộ** |
+| 15 Data engineering | core | Rất ít | **Gần như toàn bộ** |
+| 16 AI / ML | core | — | **Toàn bộ** |
+| 17 Cloud & infrastructure | core | — | **Toàn bộ** |
+| 18 DevOps / SRE / observability | core | Alarm management (từ vựng khác) | **Gần như toàn bộ** |
+| 19 Security & cryptography | supporting | An ninh OT khi gặp | Phần IT, crypto, ML security |
+| 20 Performance engineering | core | — | **Toàn bộ** |
+| 21 Testing & verification | supporting | FAT/SAT, nghiệm thu | Test tự động, CI, test hệ phi tất định |
+| 22 Systems architecture | core | **Thực hành** — tích hợp đa bên, commissioning | **Từ vựng và khung** — pattern, ADR, đánh đổi |
+| 23 HCI / UX | adjacent | HMI, thiết kế màn hình vận hành | Human factors lý thuyết |
+| 24 Business & operations | adjacent | **Phần lớn** — quy trình, tiến độ, nhà thầu | ROI kỹ thuật, tự động hóa cái gì |
+| 25 Standards & regulation | adjacent | **Phần lớn** — grid code, tiêu chuẩn thiết bị | EU AI Act, bảo vệ dữ liệu |
+| 26 Economics of engineering | supporting | Ngân sách dự án | Cost-per-inference, TCO phần mềm |
+| 27 Reliability & safety | supporting | **Phần lớn** — bảo vệ, interlock, an toàn | FMEA có hệ thống, SRE |
+| 28 Queueing & capacity | supporting | — | **Toàn bộ** |
+| 29 Information theory | supporting | — | **Toàn bộ** |
+| 30 Numerical & floating-point | supporting | — | **Toàn bộ** |
+| 31 Metrology & calibration | supporting | **Phần lớn** — hiệu chuẩn thiết bị thật | Bất định đo ở mức toán |
+| 32 Time & synchronization | supporting | Một phần (đồng bộ trong mạng công nghiệp) | NTP/PTP, thời gian phân tán |
+| 33 Simulation & digital twins | adjacent | Một phần (mô phỏng trước commissioning) | Dữ liệu tổng hợp, sim-to-real |
+| 34 Human factors of automation | adjacent | **Phần lớn** — quan sát người vận hành thật | Lý thuyết, autonomy levels |
+| 35 Technical writing | supporting | **Phần lớn** — spec, báo cáo, nghiệm thu | ADR, RFC, postmortem |
+| 36 Licensing & IP | adjacent | Rất ít | **Gần như toàn bộ** |
+| 37 Energy & power | core | **Phần lớn** | Power budget cho thiết bị nhỏ |
+| 38 Supply chain | peripheral | Một phần (mua sắm trong EPC) | — |
+
+**Đọc bảng này thế nào:** cột "phải tự mua" là **đặc tả yêu cầu cho 3.600 h tự học**. Mọi ô ghi "toàn bộ" hoặc "gần như toàn bộ" đều thuộc nhóm ưu tiên cao nhất ở §9.2 quy tắc 2 — vì nếu bạn không tự học thì không có nguồn nào khác, mãi mãi.
+
+**Cảnh báo về chữ "công việc cấp":** nó có nghĩa *có cơ hội học*, không có nghĩa *tự động học được*. Cơ hội chỉ thành kiến thức nếu bạn áp dụng thói quen dịch sang khái niệm trung lập ở §2.3d. Hai người cùng làm một dự án, một người ra với kiến thức chuyển nhượng được, người kia ra với kỹ năng bấm nút — khác biệt nằm ở thói quen đó.
+
+---
+
 
 # 4. DEPENDENCY GRAPH
 
@@ -1387,6 +1561,30 @@ Model đã train
 
 ---
 
+## C5.16 · Giao thức công nghiệp (OT) — `In→Ad`
+
+*Leaf bổ sung ở v3. Đây là lỗ hổng độ phủ của v2 — nó thuộc về nhánh này bất kể người học làm nghề gì, vì mọi hệ có tài sản vật lý đều gặp ít nhất một giao thức trong nhóm này.*
+
+**Sub-leaves:**
+- **Modbus** RTU và TCP: register map, function code, endianness, giới hạn cơ bản (không có schema, không có phát hiện thiết bị)
+- **Profibus DP** và **Profinet**: RT vs IRT, mô hình nhà cung cấp/người tiêu dùng, GSD/GSDML
+- **EtherCAT** và khái niệm distributed clock
+- **IEC 61850** cho tự động hóa trạm: mô hình dữ liệu phân cấp, MMS, GOOSE, Sampled Values, file SCL
+- **IEC 60870-5-104** và **DNP3** cho telemetry SCADA tới trung tâm điều độ
+- **HART** và cảm biến thông minh trên vòng 4–20 mA
+- **CAN/CANopen**, **BACnet** (tòa nhà), **M-Bus** (đo đếm)
+- **OPC UA**: mô hình thông tin, client-server vs PubSub, companion specification, và vì sao nó là cầu nối IT/OT được chọn
+- Gateway giao thức: dịch giữa các thế giới, và cái mất trong mỗi lần dịch
+- Đánh đổi chung: xác định thời gian, chi phí, bề rộng hỗ trợ, khả năng mô tả dữ liệu
+- So sánh với nhóm giao thức IT (MQTT, gRPC, HTTP) ở C5.8 — cái gì tương đương, cái gì không
+
+**Dùng để xây:** mọi cầu nối giữa tầng thiết bị công nghiệp và tầng dữ liệu hiện đại; đây là đường dẫn dữ liệu của bất kỳ hệ IIoT nào.
+
+**Checkpoint:** đọc dữ liệu từ một thiết bị công nghiệp thật qua giao thức gốc của nó, đưa lên một hệ hiện đại (MQTT hoặc time-series store), **và viết ra chính xác cái gì bị mất trong quá trình dịch** — kiểu dữ liệu, timestamp, chất lượng, ngữ nghĩa.
+
+**Cạm bẫy:** coi mọi giao thức OT là "cũ và tệ". Nhiều thứ trong nhóm này giải quyết bài toán mà giao thức IT không giải quyết — tính xác định thời gian, hoạt động trên đường truyền cực hạn chế, và vòng đời 20 năm. Hiểu **vì sao** chúng được thiết kế như vậy có giá trị hơn nhiều so với chê chúng.
+
+
 ## ▸ Thứ tự học trong C5
 
 ```
@@ -1569,6 +1767,35 @@ Model đã train
 **Checkpoint:** chứng minh một tác vụ luôn hoàn thành trong deadline **dưới tải xấu nhất bạn có thể tạo ra** — bao gồm khi DMA đang chạy, khi mọi ngắt đang bắn, và khi flash đang được ghi.
 
 ---
+
+## C6.16 · PLC và DCS như mô hình tính toán thứ tư — `In→Ad`
+
+*Leaf bổ sung ở v3. C6.8 của v2 so sánh ba mô hình: bare-metal, RTOS, embedded Linux. Thiếu mô hình thứ tư, vốn đang điều khiển phần lớn hạ tầng vật lý của thế giới.*
+
+**Sub-leaves:**
+- Mô hình scan cycle: đọc ảnh vào → thực thi → ghi ảnh ra; và vì sao mô hình này cho tính xác định
+- Process image và ngữ nghĩa của nó — khác với truy cập I/O trực tiếp thế nào
+- **IEC 61131-3**: LD, FBD, ST, IL, SFC — mỗi ngôn ngữ cho loại bài toán nào
+- Khối tổ chức và tác vụ chu kỳ; ngắt phần cứng trong thế giới PLC
+- Thời gian chu kỳ, giám sát chu kỳ, và tương ứng với WCET ở C6.15
+- Khối dữ liệu, biến giữ lại (retentive), và trạng thái sống sót qua mất điện
+- **DCS vs PLC vs PAC**: khác biệt thật (kiến trúc điều khiển phân tán, kỹ thuật tập trung) chứ không phải khác biệt marketing
+- Dự phòng trong PLC/DCS: CPU nóng dự phòng, I/O dự phòng, chuyển đổi không va đập
+- Kỹ thuật an toàn: PLC an toàn, kênh kép, và vì sao logic an toàn tách khỏi logic điều khiển
+- Vòng đời kỹ thuật: FAT → SAT → commissioning → bàn giao, và tài liệu đi kèm
+- Vì sao PLC tồn tại thay vì dùng MCU: bảo hành, chứng nhận, vòng đời 20 năm, nhân lực thay thế được
+- **Ánh xạ sang khái niệm trung lập** (bảng §2.3d) — đây là sub-leaf quan trọng nhất
+
+**Dùng để xây:** hiểu tầng điều khiển của mọi hệ công nghiệp; và hiểu **ranh giới** giữa nó với tầng phần mềm hiện đại — nơi bạn sẽ làm việc.
+
+**Checkpoint:** cho một bài toán điều khiển cụ thể, lập luận chọn PLC / MCU với RTOS / embedded Linux, bằng bảng định lượng (tính xác định, chi phí, vòng đời, chứng nhận, nhân lực bảo trì). Và: viết được cùng một logic điều khiển ở cả hai thế giới — ST trên PLC và C trên MCU — rồi so sánh cái gì dễ hơn ở mỗi bên và vì sao.
+
+**Cạm bẫy đối xứng, cả hai đều phổ biến:**
+- Kỹ sư phần mềm coi PLC là công nghệ lạc hậu → bỏ lỡ việc nó giải bài toán tính xác định và độ tin cậy mà họ chưa từng phải giải
+- Kỹ sư tự động hóa coi phần mềm hiện đại là không đáng tin → bỏ lỡ 40 năm tiến bộ về kiểm soát phiên bản, test, và khả năng tiến hóa
+
+Người đứng giữa hai bên có giá trị chính vì rất ít người chịu học cả hai.
+
 
 ## ▸ Thứ tự học trong C6
 
@@ -2467,6 +2694,29 @@ Model đã train
 
 ---
 
+## C12.15 · Kiến trúc phân tầng công nghiệp: ISA-95 và Purdue — `In→Ad`
+
+*Leaf bổ sung ở v3. C12.9 của v2 liệt kê ba kiến trúc tham chiếu (IoT platform, ML platform, hệ agentic) nhưng thiếu kiến trúc tham chiếu đã tồn tại lâu nhất và đang chi phối mọi tài sản vật lý công nghiệp.*
+
+**Sub-leaves:**
+- **ISA-95 / IEC 62264**: Level 0 (quá trình vật lý) → L1 (cảm biến & chấp hành) → L2 (điều khiển: PLC/DCS/SCADA) → L3 (MES: điều độ sản xuất) → L4 (ERP: kế hoạch kinh doanh)
+- **Mô hình Purdue** cho phân tách mạng, và mối quan hệ với ISA-95
+- Ngữ nghĩa dữ liệu đổi thế nào khi đi lên từng tầng: từ giá trị thô → đại lượng vật lý → sự kiện có nghĩa → chỉ số kinh doanh
+- Thang thời gian đổi theo tầng: mili giây ở L1–L2, giây–phút ở L3, giờ–ngày ở L4
+- Vì sao mô hình này **đang bị áp lực**: edge computing, kết nối trực tiếp lên cloud, và mô hình unified namespace
+- **Unified Namespace** và kiến trúc hướng sự kiện trong công nghiệp — thay thế hay bổ sung cho ISA-95
+- Đối chiếu ISA-95 với vòng lặp của roadmap này: `sense/act` ≈ L0–L1 · `decide` ≈ L2 · `store/observe` ≈ L2–L3 · `learn/infer/adapt` **không có chỗ trong ISA-95** — và đó chính là khoảng trống mà toàn bộ ngành đang tìm cách lấp
+- Đưa ML vào kiến trúc phân tầng: chạy ở tầng nào, ai chịu trách nhiệm, và làm sao không phá tính xác định của L2
+- Digital twin đặt ở đâu trong mô hình
+- Cạm bẫy khi áp kiến trúc IT lên tài sản công nghiệp và ngược lại
+
+**Dùng để xây:** từ vựng chung để nói chuyện với cả hai thế giới. Đây là **leaf có giá trị phiên dịch cao nhất** trong toàn bộ C12.
+
+**Checkpoint:** lấy một hệ thống bạn biết, vẽ nó theo ISA-95, chỉ ra **chính xác** tầng nào phần `learn/infer/adapt` nên nằm và vì sao; sau đó vẽ lại theo unified namespace và so sánh cái gì được, cái gì mất.
+
+**[Inference]** Đây là leaf mà giá trị của nó tăng theo thời gian: khoảng trống `learn/infer/adapt` trong ISA-95 là khoảng trống mà mọi nhà cung cấp công nghiệp đang cố lấp, và chưa ai lấp gọn. Người hiểu cả hai phía của khoảng trống đó ở vị thế hiếm.
+
+
 ## ▸ Thứ tự học trong C12
 
 ```
@@ -2564,6 +2814,25 @@ Phân rã tới tầng leaf, mỗi leaf có mức + lý do cần + checkpoint nh
 | **S3.6 An toàn trong điều khiển** | **In** | Giới hạn mềm và giới hạn cứng · watchdog nhiều tầng · trạng thái an toàn (fail-safe) và định nghĩa nó · phát hiện dao động và thoát · khóa liên động phần cứng độc lập với phần mềm · giới hạn tốc độ thay đổi như biện pháp an toàn · ghi log vòng điều khiển để phân tích sau sự cố | **Bắt buộc** khi phần mềm điều khiển vật thể có thể gây hại |
 | **S3.7 Control vs learned policy** | **In** | Khi nào bộ điều khiển cổ điển tốt hơn ML: hệ có mô hình, cần đảm bảo, cần giải thích · khi nào ML thắng: mô hình không biết, không gian trạng thái lớn · hệ lai: ML sinh tham chiếu, control theo dõi · learned policy và vấn đề đảm bảo an toàn · shield/safety layer bao quanh learned policy | **Phán đoán phân biệt bạn với người chỉ biết ML** |
 
+
+**Bổ sung ở v3 — S3.8 · Điều khiển quá trình công nghiệp — `Wo→In`**
+
+*Lỗ hổng độ phủ của v2: S3 mô tả control theory ở dạng học thuật (PID, ổn định, state-space) nhưng thiếu hình thái nó thực sự xuất hiện trong nhà máy.*
+
+| Sub-leaf | Nội dung |
+|---|---|
+| Cấu trúc điều khiển | Vòng đơn · cascade (vòng trong nhanh, vòng ngoài chậm) · tỷ lệ (ratio) · split-range · override/chọn lựa |
+| Feedforward trong quá trình | Bù nhiễu đo được trước khi nó ảnh hưởng — thường hiệu quả hơn tinh chỉnh PID |
+| Nhận dạng đối tượng | Đáp ứng bước, mô hình bậc nhất có trễ (FOPDT), và vì sao trễ vận chuyển phá ổn định |
+| Điều khiển bề mặt và chống dao động | Tương tác giữa các vòng, decoupling, và dao động lan truyền trong nhà máy |
+| MPC ở mức khái niệm | Khi nào điều khiển dự báo đáng chi phí, và vì sao nó là cầu nối tự nhiên sang ML |
+| Điều khiển cấp nhà máy | Setpoint từ tầng trên, tối ưu hóa thời gian thực, và ranh giới với tầng MES |
+| Bump-less transfer và chuyển chế độ | Tự động ↔ tay ↔ tầng, và vì sao chuyển chế độ là nơi tai nạn xảy ra |
+| Vòng điều khiển trong hệ điện | Điều khiển công suất tác dụng/phản kháng, đáp ứng tần số, tuân thủ grid code — vòng kín có ràng buộc pháp lý |
+
+**Checkpoint:** thiết kế và điều chỉnh một vòng cascade trên hệ vật lý thật (hoặc mô phỏng đã hiệu chuẩn theo đối tượng thật), chứng minh nó tốt hơn vòng đơn bằng đồ thị đáp ứng nhiễu; và nêu được ≥2 tình huống cascade **làm tệ hơn**.
+
+
 **Checkpoint tổng S3:** (a) điều chỉnh PID trên hệ vật lý thật đạt chỉ tiêu overshoot và thời gian ổn định, có đồ thị đáp ứng bước trước/sau; (b) thiết kế và chứng minh trạng thái fail-safe cho hệ đó dưới 3 loại lỗi; (c) cho một bài toán điều khiển cụ thể, lập luận có nên dùng ML hay không, bằng tiêu chí.
 
 **Tài nguyên:** *Feedback Systems: An Introduction for Scientists and Engineers* (Åström & Murray — **miễn phí**, Caltech) · *PID Controllers: Theory, Design and Tuning* (Åström & Hägglund) · Brian Douglas — video về control theory (trực giác rất tốt) · MATLAB/Octave hoặc Python-control để mô phỏng.
@@ -2582,6 +2851,25 @@ Phân rã tới tầng leaf, mỗi leaf có mức + lý do cần + checkpoint nh
 | **S4.6 Bảo mật chuỗi cung ứng** | Wo | SBOM và vì sao nó quan trọng · khóa phiên bản dependency và xác minh hash · tấn công qua dependency và typosquatting · provenance của build và reproducible build · ký artifact · quét lỗ hổng và ưu tiên theo khả năng khai thác thật · dependency của model và dataset | Bề mặt tấn công lớn nhất của dự án hiện đại |
 | **S4.7 Bảo mật đặc thù ML** | **In** | Prompt injection: trực tiếp và gián tiếp qua dữ liệu · ranh giới tool-use và quyền của agent · trích xuất model và trích xuất dữ liệu huấn luyện · ngộ độc dữ liệu và backdoor · ví dụ đối kháng · tấn công suy luận thành viên (membership inference) · rò rỉ qua output của model · phòng thủ: cách ly, xác thực output, quyền tối thiểu cho tool, human-in-the-loop cho hành động rủi ro | Lớp lỗ hổng mới mà kinh nghiệm bảo mật truyền thống không bao |
 | **S4.8 Quyền riêng tư** | Wo | Tối thiểu hóa dữ liệu như quyết định kiến trúc · giới hạn của ẩn danh hóa và tái định danh · giả danh hóa (pseudonymization) · xử lý tại chỗ để tránh truyền · quyền riêng tư vi phân ở mức khái niệm · federated learning ở mức khái niệm · lưu giữ và xóa (nối A5) · riêng tư trong log và trace | Quyết định kiến trúc, không chỉ chính sách |
+
+
+**Bổ sung ở v3 — S4.9 · An ninh OT / hệ thống điều khiển công nghiệp — `Wo→In`**
+
+*Lỗ hổng độ phủ của v2: S4 bao bảo mật IT và bảo mật ML nhưng không bao bảo mật OT, vốn có mô hình mối đe dọa và thứ tự ưu tiên khác hẳn.*
+
+| Sub-leaf | Nội dung |
+|---|---|
+| Đảo ngược thứ tự ưu tiên | IT ưu tiên bí mật → toàn vẹn → sẵn sàng. **OT đảo ngược: an toàn → sẵn sàng → toàn vẹn → bí mật.** Hiểu sai điều này là nguồn của mọi xung đột IT/OT |
+| **IEC 62443** | Khái niệm zone và conduit · security level SL 1–4 · phân vai nhà sản xuất / nhà tích hợp / chủ sở hữu |
+| Mô hình Purdue cho phân tách mạng | Tầng 0–5, DMZ công nghiệp, và vì sao "air gap" gần như không còn tồn tại thật |
+| Truy cập từ xa vào hệ điều khiển | Jump host, ghi phiên, và rủi ro của kết nối nhà cung cấp |
+| Bản vá trong môi trường không dừng được | Cửa sổ bảo trì, bù đắp bằng biện pháp bù trừ, và vì sao "cứ vá đi" là lời khuyên vô dụng ở đây |
+| Mối đe dọa đặc thù | Thao túng logic điều khiển, giả mạo giá trị đo, tấn công vào hệ an toàn, ransomware làm dừng sản xuất |
+| An toàn vs an ninh | Hai từ khác nhau, hai bộ tiêu chuẩn khác nhau, và nơi chúng mâu thuẫn — biện pháp an ninh không được làm giảm an toàn |
+| Giám sát an ninh OT | Phát hiện bất thường trên lưu lượng công nghiệp; vì sao nó dễ hơn IT (lưu lượng rất tất định) và khó hơn IT (không được can thiệp) |
+
+**Checkpoint:** vẽ mô hình zone/conduit cho một hệ có cả tầng OT lẫn tầng cloud, xác định mọi conduit vượt ranh giới tin cậy, và với mỗi cái nêu biện pháp bảo vệ + **cái gì xảy ra với an toàn nếu biện pháp đó lỗi**.
+
 
 **Checkpoint tổng S4:** (a) threat model cho toàn vòng `sense→act` của hệ bạn, tìm ≥3 vector chưa nghĩ tới; (b) dựng mTLS + provisioning + xoay vòng chứng chỉ cho một thiết bị, chứng minh hoạt động sau khi chứng chỉ cũ hết hạn; (c) chứng minh một agent có tool không thể thực hiện một hành động ngoài phạm vi được cấp, kể cả khi input cố tình dẫn dụ.
 
@@ -2973,242 +3261,201 @@ Mô hình process của Unix · TCP/IP · ngữ nghĩa HTTP · mô hình quan h�
 
 ---
 
-# 9. KIẾN TRÚC 5 NĂM THEO PHASE
+# 9. KIẾN TRÚC 5–6 NĂM THEO PHASE
 
-Các phase **chồng lấn có chủ ý** — đây là kiến trúc song song, không phải hàng đợi. Mốc tháng là hướng dẫn; **tín hiệu chuyển phase** mới là tiêu chí thật.
+**Thay đổi cấu trúc so với v2:** giờ có **hai track chạy song song**, không phải một.
+
+| Track | Nguồn | Điều khiển bởi | Nhánh chính |
+|---|---|---|---|
+| **Track OT** | Công việc | Dự án được giao — bạn không kiểm soát | C7, S2, S3, S6, A4, A5, phần OT của C5/C6/C12 |
+| **Track IT** | Tự học | Roadmap này — bạn kiểm soát hoàn toàn | C1, C2, C3, C4, C8, C9, C10, C11, S1, S4, S5, phần IT của C5/C6/C12 |
+| **Cầu nối** | Project cá nhân | Bạn thiết kế | Nơi hai track gặp nhau, và nguồn cung `observe→adapt` duy nhất |
+
+Track OT **không lập lịch được** — nó phụ thuộc dự án công ty giao. Nên roadmap chỉ lập lịch cho Track IT, và coi Track OT là đầu vào ngẫu nhiên có xu hướng tích cực.
 
 ## Bản đồ tổng
 
 ```
-Tháng:  0    6    12   18   24   30   36   42   48   54   60
-        |----|----|----|----|----|----|----|----|----|----|
-P0 ███
-P1  ████████████████
-P2       ██████████████████████████
-P3                 ████████████████████████████
-P4                           ████████████████████████
-P5                                     ████████████████████
-                  ▲
-                  └─ ĐI LÀM (tháng 12–15)
+Tháng:  0    6    12   18   24   30   36   42   48   54   60   66   72
+        |----|----|----|----|----|----|----|----|----|----|----|----|
+
+TRACK OT (công việc — không lập lịch được)
+ Thử việc ██
+ Định hướng, theo dõi, đọc bản vẽ  ████████████
+ Tham gia commissioning có giám sát     ████████████████
+ Commissioning độc lập, đóng góp thiết kế     ██████████████████████
+ Trách nhiệm cấp hệ thống                            ████████████████████████
+
+TRACK IT (tự học — lập lịch được)
+P0 ██████
+P1   ████████████████████
+P2          ████████████████████████
+P3                    ████████████████████████
+P4                              ████████████████████████
+P5                                        ████████████████████████
+
+CẦU NỐI (project)
+ P1 ████
+ P2      ██████████
+ P3              ████████████
+ P4                      ████████████
+ P5                              ████████████
+ P6                                    ████████████████████████
+                    ▲                          ▲
+                    │                          └─ điểm rẽ nhánh (§11.4)
+                    └─ hết thử việc + P2 xong
 ```
 
 ---
 
-## ◆ PHASE 0 · BOOTSTRAP — tháng 0–3 · ~350 h
+## ◆ PHASE 0 · BOOTSTRAP — tháng 0–6 · ~350 h tự học
 
-**Mục tiêu:** có môi trường, có thói quen, có vòng phản hồi nhanh, và **có một thứ chạy đầu-cuối dù xấu**.
+**Giãn từ 3 tháng lên 6** vì thử việc và định hướng công việc ăn phần lớn năng lượng.
 
 | Hạng mục | Giờ | Nội dung |
 |---|---|---|
 | C1 — C và Python cơ bản | 150 | Con trỏ, bộ nhớ, cấu trúc; Python + pytest |
 | C1.9 — Tooling debug | 30 | gdb, valgrind, sanitizer — **sớm, không hoãn** |
 | C4.12 + môi trường | 30 | Linux như môi trường sống, shell, dotfiles |
-| C1.10 — Git | 20 | Mô hình đối tượng, workflow cơ bản |
-| C6 — Blink + toolchain | 40 | Board đầu tiên, cross-compile, nạp firmware |
-| S1.1 — Discrete math khởi động | 40 | Logic, tập hợp, quy nạp |
+| C1.10 — Git | 20 | Mô hình đối tượng, workflow |
+| C6 — Blink + toolchain | 40 | Board đầu tiên, cross-compile |
+| S1.1 — Discrete math | 40 | Logic, tập hợp, quy nạp |
 | **P1** — Sensor node + logger | 40 | Project đầu tiên |
 
-**Outcome:** một thiết bị đọc cảm biến → gửi về máy → lưu SQLite → vẽ đồ thị. Xấu, nhưng chạy đầu-cuối và bạn hiểu từng dòng.
+**Song song ở Track OT:** ghi lại **mọi khái niệm vendor bạn gặp** và khái niệm trung lập bên dưới nó (bảng ở §2.3d). Đây là thói quen rẻ nhất có ROI cao nhất trong toàn bộ 6 năm — bắt đầu từ tuần đầu tiên.
 
-**Tín hiệu sang Phase 1:** bạn dựng lại được toàn bộ chuỗi đó từ đầu trong một buổi, **không copy-paste**, và giải thích được vì sao mỗi phần hoạt động.
-
----
-
-## ◆ PHASE 1 · NỀN TÍNH TOÁN — tháng 1–12 · ~1.200 h
-
-**Mục tiêu:** đóng các dependency gốc của graph §4. Đây là phase có **tỷ lệ đầu tư/lợi ích cao nhất** và cũng là phase dễ bỏ cuộc nhất.
-
-| Nhánh | Giờ | Trọng tâm |
-|---|---|---|
-| C1 Programming | 260 | C nâng cao, UB, build system, Python packaging |
-| C2 DSA | 200 | Toàn bộ phần nền: độ phức tạp → DP |
-| C3 Computer architecture | 180 | **nand2tetris phần 1** (60 h) + ISA + assembly |
-| C4 OS | 100 | Tiến trình, luồng, bộ nhớ ảo — khởi động |
-| S1 Mathematics | 200 | **Đợt 1**: discrete + đại số tuyến tính |
-| C6 Embedded | 60 | Đọc datasheet, GPIO, timer |
-| Project + slack | 200 | P1 hoàn thiện, khởi động P2 |
-
-**Phân bổ:** ~40% lập trình & DSA · ~20% kiến trúc máy tính · ~17% toán · ~8% OS · ~15% project.
-
-**Outcome:**
-- Tự dựng CPU đồ chơi và chạy assembly trên nó
-- Tự cài mọi cấu trúc dữ liệu nền và phân tích được chúng
-- Đọc được assembly do compiler sinh và giải thích tối ưu hóa
-- Cross-compile được cho ARM, nạp firmware, debug bằng gdb
-
-**Tín hiệu sang Phase 2:** bạn **debug bằng cách lập luận về bộ nhớ và về máy**, không bằng thêm `print` và thử. Cụ thể: đọc một core dump và giải thích được segfault.
-
-**Cạm bẫy của phase này:** cảm giác chậm. Bạn học rất nhiều mà chưa xây được gì ấn tượng. Đây là bình thường và là lý do 90% người tự học bỏ cuộc ở đây. Cách chống: giữ P1/P2 chạy song song để luôn có thứ hữu hình.
+**Tín hiệu sang Phase 1:** dựng lại P1 từ đầu trong một buổi, không copy-paste. Và: bạn có một file ghi chú ≥30 cặp *khái niệm vendor ↔ khái niệm trung lập*.
 
 ---
 
-## ◆ PHASE 2 · NỀN HỆ THỐNG + ĐI LÀM — tháng 9–24 · ~1.500 h
+## ◆ PHASE 1 · NỀN TÍNH TOÁN — tháng 3–24 · ~800 h tự học
 
-**Mục tiêu kép:** OS + mạng + dữ liệu tới mức Advanced, **và vào thị trường lao động**.
+**Giãn từ 12 lên 21 tháng.** Đây là phase dài nhất và khó nhất khi vừa đi làm — vì nó cho cảm giác chậm và không nối trực tiếp với công việc.
 
 | Nhánh | Giờ | Trọng tâm |
 |---|---|---|
-| C4 OS & concurrency | 260 | Concurrency, I/O model, filesystem, scheduling |
-| C5 Networking | 200 | TCP sâu, socket, packet capture, DNS, HTTP |
-| C9 Data engineering | 120 | Mô hình dữ liệu, SQL sâu, transaction |
+| C1 Programming | 180 | C nâng cao, UB, build system, Python packaging |
+| C2 DSA | 140 | Độ phức tạp → DP |
+| C3 Computer architecture | 130 | **nand2tetris phần 1** (70 h) + ISA + assembly |
+| C4 OS | 70 | Tiến trình, luồng, bộ nhớ ảo |
+| S1 Mathematics | 140 | **Đợt 1**: discrete + đại số tuyến tính |
+| C6 Embedded | 50 | Đọc datasheet, GPIO, timer |
+| Project | 90 | **P2a + P2b** |
+
+**Cạm bẫy đặc thù của người vừa đi làm:** phase này không cho bạn thứ gì dùng được ở công ty ngay, nên nó dễ bị bỏ. Chống bằng hai cách: giữ P2 chạy để luôn có thứ hữu hình, và dùng bảng §2.3d để thấy nand2tetris đang giải thích chính cái PLC bạn dùng hằng ngày.
+
+**Tín hiệu sang Phase 2:** bạn debug bằng lập luận về bộ nhớ, không bằng thêm `print`. Và bạn giải thích được scan cycle của PLC bằng từ vựng của C4.2 và C6.15.
+
+---
+
+## ◆ PHASE 2 · NỀN HỆ THỐNG — tháng 18–38 · ~800 h tự học
+
+**Mục tiêu:** mạng, dữ liệu, OS ở mức Advanced. Đây là phase bắt đầu **giao với công việc** — bạn sẽ hiểu tầng dưới của Profinet, của historian, của mạng nhà máy.
+
+| Nhánh | Giờ | Trọng tâm |
+|---|---|---|
+| C4 OS & concurrency | 170 | Concurrency, I/O model, filesystem, scheduling |
+| C5 Networking | 160 | TCP sâu, socket, packet capture, DNS, HTTP |
+| C9 Data engineering | 130 | Mô hình dữ liệu, SQL sâu, transaction, chuỗi thời gian |
 | C10 Distributed | 60 | **Mô hình lỗi** — nền tư duy |
-| C8 ML | 80 | Nền học thống kê + **đánh giá** (trước mọi modeling) |
+| C8 ML | 70 | Nền học thống kê + **đánh giá** (trước mọi modeling) |
 | C11 Observability | 40 | Bốn tín hiệu + instrumentation |
-| C1 + C2 tiếp | 180 | Error handling, runtime internals, cấu trúc xác suất |
-| C3 tiếp | 80 | **Phân cấp bộ nhớ** + phương pháp đo |
-| C6 Embedded | 80 | Bus, ngắt, logic analyzer |
-| C7 Sensing | 40 | **Lấy mẫu + aliasing** |
-| S1 Mathematics | 80 | **Đợt 2**: xác suất + thống kê |
-| S8 Communication | 25 | Design doc, ADR — bắt đầu viết mọi quyết định |
-| **Tìm việc** | 100 | Từ tháng ~12: hồ sơ, dự án trình bày được, phỏng vấn |
-| Project + slack | 155 | **P2** hoàn thành |
+| C1 + C2 tiếp | 80 | Error handling, runtime internals |
+| C3 tiếp | 50 | **Phân cấp bộ nhớ** + phương pháp đo |
+| S1 Mathematics | 60 | **Đợt 2**: xác suất + thống kê |
+| S8 Communication | 20 | Design doc, ADR |
+| Project | 160 | **P2c** xong, **P3** khởi động |
 
-### ★ Chèn bắt buộc: đi làm từ tháng 12–15
+**Giao thoa với Track OT:** khi bạn học C5.5 (TCP sâu) và C5.16 (giao thức công nghiệp), lần đầu bạn sẽ thấy Profinet, Modbus TCP và IEC 61850 không phải ba thứ ma thuật riêng biệt mà là ba điểm khác nhau trên cùng một phổ đánh đổi.
 
-**[Recommendation — khuyến nghị mạnh nhất trong tài liệu này]**
-
-Từ khoảng **tháng 12**, dành 15–20% thời gian cho việc vào thị trường lao động. Nhắm:
-
-| Nhắm vào | Không nhắm vào |
-|---|---|
-| Backend engineer / junior software engineer | "AI engineer" |
-| Platform / infrastructure engineer | "Machine learning engineer" |
-| Embedded software engineer | "Data scientist" |
-| Systems / integration engineer | Bất kỳ vị trí nào yêu cầu 3+ năm kinh nghiệm |
-
-**Lý do** (§2.4): cửa entry-level AI rất hẹp (~2,5% tin tuyển nhắm 0–2 năm), trong khi backend/infra vẫn tuyển đông nhất theo số lượng thô. Bạn vào bằng cửa rộng, rồi dịch chuyển từ bên trong.
-
-**Tiêu chí chọn việc trong 2 năm đầu:** *bạn học được gì* > *lương bao nhiêu*. Cụ thể, ưu tiên nơi có: hệ thống chạy production thật, người review code của bạn nghiêm túc, và on-call rotation (có, on-call là tính năng chứ không phải lỗi — nó dạy bạn thứ không tự học được).
-
-**Outcome Phase 2:**
-- Tự viết TCP server + key-value store có WAL + shell tối giản (P2)
-- Thiết kế schema và tối ưu truy vấn dựa trên kế hoạch thực thi
-- Có việc làm kỹ thuật, **hoặc** có 2 dự án mà kỹ sư senior đọc code không thấy dấu hiệu người mới
-
-**Tín hiệu sang Phase 3:** bạn có việc làm kỹ thuật; **hoặc** bạn đã vượt qua ≥3 vòng phỏng vấn kỹ thuật và biết chính xác mình còn thiếu gì.
+**Tín hiệu sang Phase 3:** từ packet capture giải thích được một sự cố mạng nhà máy — và giải thích được cho cả kỹ sư OT lẫn kỹ sư IT, bằng từ vựng của mỗi bên.
 
 ---
 
-## ◆ PHASE 3 · VÒNG LẶP KHÉP LẠI — tháng 18–36 · ~1.600 h
+## ◆ PHASE 3 · VÒNG LẶP KHÉP LẠI — tháng 30–50 · ~850 h tự học
 
-**Mục tiêu:** nối đầu vật lý với đầu đám mây; đưa ML vào hệ thống thật.
+**Mục tiêu:** mua ba cung `learn`, `infer`, `adapt` mà cả công việc lẫn ngành OT đều không cho.
 
 | Nhánh | Giờ | Trọng tâm |
 |---|---|---|
-| C6 Embedded | 200 | RTOS, DMA, năng lượng, kiến trúc firmware, **bootloader/OTA** |
-| C7 Sensing | 160 | Lọc, FFT, **hiệu chuẩn**, **thời gian & đồng bộ** |
-| C8 ML | 200 | Neural net từ đầu, kiến trúc, **nén model** |
+| C8 ML & inference | 230 | Neural net từ đầu, kiến trúc, **nén model**, eval |
+| C6 Embedded | 150 | RTOS, DMA, năng lượng, kiến trúc firmware, **bootloader/OTA** |
+| C7 Sensing — **phần công việc không cho** | 80 | DSP, FFT, sensor fusion, trích đặc trưng cho ML |
 | C10 Distributed | 140 | **Idempotency**, nhất quán, **kiểm soát tải** |
-| C9 Data | 120 | **Chuỗi thời gian**, **ingest từ edge**, streaming |
-| C5 Networking | 100 | TLS, **MQTT/CoAP/gRPC**, radio, kết nối thực địa |
-| C11 Observability | 60 | Profiling, phân phối độ trễ, benchmark |
-| C4 OS | 90 | RTOS, container, Linux nền tảng, mẫu concurrency |
-| C3 Architecture | 90 | DMA/ngắt, SIMD, nhất quán bộ nhớ, GPU |
-| C1 Programming | 90 | Go hoặc Rust, đọc source lớn |
-| C12 Architecture | 40 | ADR, mẫu kiến trúc — bắt đầu |
-| S1 Math | 40 | **Đợt 3**: Fourier + optimization + numerical |
-| S2 Electronics | 100 | Datasheet, nguồn, pin, đo đạc |
-| S3 Control | 50 | PID, an toàn trong điều khiển |
-| S4 Security | 50 | Threat modeling, identity, secure boot |
-| Project + slack | 70 | **P3** hoàn thành, **P4** khởi động |
+| C9 Data | 90 | **Ingest từ edge**, streaming, schema contract |
+| C5 Networking | 80 | TLS, MQTT/gRPC, kết nối thực địa |
+| C11 Observability | 40 | Profiling, phân phối độ trễ |
+| C12 Architecture | 40 | ADR, mẫu kiến trúc, **ISA-95** |
+| S4 Security | 40 | Threat modeling, **IEC 62443** |
+| Project | 160 | **P3** hoàn thành (30 ngày thực địa), **P4** khởi động |
 
-**Outcome:**
-- Thiết bị chạy ≥30 ngày ngoài thực địa, có OTA chịu được mất điện giữa chừng
-- Model quantize chạy trên MCU trong ngân sách RAM, có eval set từ dữ liệu thật
-- Pipeline ingest chịu được thiết bị offline 24 h mà không mất không trùng
+**Lưu ý phân bổ C7:** ở v2 nhánh này là 260 h tự học. Ở v3 chỉ còn 80 h vì công việc cấp phần lớn — nhưng **chỉ phần instrumentation công nghiệp**. Phần DSP, FFT, sensor fusion và trích xuất đặc trưng cho ML thì công việc không cho, và đó chính là 80 h này.
 
-**Tín hiệu sang Phase 4:** bạn **chẩn đoán được một lỗi mà nguyên nhân nằm ở tầng khác với tầng triệu chứng** — và làm được ≥3 lần với 3 cặp tầng khác nhau. Đây là định nghĩa thao tác của "năng lực tích hợp".
+**Tín hiệu sang Phase 4:** P3 chạy 30 ngày ngoài thực địa. Và bạn chẩn đoán được một lỗi mà nguyên nhân nằm ở tầng khác với tầng triệu chứng, ≥3 lần, với 3 cặp tầng khác nhau.
 
 ---
 
-## ◆ PHASE 4 · QUY MÔ, ĐỘ TIN CẬY, PRODUCTION — tháng 30–48 · ~1.500 h
-
-**Mục tiêu:** từ "chạy được" sang "chạy được dưới tải, có người phụ thuộc vào".
+## ◆ PHASE 4 · QUY MÔ, ĐỘ TIN CẬY, PRODUCTION — tháng 42–62 · ~750 h tự học
 
 | Nhánh | Giờ | Trọng tâm |
 |---|---|---|
-| C8 ML | 180 | **Serving**, LLM systems, **eval harness**, tinh chỉnh |
-| C11 Observability | 120 | SLO, hàng đợi, capacity, chaos, cảnh báo, incident |
-| C10 Distributed | 120 | Cloud, consensus, IaC, **Kubernetes** (sau distributed) |
-| C9 Data | 80 | Object storage, vector, chất lượng dữ liệu, backup |
-| C6 Embedded | 120 | **Inference trên thiết bị**, bảo mật, real-time |
-| C12 Architecture | 70 | Interface, đánh đổi, kiến trúc tham chiếu |
-| C3 Architecture | 90 | GPU sâu, **NPU & accelerator**, năng lượng |
-| C5 Networking | 50 | Mạng cloud, chế độ hỏng |
-| S5 Testing | 70 | Test hệ phi tất định, eval như testing, HIL |
-| S6 Reliability | 40 | FMEA, dự phòng, giám sát sức khỏe |
-| S7 Economics | 35 | Mô hình chi phí, capacity, build-vs-buy |
-| S4 Security | 40 | **Bảo mật đặc thù ML**, chuỗi cung ứng |
-| A1–A3 Adjacent | 80 | Robotics, simulation, human factors |
-| Project + slack | 405 | **P4** hoàn thành, **P5** hoàn thành, **P6** khởi động |
+| C8 ML | 150 | **Serving**, LLM systems, **eval harness**, drift |
+| C11 Observability | 90 | SLO, hàng đợi, capacity, chaos, incident |
+| C10 Distributed & cloud | 100 | Cloud, IaC, **Kubernetes** (sau distributed) |
+| C9 Data | 60 | Object storage, vector, chất lượng dữ liệu, backup |
+| C6 Embedded | 80 | **Inference trên thiết bị**, bảo mật, real-time |
+| C3 Architecture | 50 | GPU, **NPU & accelerator** |
+| C12 Architecture | 40 | Interface, đánh đổi, kiến trúc tham chiếu |
+| S5 Testing | 50 | Test hệ phi tất định, eval như testing, HIL |
+| S7 Economics | 20 | Mô hình chi phí, capacity |
+| A1–A3 Adjacent | 60 | Robotics, simulation, human factors |
+| Project | 190 | **P4** hoàn thành, **P5** hoàn thành |
 
-**Outcome:**
-- Hệ có SLO, error budget, chaos test, dashboard chi phí
-- Serving stack tự host với throughput đã tối ưu, cost-per-inference đo được
-- Bạn đã trực sự cố thật và viết postmortem
-
-**Tín hiệu sang Phase 5:** bạn **dự đoán được hành vi hệ thống dưới tải trước khi đo**, và dự đoán đúng thường xuyên hơn sai. Kiểm chứng: ghi lại 10 dự đoán, đo, đếm.
+**Tín hiệu sang Phase 5:** dự đoán được hành vi hệ thống dưới tải trước khi đo, đúng thường xuyên hơn sai. Ghi 10 dự đoán, đo, đếm.
 
 ---
 
-## ◆ PHASE 5 · KIẾN TRÚC & CHIỀU SÂU CHUYÊN BIỆT — tháng 42–60 · ~1.450 h
-
-**Mục tiêu:** từ người xây sang người quyết định cách xây. Và đẩy 2–3 nhánh lên Expert.
+## ◆ PHASE 5 · KIẾN TRÚC & CHIỀU SÂU — tháng 54–78 · ~700 h tự học
 
 | Nhánh | Giờ | Trọng tâm |
 |---|---|---|
-| C12 Architecture | 110 | **FMEA xuyên tầng**, **phân chia edge–cloud**, trạng thái, migration, security by design |
-| C8 ML | 100 | Mẫu agentic, **drift & monitoring**, chi phí, chế độ hỏng |
-| Nhánh Expert #1 (C6 hoặc C8) | 200 | Đẩy tới mức tự implement lại core components |
-| Nhánh Expert #2 (C1) | 100 | Đọc và đóng góp vào source dự án lớn |
-| C11 Observability | 40 | Debug phân tán + ML, quan sát chi phí |
-| C10 Distributed | 40 | Đa vùng, edge–cloud |
-| A4–A6 Adjacent | 110 | Business, standards, licensing |
-| S8 Communication | 15 | Hoàn thiện |
-| **P6** — hệ end-to-end | 500 | North Star ở dạng sản phẩm |
-| **P7** — làm cứng hoặc open source | 200 | Tùy chọn ở §10 |
-| Slack + review | 35 | |
+| C12 Architecture | 60 | **FMEA xuyên tầng**, **phân chia edge–cloud**, migration, security by design |
+| Nhánh Expert đã chọn | 180 | Đẩy tới mức tự implement lại core components |
+| C8 ML | 80 | Mẫu agentic, monitoring, chi phí, chế độ hỏng |
+| A4–A6 Adjacent | 80 | Business, standards, licensing |
+| **P6** — hệ end-to-end | 250 | **North Star ở dạng sản phẩm — 90 ngày vận hành** |
+| Slack | 50 | |
 
-**Outcome:**
-- Một hệ end-to-end đầy đủ do bạn thiết kế, vận hành, và bảo vệ được
-- Một tập ADR mà người lạ đọc được
-- 2–3 nhánh ở mức Expert
-- Có thể: đóng góp có ý nghĩa vào một dự án mã nguồn mở trong stack
+**P7** (làm cứng hoặc đóng góp mã nguồn mở) chuyển sang tùy chọn sau tháng 72.
 
-**Tín hiệu hoàn thành:** người khác đến hỏi bạn **nên thiết kế thế nào**, và bạn trả lời bằng đánh đổi có số liệu chứ không bằng sở thích. Và: bạn nêu được rõ ràng cái bạn **không** biết.
+**Tín hiệu hoàn thành:** người khác đến hỏi bạn *nên thiết kế thế nào*, và bạn trả lời bằng đánh đổi có số liệu. Và bạn nêu được rõ ràng cái bạn **không** biết.
 
 ---
 
-## 9.1 — Bảng tổng giờ theo phase
+## 9.1 — Bảng tổng giờ theo phase (chỉ Track IT)
 
-| Phase | Tháng | Giờ | % tổng |
+| Phase | Tháng | Giờ tự học | % |
 |---|---|---|---|
-| P0 Bootstrap | 0–3 | 350 | 5% |
-| P1 Nền tính toán | 1–12 | 1.200 | 18% |
-| P2 Nền hệ thống + đi làm | 9–24 | 1.500 | 23% |
-| P3 Vòng lặp khép lại | 18–36 | 1.600 | 24% |
-| P4 Quy mô & production | 30–48 | 1.500 | 23% |
-| P5 Kiến trúc & chuyên sâu | 42–60 | 1.450 | 22% |
-| | | **~6.600 h** (có chồng lấn) | |
+| P0 Bootstrap | 0–6 | 350 | 10% |
+| P1 Nền tính toán | 3–24 | 800 | 22% |
+| P2 Nền hệ thống | 18–38 | 800 | 22% |
+| P3 Vòng lặp khép lại | 30–50 | 850 | 24% |
+| P4 Quy mô & production | 42–62 | 750 | 21% |
+| P5 Kiến trúc & chuyên sâu | 54–78 | 700 | 19% |
+| | | **~3.600 h** (có chồng lấn) | |
 
-*Tổng vượt 100% vì các phase chồng lấn về thời gian; tổng giờ thực là ~6.600.*
+*Tổng vượt 100% vì phase chồng lấn về thời gian; tổng giờ thực là ~3.600 h.*
 
-## 9.2 — Nếu bạn đi làm từ tháng 12–15, phân bổ đổi thế nào
+Cộng **~2.100 h** quy đổi từ công việc (Phụ lục D) → **~5.700 h hiệu dụng**.
 
-**[Quan trọng]** Từ khi có việc, ngân sách đổi cấu trúc:
+## 9.2 — Ba quy tắc cho người vừa đi làm vừa tự học
 
-| Nguồn | Giờ/tuần | Ghi chú |
-|---|---|---|
-| Công việc | ~40 | Không phải giờ "học" nhưng là giờ **kinh nghiệm tổ chức** |
-| Học ngoài công việc | 12–18 | Giảm từ 25–30 h, nhưng chất lượng cao hơn vì có ngữ cảnh |
-| **Tổng hiệu quả** | — | **Cao hơn** 25–30 h tự học thuần, vì công việc đóng góp vào nhiều nhánh cùng lúc |
+1. **Nhánh nào công việc đang dạy thì đừng tự học song song.** Chờ. Nếu tháng này bạn đang commissioning một hệ điều khiển, đừng dành tối để đọc control theory — dành tối cho C1 hoặc C8. Học cùng lúc cùng chủ đề từ hai nguồn nghe có vẻ tăng tốc nhưng thực tế là trùng lặp.
 
-**Điều chỉnh cần làm khi đi làm:**
-1. Chọn nhánh học ngoài giờ **bù đắp** cho công việc, không trùng lặp. Nếu công việc là backend, học ngoài giờ là C6/C7.
-2. Dùng công việc làm nơi thực hành C11, C12, S8 — ba nhánh khó tự học nhất.
-3. Bảo vệ ≥10 h/tuần cho việc học có cấu trúc. Nếu công việc ăn hết, đó là tín hiệu đổi việc chứ không phải tín hiệu bỏ roadmap.
+2. **Ưu tiên nhánh công việc không bao giờ cho.** Thứ tự bất biến: C8 > C10 > C2/C3/C4 > C1 > phần còn lại. Lý do: đây là những thứ mà nếu bạn không tự học thì **không có nguồn nào khác**, mãi mãi.
 
----
+3. **Chuyển đổi mỗi thứ học được ở công ty thành khái niệm trung lập trong vòng 1 tuần.** Nếu sau một tháng bạn chỉ nói được "tôi cấu hình OB35 chu kỳ 100ms", bạn chưa học gì chuyển nhượng được. Nếu bạn nói được "tôi cấu hình một tác vụ chu kỳ với ngân sách WCET 100ms, và tôi biết cách đo jitter của nó" — đó là kiến thức đi theo bạn suốt đời.
+
 
 # 10. PROJECT PROGRESSION — ĐẶC TẢ ĐẦY ĐỦ
 
@@ -3335,6 +3582,10 @@ Làm cả ba cùng lúc. Làm tuần tự; P2b dùng lại P2a là một phần 
 ---
 
 ## ◆ P3 · EDGE ANOMALY DETECTOR — *realistic* — tháng 14–22 — ~180 h
+
+> **[Ghi chú v3 — P3 đổi vai trò]** Ở v2, P3 là bài tập tích hợp. Ở v3 nó là **nguồn kinh nghiệm vận hành dài hạn duy nhất của bạn**, vì công ty là tổng thầu EPC không làm O&M (§2.3c). Yêu cầu "30 ngày ngoài thực địa" chuyển từ *nên có* sang **không thương lượng**.
+>
+> **Chọn đối tượng giám sát:** hoàn toàn tự do, và **không nên** mặc định chọn thiết bị ngành năng lượng chỉ vì bạn làm ở đó. Một máy bơm, một tủ lạnh, một máy giặt, một quạt công nghiệp đều dạy cùng bài học kỹ thuật. Chọn theo tiêu chí: (a) bạn tiếp cận được 30 ngày liên tục, (b) bạn tạo được bất thường có kiểm soát, (c) nó **không** thuộc tài sản công ty — để tránh vướng quy định và để bạn tự do thử nghiệm.
 
 ### Mục tiêu
 ML trong ràng buộc thật, không trong notebook. **Đây là project khác biệt hóa lớn nhất của bạn.**
@@ -3687,90 +3938,135 @@ Chọn **một**:
 
 # 11. SCENARIOS + RECOMMENDED PATH
 
+## 11.0 — Đích đã xác nhận: liên ngành, không chuyên ngành
+
+Bạn đã nói rõ: *đích đến không chỉ ở ngành năng lượng, cũng không thuần một mảng nào cả*.
+
+Đây là một vị thế **hợp lệ và mạch lạc**, không phải sự thiếu quyết đoán — và nó chính là main root đã chuẩn hóa ở §1.2. Nhưng nó có một chế độ hỏng cụ thể cần gọi tên: **nông ở mọi nơi**.
+
+Ba cơ chế phòng vệ, đã có sẵn trong kiến trúc tài liệu:
+
+| Cơ chế | Ở đâu | Tác dụng |
+|---|---|---|
+| **Gradient độ sâu theo khoảng cách tới root** | §1.2, §6 | "Liên ngành" không có nghĩa là mọi nhánh cùng mức. Core Advanced, supporting Working–Intermediate, adjacent Basic–Working. Đây là cấu trúc, không phải thỏa hiệp |
+| **Chiều sâu chứng minh qua project** | §10 | 7 project thay vì 20. Mỗi cái tích hợp nhiều nhánh và có tiêu chí nghiệm thu đo được |
+| **1–2 nhánh Expert** | §2.2, §11.4 | Người liên ngành không có nhánh nào sâu thì không ai tin. Phải có ít nhất một chỗ bạn sâu hơn chuyên gia trung bình |
+
+**Nói thẳng:** "đi trên nền của tất cả các mảng" chỉ có giá trị nếu *cái nền* đủ dày. Nền dày = core ở Advanced, không phải core ở Working. Đó là lý do §6 không hạ mục tiêu dù ngân sách giảm.
+
+---
+
 ## 11.1 — Bốn hướng khả thi
 
 | | **SC-A · Cloud AI Platform** | **SC-B · Edge-to-Cloud Systems** | **SC-C · Robotics / Autonomy** | **SC-D · ML Systems research-leaning** |
 |---|---|---|---|---|
 | **Main root thu hẹp thành** | Xây và vận hành hạ tầng cho sản phẩm AI | Xây hệ có vòng khép kín từ vật lý tới cloud | Xây máy tự hành an toàn | Nghiên cứu và cải thiện chính hệ ML |
-| **Nhánh lên Expert** | C8, C10 | C6 hoặc C8, + C1, + C12 | C6, C7, S3 | C8, C3 |
-| **Nhánh lên Advanced** | C9, C11, C1, C5 | C3, C4, C5, C7, C9, C10, C11 | C4, C10, A1, S6 | C1, S1, C11 |
+| **Nhánh lên Expert** | C8, C10 | C8 hoặc C12 | C6, C7, S3 | C8, C3 |
+| **Nhánh lên Advanced** | C9, C11, C1, C5 | C1, C5, C7, C10, C12, S3 | C4, C10, A1, S6 | C1, S1, C11 |
 | **Gần như bỏ** | C6, C7, S2, S3 | Chiều sâu robotics, chiều sâu research | Chiều sâu cloud, chiều sâu data | C6, C7, C9, C10, S2 |
-| **Thời gian tới việc làm** | **Nhanh nhất: ~12–15 tháng** | ~15–20 tháng | ~24–30 tháng | Chậm nhất; thường cần bằng cấp |
+| **Khớp với vị trí hiện tại của bạn** | Thấp — phải bỏ toàn bộ vốn OT | **Rất cao — vị trí hiện tại phủ nửa khó nhất** | Trung bình | Không |
+| **Khớp với đích liên ngành** | Một phần | **Đầy đủ** | Một phần | Không |
 | **Mức độ đông đúc** | Cao | **Thấp** | Trung bình | Rất cao ở đỉnh |
-| **Khớp với "end-to-end" bạn phát biểu** | Một phần — thiếu đầu vật lý | **Đầy đủ** | Một phần — thiếu đầu dữ liệu quy mô | Không khớp |
-| **Cần phần cứng** | Không | Có (đã xác nhận) | Nhiều, và đắt hơn | Không, nhưng cần GPU |
-| **Rủi ro chính** | Bị coi là "một AI engineer nữa" | Dàn trải, không đủ sâu ở đâu | Chu kỳ phản hồi rất chậm | Cạnh tranh với PhD |
-| **Trần thu nhập** | Cao | Cao, nhưng phân tán hơn | Trung bình–cao, ít vị trí | Rất cao nếu vào được, rất thấp nếu không |
-| **Độ bền trước thay đổi công nghệ** | Trung bình | **Cao** — phần vật lý thay đổi chậm | Cao | Thấp — nội dung nghiên cứu thay đổi nhanh nhất |
+| **Độ bền trước thay đổi công nghệ** | Trung bình | **Cao** — phần vật lý đổi chậm | Cao | Thấp |
 
-## 11.2 — Khuyến nghị: SC-B, với thứ tự đảo ngược
+---
 
-**[Recommendation — độ tin cậy: cao về hướng, trung bình về mốc]**
+## 11.2 — Khuyến nghị: SC-B, và bạn đã đứng ở nửa khó của nó
 
-Chọn **SC-B · Edge-to-Cloud Intelligent Systems**, với điều chỉnh quan trọng về trình tự:
+**[Recommendation — độ tin cậy cao]**
 
-> ### Vào bằng software/infra. Khác biệt hóa bằng edge + AI systems.
+**SC-B · Edge-to-Cloud Intelligent Systems** vẫn là khuyến nghị. Nhưng lập luận đổi hoàn toàn so với v2.
+
+Ở v2, SC-B được khuyến nghị **dù** nó chậm hơn SC-A tới việc làm, và tôi phải thiết kế một chiến lược sắp xếp lại thứ tự để bù. Bây giờ điều đó không còn cần:
+
+> ### Bạn đang đứng ở nửa khó hơn của SC-B.
 >
-> **Tháng 0–20:** ~75–80% giờ cho C1–C5, C9, C10 — tức là hồ sơ của một backend/infra engineer **tuyển được**. Nhánh edge (C6, C7) chạy song song ở 20–25% giờ, đủ để duy trì và đủ để nuôi P1/P3, **nhưng không phải là vé vào cửa**.
+> SC-B có hai nửa. Nửa **IT** (phần mềm, cloud, ML, dữ liệu) tự học được — chậm nhưng có đầy đủ tài liệu, không cần thiết bị, không cần ai cho phép. Nửa **OT/vật lý** (cảm biến thật, điều khiển thật, an toàn thật, tích hợp đa bên thật) **gần như không tự học được** — nó cần hệ thống thật, hậu quả thật, và người chịu trách nhiệm thật.
 >
-> **Tháng 20+:** khi đã có việc, đảo tỷ lệ. Edge + AI systems trở thành nơi bạn xây chiều sâu phân biệt. Đây cũng là lúc chọn nhánh nào lên Expert.
+> Bạn đang được trả tiền để học nửa thứ hai.
+>
+> Chiến lược v3 vì vậy đơn giản hơn v2 rất nhiều: **để công việc lo nửa OT, dồn toàn bộ ngân sách tự học vào nửa IT.**
 
-### Vì sao SC-B chứ không SC-A, dù SC-A nhanh hơn tới việc làm
+Ba lý do phụ:
 
 | Lý do | Lập luận |
 |---|---|
-| **Khớp với mục tiêu bạn phát biểu** | SC-B là hướng duy nhất thực sự khớp với domain bạn viết ra. Nếu tôi khuyến nghị SC-A, tôi đang lặng lẽ đổi mục tiêu của bạn mà không nói |
-| **Khác biệt hóa bền** | Năng lực tích hợp vật lý–số tốn thời gian để có và không sao chép được bằng một khóa học cuối tuần. Nó cũng không bị công cụ mới xóa bỏ |
-| **Bối cảnh Việt Nam** [Inference] | Cơ sở công nghiệp sản xuất, điện tử và ô tô ở đây có thật và đang số hóa. Số người vừa biết firmware vừa biết hạ tầng cloud thì ít. **Cảnh báo:** đây là luận điểm về vị trí địa lý, không phải về thị trường toàn cầu. Nếu bạn nhắm remote cho công ty nước ngoài, luận điểm này yếu đi đáng kể và SC-A cạnh tranh hơn |
-| **Vòng phản hồi vật lý dạy thứ cloud không dạy** | Hệ thống hỏng theo cách bạn không tưởng tượng ra được. Không có nút rollback cho một board đã gắn trên máy ở nhà xưởng. Kỷ luật học được ở đây chuyển sang mọi nhánh khác |
-| **Bạn đã xác nhận có phần cứng** | Rào cản lớn nhất của SC-B đã được gỡ |
+| **Khớp với đích liên ngành** | SC-B là hướng duy nhất trong bốn hướng mà **cả hai thế giới đều nằm trong phạm vi**. Ba hướng kia đều yêu cầu bỏ một nửa |
+| **EPC cho bề rộng** | Bạn thấy nhiều nhà máy, nhiều vendor, nhiều loại hệ trong vài năm — thay vì một hệ trong mười năm. Với đích liên ngành, đây là mô hình phơi nhiễm gần lý tưởng |
+| **Vốn OT chuyển ngành được** | Hội tụ IT/OT không phải hiện tượng riêng của năng lượng. Nó xuất hiện ở sản xuất, hạ tầng, giao thông, nước, tòa nhà, logistics. Người biết cả hai thế giới đi sang ngành nào cũng được; người biết một thế giới thì không |
 
-### Vì sao đảo thứ tự thay vì chạy SC-B thuần
-
-Dữ liệu thị trường 2026 [Fact]: cửa entry-level AI rất hẹp (~2,5% tin tuyển nhắm 0–2 năm), trong khi backend/infra vẫn là nhóm tuyển đông nhất theo số lượng thô.
-
-Nếu bạn dồn 20 tháng đầu vào embedded + ML, bạn sẽ có hồ sơ **thú vị** nhưng **khó tuyển**, đúng vào lúc bạn cần nhất phần kinh nghiệm không tự học được (§2.2). Đảo thứ tự giải quyết mâu thuẫn này mà không hy sinh đích đến.
+---
 
 ## 11.3 — Chọn SC-B thì mất gì — nói rõ
 
 | Đánh đổi | Mức độ | Phòng ngừa |
 |---|---|---|
-| **Chậm hơn SC-A tới việc làm đầu tiên** | ~3–5 tháng | Chấp nhận; hoặc rút ngắn bằng cách hoãn C7 sang sau khi có việc |
 | **Không sâu bằng chuyên gia từng tầng** | Chắc chắn xảy ra | Đây là **thiết kế**, không phải lỗi. Giá trị của bạn ở mối nối. Nếu bạn không tin luận điểm đó, đừng chọn SC-B |
-| **Rủi ro "biết rộng mà nông"** | Thật và nghiêm trọng | Phòng ngừa duy nhất: **chiều sâu chứng minh được qua project**, không qua danh sách kỹ năng. Đây là lý do §10 có 7 project thay vì 20 |
-| **Thị trường tuyển cho đúng profile này hẹp hơn** | Thật | Ít tin tuyển khớp chính xác, nhưng bạn cạnh tranh với ít người hơn ở mỗi tin. Đây là đánh đổi **variance**, không phải đánh đổi expected value |
-| **Chi phí thời gian debug phần cứng** | 1 bug có thể ăn cả tuần | Đầu tư sớm vào công cụ đo (logic analyzer, scope) — ROI cao nhất trong toàn bộ BOM |
-| **Khó giải thích profile khi phỏng vấn** | Thật | Chuẩn bị một câu chuyện một câu: *"Tôi xây hệ thống nối cảm biến vật lý với hạ tầng cloud và mô hình học máy — và tôi debug được xuyên cả ba tầng."* Rồi chứng minh bằng P3 hoặc P6 |
+| **Rủi ro "biết rộng mà nông"** | Thật, và là rủi ro chính của đích liên ngành | Ba cơ chế phòng vệ ở §11.0. Kiểm tra định kỳ: bạn có **ít nhất một nhánh** mà bạn sâu hơn chuyên gia trung bình không? |
+| **Ngân sách tự học chỉ còn 3.600 h** | Thật | Expert 1–2 nhánh thay vì 2–3. Chấp nhận, hoặc tăng giờ, hoặc kéo dài timeline |
+| **Thiếu cung `observe→adapt`** | Nghiêm trọng | Project cá nhân là nguồn duy nhất (§2.3c). P3 và P6 thành bắt buộc |
+| **Vốn vendor Siemens/ABB không chuyển nhượng** | Thật | Thói quen dịch sang khái niệm trung lập (§2.3d). Làm hằng tuần, không để dồn |
+| **Khó giải thích profile khi phỏng vấn** | Thật, và sẽ kéo dài | Chuẩn bị một câu: *"Tôi xây hệ thống nối thiết bị vật lý với hạ tầng phần mềm và mô hình học máy — và tôi debug được xuyên cả ba tầng."* Rồi chứng minh bằng P3 hoặc P6 |
 
-## 11.4 — Điểm rẽ nhánh: tháng 18–24
+---
 
-Tại đây, **quyết định lại một lần** dựa trên bằng chứng thực tế, không dựa trên kế hoạch cũ.
+## 11.4 — Điểm rẽ nhánh: tháng 24–30
 
-| Bằng chứng quan sát được | Nghiêng về | Hành động cụ thể |
+**Dịch từ tháng 18–24 của v2** — vì bạn cần qua ít nhất một chu kỳ dự án EPC đầy đủ (thiết kế → thi công → chạy thử → bàn giao) trước khi có đủ bằng chứng.
+
+Quyết định ở đây: **nhánh nào lên Expert.**
+
+| Bằng chứng quan sát được | Chọn Expert ở | Hành động cụ thể |
 |---|---|---|
-| P3 hấp dẫn hơn P2; debug phần cứng không làm bạn nản; bạn thấy hứng khi đo bằng scope | **Edge** | C6 → Expert, C7 → Advanced. Giảm C10 xuống Intermediate–Advanced |
-| P2/P4 hấp dẫn hơn; phần cứng chỉ thấy phiền; bạn thích tối ưu và quy mô | **Cloud** | C6 dừng ở Intermediate. Dồn vào C8.10, C10, C11 → Expert ở C8 |
-| Bạn đã có việc | **Để công việc quyết định** | Nhánh nào công việc dùng hàng ngày → đẩy lên Expert. Đây là lựa chọn tối ưu và cũng là lựa chọn ít người dám chọn |
-| Bạn thấy C12 (kiến trúc) hấp dẫn hơn cả hai | **Kiến trúc** | Giữ cả hai ở Advanced, đẩy C12 → Expert. Đích là systems architect chứ không phải specialist |
-| Không nhánh nào hấp dẫn sau 20 tháng | **Tín hiệu nghiêm trọng** | Không phải vấn đề kỷ luật. Xem lại §11.1 — có thể domain này không phải của bạn, và biết điều đó ở tháng 20 tốt hơn ở tháng 50 |
+| Bạn thấy phần thú vị nhất là *làm cho hệ thông minh hơn*; P3 hấp dẫn hơn P4; bạn thích eval và đo đạc | **C8 · ML & inference systems** | Tăng C8 lên ~500 h, giảm C10 và C11 xuống Intermediate–Advanced |
+| Bạn thấy phần thú vị nhất là *làm cho nhiều hệ ghép được với nhau*; bạn hay là người giải thích giữa hai bên; bạn thích viết design doc | **C12 · Systems architecture** | Tăng C12 lên ~350 h, giữ C8 ở Advanced, tăng S8 và A4 |
+| Bạn thấy công việc dạy bạn nhiều hơn tự học | **Để công việc quyết định** | Nhánh nào công ty dùng bạn nhiều nhất → đẩy lên Expert. Ít người dám chọn cách này và nó thường tối ưu |
+| Không nhánh nào hấp dẫn sau 30 tháng | **Tín hiệu nghiêm trọng** | Không phải vấn đề kỷ luật. Xem lại §11.1 — có thể domain này không phải của bạn, và biết ở tháng 30 tốt hơn ở tháng 70 |
+
+**Không chọn Expert ở C6, C7, S2, S3.** Lý do: công việc đang cấp chúng ở mức Advanced miễn phí. Dùng ngân sách tự học khan hiếm để đẩy chúng lên Expert là phân bổ sai — đó là mua thứ bạn đang được cho.
+
+---
 
 ## 11.5 — Nếu bạn muốn chọn hướng khác
 
-Tôi vẫn đưa đủ thông tin để bạn chọn ngược lại khuyến nghị.
-
 ### Chọn SC-A · Cloud AI Platform
-**Đổi gì trong roadmap này:** bỏ C6, C7 xuống Awareness; bỏ S2, S3; C8 và C10 lên Expert; tăng C9 và C11; P3 thay bằng "xây feature store + training pipeline"; P6 thu hẹp thành hệ agentic thuần software.
-**Tiết kiệm:** ~700 h. **Mất:** toàn bộ luận điểm khác biệt hóa ở §11.2.
+**Đổi gì:** bỏ C6, C7 xuống Awareness; bỏ S2, S3; C8 và C10 lên Expert; P3 thay bằng "feature store + training pipeline".
+**Chi phí thật:** bạn vứt bỏ toàn bộ vốn OT đang được trả tiền để tích lũy. Chỉ hợp lý nếu bạn quyết định rời hẳn ngành công nghiệp.
 
 ### Chọn SC-C · Robotics
-**Đổi gì:** A1 từ adjacent lên core (Advanced); thêm kinematics, dynamics, motion planning ở mức Intermediate; S3 lên Advanced; C9, C10 xuống Working; thêm ROS 2 như nhánh core; P6 thành một robot thật.
-**Thêm:** ~800 h và chi phí phần cứng cao hơn nhiều. **Mất:** năng lực hạ tầng và dữ liệu ở quy mô.
+**Đổi gì:** A1 lên core Advanced; thêm kinematics, dynamics, motion planning ở Intermediate; S3 lên Advanced; C9, C10 xuống Working.
+**Lưu ý:** vốn OT của bạn chuyển sang đây **tốt hơn** sang SC-A — điều khiển, an toàn, cảm biến, thời gian thực đều dùng lại được.
 
 ### Chọn SC-D · Research
-**Roadmap này không phù hợp.** Bạn cần: S1 lên Advanced (kể cả measure-theoretic probability và optimization lý thuyết), C8 lên Expert ở modeling chứ không ở serving, C3 ở GPU/accelerator, và **bằng cấp** — không phải vì bằng cấp dạy bạn nhiều hơn, mà vì cửa vào của nghiên cứu được gác bởi thể chế.
-Nếu đây là đích thật, nói ngay và tôi viết roadmap khác.
+**Roadmap này không phù hợp**, và vốn OT của bạn gần như không dùng được. Cần bằng cấp. Nếu đây là đích thật, nói ngay và tôi viết roadmap khác.
 
 ---
+
+## 11.6 — Quyết định năm 3–5: ở lại EPC, hay chuyển sang nơi có vận hành
+
+**[Không phải quyết định của hôm nay.** Bạn đang thử việc. Đưa vào đây để bạn biết nó tồn tại và thu thập bằng chứng dần.]
+
+Ba mô hình công ty cho ba thứ khác nhau:
+
+| Mô hình | Cho gì | Không cho gì |
+|---|---|---|
+| **Tổng thầu EPC** (hiện tại) | Bề rộng, tích hợp đa bên, commissioning, nhiều vendor, nhiều loại nhà máy | Vận hành dài hạn, `observe→adapt`, dữ liệu lịch sử nhiều năm |
+| **Chủ đầu tư / IPP / nhà vận hành** | Vận hành dài hạn, dữ liệu nhiều năm, hậu quả của quyết định thiết kế, bài toán tối ưu thật | Bề rộng — thường chỉ một loại tài sản |
+| **Công ty sản phẩm / nhà cung cấp giải pháp** | Chu kỳ phát triển phần mềm, thực hành kỹ thuật hiện đại, quy mô người dùng | Tiếp xúc trực tiếp với hiện tượng vật lý |
+
+**Tín hiệu để cân nhắc chuyển** (không phải mệnh lệnh):
+- Bạn đã qua ≥3 chu kỳ dự án EPC và bắt đầu thấy lặp lại
+- P3 và P6 vẫn là nguồn kinh nghiệm vận hành **duy nhất** của bạn sau 3 năm
+- Bạn đã đạt Advanced ở ≥4 nhánh core và cần môi trường dùng chúng
+- Công ty không có đường cho bạn làm phần `learn/infer/adapt` dù bạn đã chứng minh được
+
+**Tín hiệu để ở lại:**
+- Công ty mở rộng sang O&M hoặc sang sản phẩm số (theo dõi chiến lược công ty)
+- Bạn được giao phần hệ thống có quyền quyết định kiến trúc
+- Bề rộng vẫn đang tăng — mỗi dự án vẫn dạy bạn thứ mới
+
+**[Recommendation]** Đừng quyết định trước tháng 30. Trước đó, dữ liệu bạn có về chính mình còn quá ít.
+
 
 # 12. CHỦ ĐỘNG BỎ QUA
 
@@ -3835,6 +4131,34 @@ Mọi giờ dành cho những thứ dưới đây là giờ **không** dành cho
 **Triệu chứng:** bạn "đã học" OS vì đã đọc hết OSTEP.
 **Vì sao nó nguy hiểm:** cảm giác hiểu khi đọc rất khác năng lực làm. Bạn phát hiện ra khoảng cách này ở thời điểm tệ nhất — khi đang phỏng vấn hoặc khi hệ đang hỏng.
 **Sửa:** **checkpoint ở §5 tồn tại chính xác vì lý do này.** Một nhánh chưa đạt checkpoint thì chưa xong, bất kể bạn đã đọc bao nhiêu.
+
+## 12.3b — Ba cạm bẫy bổ sung cho người đang làm trong ngành công nghiệp
+
+*Bổ sung ở v3. Ba cái này không có ở v2 vì chúng chỉ xuất hiện khi bạn đã ở trong một ngành.*
+
+### 6. Để công việc định nghĩa phạm vi học
+**Triệu chứng:** sau 2 năm, mọi thứ bạn học đều liên quan tới dự án được giao.
+**Vì sao nguy hiểm:** công việc tối ưu cho *năng suất của công ty trong quý này*, không tối ưu cho *năng lực của bạn trong 10 năm*. Hai mục tiêu đó trùng nhau khoảng 40%, không phải 100%.
+**Sửa:** ngân sách tự học phải đi vào nhánh **công việc không cho** (§9.2 quy tắc 2). Nếu tháng nào bạn thấy mình tự học đúng thứ đang làm ở công ty, tháng đó bạn mất ngân sách.
+
+### 7. Nhầm kỹ năng vendor với kiến thức
+**Triệu chứng:** bạn mô tả năng lực của mình bằng tên phần mềm.
+**Vì sao nguy hiểm:** kỹ năng vendor mất giá khi bạn đổi ngành, và ngành công nghiệp đổi nền tảng khoảng 15–20 năm một lần — đủ chậm để bạn tưởng nó vĩnh viễn, đủ nhanh để nó xảy ra trong sự nghiệp bạn.
+**Sửa:** bảng dịch ở §2.3d, làm hằng tuần. Kiểm tra: mô tả năng lực của bạn trong 3 câu **không dùng tên sản phẩm nào**. Nếu không làm được, bạn đang tích lũy kỹ năng chứ không tích lũy kiến thức.
+
+### 8. Coi phía bên kia là ngu ngốc
+**Triệu chứng đối xứng, cả hai đều phổ biến:**
+- Phía OT nhìn phần mềm hiện đại: *"bọn nó deploy 10 lần một ngày, hệ thống nào chịu nổi"*
+- Phía IT nhìn hệ công nghiệp: *"code này viết từ 2003, còn dùng Windows XP, sao chưa ai sửa"*
+
+**Vì sao cả hai đều sai:** mỗi bên tối ưu cho ràng buộc bên kia chưa từng gặp. OT tối ưu cho vòng đời 20 năm, an toàn con người, và không được dừng. IT tối ưu cho tốc độ thay đổi, quy mô, và chi phí lỗi thấp. Cả hai đều đúng **trong ràng buộc của mình**.
+
+**Vì sao nó quan trọng với riêng bạn:** giá trị của bạn nằm ở chỗ đứng giữa. Nếu bạn khinh một bên, bạn tự loại mình khỏi chính vị trí bạn đang xây. Và điều này khó hơn nó nghe — áp lực xã hội ở mỗi bên đều đẩy bạn về phía coi thường bên kia.
+
+**Kiểm tra:** với mỗi thực hành bạn thấy vô lý ở một bên, tìm ra ràng buộc khiến nó hợp lý. Nếu không tìm được, bạn chưa hiểu bên đó đủ.
+
+---
+
 
 ## 12.4 — Quy tắc quyết định khi gặp thứ mới không có trong roadmap
 
@@ -4024,6 +4348,35 @@ Ghi **tên tổ chức + tên tài nguyên**, không ghi URL (URL thay đổi; t
 | 17 | *Accelerate* (Forsgren, Humble, Kim) | — | A4 | 12 | |
 | 18 | *The Goal* (Goldratt) | — | A4.1 | 12 | Tiểu thuyết về lý thuyết ràng buộc |
 
+## 13.6b — Tài nguyên cho tầng công nghiệp (OT)
+
+*Bổ sung ở v3, phục vụ các leaf mới C5.16, C6.16, S3.8, S4.9, C12.15. Phần lớn học được **tại công việc**; danh sách này để bạn học có hệ thống thay vì học ngẫu nhiên theo dự án được giao.*
+
+| Tài nguyên | Tổ chức | Nhánh | Giờ | Ghi chú |
+|---|---|---|---|---|
+| Tài liệu chính thức TIA Portal / STEP 7 | Siemens | C6.16 | 40 | **Primary source.** Đọc phần kiến trúc hệ thống, không chỉ phần thao tác |
+| Tài liệu ABB 800xA hoặc AC500 | ABB | C6.16 | 30 | Tùy hệ bạn gặp |
+| IEC 61131-3 — chuẩn hoặc tài liệu diễn giải | IEC / PLCopen | C6.16 | 20 | Ngôn ngữ lập trình PLC, vendor-neutral |
+| PLCopen — tài liệu công khai | PLCopen | C6.16 | 15 | Khối chức năng chuẩn hóa, motion control |
+| Modbus Application Protocol Specification | Modbus Organization | C5.16 | 8 | Ngắn, đọc hết được. Primary source |
+| IEC 61850 — tài liệu giới thiệu và SCL | IEC / vendor | C5.16 | 30 | Mô hình dữ liệu phân cấp là phần đáng học nhất |
+| IEC 60870-5-104 / DNP3 — tài liệu kỹ thuật | IEC / DNP Users Group | C5.16 | 15 | Telemetry SCADA |
+| OPC UA specification + companion spec | OPC Foundation | C5.16, C12.15 | 30 | **Cầu nối IT/OT quan trọng nhất.** Đọc phần information model |
+| Profinet / Profibus — tài liệu kỹ thuật | PI (Profibus & Profinet International) | C5.16 | 20 | |
+| *Process Dynamics and Control* (Seborg et al.) | — | S3.8 | 35 | Sách chuẩn cho điều khiển quá trình công nghiệp |
+| *Practical Process Control* (Blevins/Nixon) hoặc tương đương | — | S3.8 | 20 | Thực hành hơn Seborg |
+| ISA-95 / IEC 62264 — tài liệu giới thiệu | ISA / IEC | C12.15 | 20 | |
+| IEC 62443 — tài liệu giới thiệu và hướng dẫn | IEC / ISA | S4.9 | 25 | An ninh hệ điều khiển công nghiệp |
+| CISA — hướng dẫn công khai về ICS security | CISA | S4.9 | 15 | Miễn phí, chất lượng cao |
+| Grid code Việt Nam và thông tư đấu nối | Bộ Công Thương / EVN | S3.8, A5 | 15 | Ràng buộc pháp lý định hình kiến trúc điều khiển |
+| Tài liệu inverter / turbine của nhà sản xuất | vendor | C7, S3.8 | 30 | Primary source cho hệ bạn thực sự gặp |
+| *The Unified Namespace* — tài liệu và thảo luận công khai | cộng đồng IIoT | C12.15 | 10 | Xu hướng đang định hình lại ISA-95 |
+
+**[Recommendation] về cách dùng danh mục này:** đừng đọc trước. Đọc **ngay sau** khi gặp thứ đó ở công việc — đó là lúc bạn có ngữ cảnh để hiểu, và là lúc kiến thức dính lại. Với mỗi tài nguyên, viết ra bảng ánh xạ sang khái niệm trung lập (§2.3d). Ngân sách: ~380 h, rải đều 5 năm, **phần lớn trong giờ làm việc**.
+
+---
+
+
 ## 13.7 — Tài nguyên tra cứu suốt 5 năm
 
 | Tài nguyên | Dùng cho |
@@ -4183,6 +4536,9 @@ Ngân sách: 25–30 h/tuần ≈ **330–390 h** trong 90 ngày.
 | Có mục "chủ động bỏ qua" | ✓ §12, cộng quy tắc quyết định cho thứ mới |
 | Nhãn Fact / Inference / Recommendation / Không chắc | ✓ Dùng xuyên suốt |
 | STATE block dán lại được | ✓ §16.3 |
+| **v3: giữ nguyên 38 lĩnh vực sau khi hiệu chỉnh tình huống** | ✓ §0.1 — nhãn không đổi, chỉ đổi trình tự và giờ |
+| **v3: lấp lỗ hổng độ phủ tầng công nghiệp** | ✓ C5.16, C6.16, S3.8, S4.9, C12.15 — 5 leaf mới |
+| **v3: phân tách giờ tự học và giờ công việc** | ✓ §3.5, Phụ lục B, Phụ lục D |
 
 ## 15.2 — Những gì tôi đã cân nhắc rồi cố ý loại
 
@@ -4209,7 +4565,10 @@ Ngân sách: 25–30 h/tuần ≈ **330–390 h** trong 90 ngày.
 | 5 | **Độ bền của tầng agentic/LLM tooling (§8, tầng 4)** | Trung bình, nhưng **chắc chắn sẽ cũ** | Mọi thứ ở tầng 4 và 5 nên được coi là **ảnh chụp tháng 9/2026**, không phải kết luận. Kiểm tra lại mỗi 6 tháng |
 | 6 | **C6 đạt được Expert** | Trung bình | Embedded có vòng phản hồi chặt nên tôi tin là khả thi, nhưng nó cũng có bề rộng lớn (mỗi họ MCU là một hệ sinh thái). Có thể thực tế là "Expert trên một họ MCU, Advanced trên phần còn lại" |
 | 7 | **Tỷ lệ 75–80% software/infra trong 20 tháng đầu** | Thấp–trung bình | Con số này là phán đoán, không phải tính toán. Nếu bạn thấy nó làm nhánh edge chết yểu, tăng lên 30–35% |
-| 8 | **Thời gian cho từng project ở §10** | Thấp | P6 ở mức 500 h có thể thiếu; các hệ end-to-end thật thường tốn hơn dự kiến 1,5–2× |
+| 8 | **Thời gian cho từng project ở §10** | Thấp | Con số này là phán đoán. P6 ở mức 250 h tự học có thể thiếu 1,5–2× |
+| 9 | **[v3] Giờ công việc quy đổi ~2.100 h** | **Cao** | Đây là ước lượng yếu nhất trong bản v3. Nó giả định công việc cho kỹ thuật thật chứ không chủ yếu giấy tờ và giám sát nhà thầu. **Tự kiểm ở tháng 12:** đối chiếu cột "công việc" ở Phụ lục D với nhật ký thực tế |
+| 10 | **[v3] Tự học 12–18 h/tuần bền được trong 5–6 năm** | **Cao** | Vừa đi làm vừa tự học ở cường độ này trong 6 năm là yêu cầu lớn. Đợt thi công công trường có thể làm nó về 0 trong nhiều tuần |
+| 11 | **[v3] Công việc sẽ cấp C7/S2/S3 ở mức Advanced** | Trung bình | Phụ thuộc bạn được giao việc kỹ thuật hay việc quản lý. Nếu lệch sang quản lý, ba nhánh này phải quay lại ngân sách tự học |
 
 ## 15.4 — Mâu thuẫn cố ý trong tài liệu
 
@@ -4274,56 +4633,77 @@ DOMAIN
   chuẩn hóa:  Intelligent Systems Integration Engineering
   trục:       sense → transport → store → learn → infer →
               decide → act → observe → adapt
-  spine:      SC-B (Edge-to-Cloud), thứ tự ĐẢO:
-              software/infra trước, edge+AI sau
+  đích:       LIÊN NGÀNH — không chuyên một mảng, nền dày
+              ở tất cả, sâu theo khoảng cách tới root
+  spine:      SC-B (Edge-to-Cloud)
+              → công việc lo nửa OT, tự học lo nửa IT
+
+TÌNH HUỐNG NGHỀ NGHIỆP
+  vị trí:     Kỹ sư tự động hóa — IPC E&C (tổng thầu EPC)
+  giai đoạn:  thử việc, đang tìm hiểu
+  stack:      hỗn hợp, nhiều Siemens và ABB
+  mô hình cty: EPC, KHÔNG làm O&M dài hạn
+              → cung observe→adapt phải mua bằng project
 
 NGÂN SÁCH
-  thời gian:  25–30 h/tuần → ~6.600 h / 5 năm   [ĐÃ XÁC NHẬN]
-  phần cứng:  8–15tr VND rải 5 năm               [ĐÃ XÁC NHẬN]
-  GPU:        thuê theo giờ Phase 1–3            [ràng buộc còn lại]
+  tự học:     12–18 h/tuần → ~3.600 h / 5–6 năm
+  công việc:  ~2.100 h quy đổi (Phụ lục D)
+  hiệu dụng:  ~5.700 h
+  phần cứng:  8–15tr VND rải 5 năm         [ĐÃ XÁC NHẬN]
+  GPU:        thuê theo giờ Phase 1–3
+  ràng buộc lớn nhất: NĂNG LƯỢNG sau giờ làm
 
 PHASE HIỆN TẠI
-  phase:      Phase 0 — Bootstrap (tháng 0–3)
+  Track IT:   Phase 0 — Bootstrap (tháng 0–6)
+  Track OT:   thử việc / định hướng
   tuần thứ:   ___
-  giờ tuần này: ___ / mục tiêu 25–30
+  giờ tuần này: ___ / mục tiêu 12–18
 
 ĐÃ ĐẠT (checkpoint — xem Phụ lục C)
   (chưa có)
 
 ĐANG LÀM
   §14.1 — tuần 1 của 90 ngày đầu
+  Sổ "khái niệm vendor ↔ khái niệm trung lập": ___ cặp
   P1 — chưa khởi động
 
 QUYẾT ĐỊNH ĐÃ CHỐT
-  ✓ vào bằng software/infra, khác biệt bằng edge + AI systems
-  ✓ đi làm từ tháng ~12–15, không đợi học xong
-  ✓ 3 ngôn ngữ trong 5 năm: C, Python, + Go hoặc Rust
-  ✓ ngôn ngữ thứ 3 chốt ở Phase 3, không sớm hơn
+  ✓ giữ nguyên phạm vi 38 lĩnh vực — tình huống đổi
+    trình tự và giờ, KHÔNG đổi phạm vi
+  ✓ công việc lo nửa OT, tự học lo nửa IT
+  ✓ ưu tiên tự học: C8 > C10 > C2/C3/C4 > C1 > còn lại
+  ✓ KHÔNG tự học song song nhánh công việc đang dạy
+  ✓ P3 (30 ngày) và P6 (90 ngày) là BẮT BUỘC —
+    nguồn kinh nghiệm vận hành dài hạn duy nhất
+  ✓ không chọn Expert ở C6/C7/S2/S3 (công việc đã cho)
+  ✓ 3 ngôn ngữ: C, Python, + Go hoặc Rust (chốt Phase 3)
   ✓ Kubernetes học SAU distributed systems
   ✓ trần 20 h cho bất kỳ agent framework nào
   ✓ không certification trong 2 năm đầu
-  ✓ không mua board mới cho tới khi board hiện tại
-    chạy một project ≥30 ngày
+  ✓ dịch mọi khái niệm vendor sang trung lập trong ≤1 tuần
 
 ĐIỂM RẼ NHÁNH SẮP TỚI
-  tháng 18–24: chọn C6 hay C8 lên Expert (§11.4)
+  tháng 24–30: chọn C8 hay C12 lên Expert (§11.4)
+  tháng 30+:   cân nhắc EPC vs nơi có vận hành (§11.6)
 
 CÂU HỎI ĐANG MỞ
-  1. mục tiêu cuối: đi làm / tự làm sản phẩm / nghiên cứu?
-  2. remote cho công ty nước ngoài hay thị trường VN?
-     (ảnh hưởng trực tiếp tới luận điểm §11.2)
+  1. giờ tự học thực tế bền được bao nhiêu? (giả định 12–18)
+  2. 12 tháng đầu công việc có cho kỹ thuật thật, hay chủ yếu
+     giấy tờ và giám sát? → quyết định Phụ lục D có đúng không
   3. trình độ hiện có ở từng nhánh — để đánh dấu phần skip được
 
 CẦN KIỂM TRA LẠI
   [ ] §8 tầng 4–5: mỗi 6 tháng (lần gần nhất: 09/2026)
   [ ] §13 tài nguyên còn tồn tại: mỗi 6 tháng
   [ ] §15.3 điều không chắc: mỗi quý
+  [ ] Phụ lục D giờ quy đổi: mỗi 6 tháng, đối chiếu thực tế
 
 TÀI LIỆU
-  phiên bản: v2.0 · 14/09/2026
-  trạng thái: hoàn chỉnh, không nhánh nào bị nén
+  phiên bản: v3.0 · 14/09/2026
+  trạng thái: hoàn chỉnh, 38 lĩnh vực, không nhánh nào bị nén
 ════════════════════════════════════════════════════════
 ```
+
 
 ## 16.4 — Cách dùng roadmap này
 
@@ -4438,101 +4818,110 @@ Giá tham chiếu VND, mua được ở Hà Nội (chợ Nhật Tảo / Trời �
 
 # PHỤ LỤC B · NGÂN SÁCH GIỜ CHI TIẾT
 
-Tổng: **6.600 h** trong 5 năm (25–30 h/tuần × 48 tuần × 5 năm).
+**v3:** hai nguồn giờ, không phải một.
 
-## B.1 — Phân bổ theo nhãn
-
-| Nhãn | Giờ | % |
+| Nguồn | Giờ / 5 năm | Kiểm soát được? |
 |---|---|---|
-| Core (12 nhánh) | 4.270 | 64,7% |
-| Supporting (8 nhánh) | 900 | 13,6% |
-| Adjacent (6 nhánh) | 300 | 4,5% |
-| Project tích hợp (ngoài giờ nhánh) | 1.000 | 15,2% |
-| Slack, review, viết lách, STATE | 130 | 2,0% |
-| **Tổng** | **6.600** | **100%** |
+| Tự học | **3.600** | Có, hoàn toàn |
+| Công việc quy đổi | **~2.100** | Không — phụ thuộc dự án được giao |
+| **Hiệu dụng** | **~5.700** | |
 
-## B.2 — Core · giờ theo nhánh × phase
+## B.1 — Phân bổ giờ tự học theo nhãn
 
-| Nhánh | P0 | P1 | P2 | P3 | P4 | P5 | **Tổng** |
-|---|---|---|---|---|---|---|---|
-| C1 Programming & runtimes | 110 | 150 | 100 | 60 | 20 | 10 | **450** |
-| C2 DSA | — | 200 | 60 | 20 | — | — | **280** |
-| C3 Computer architecture | — | 180 | 80 | 50 | 40 | — | **350** |
-| C4 OS & concurrency | — | 100 | 160 | 90 | 30 | 20 | **400** |
-| C5 Networking | — | — | 200 | 100 | 40 | 10 | **350** |
-| C6 Embedded & firmware | 30 | 60 | 80 | 170 | 90 | 30 | **460** |
-| C7 Sensing & signals | — | — | 40 | 140 | 60 | 20 | **260** |
-| C8 ML & inference systems | — | — | 80 | 180 | 200 | 100 | **560** |
-| C9 Data engineering & storage | — | — | 120 | 110 | 70 | 20 | **320** |
-| C10 Distributed & cloud | — | — | 60 | 130 | 130 | 40 | **360** |
-| C11 Observability & performance | — | — | 40 | 60 | 120 | 40 | **260** |
-| C12 Systems architecture | — | — | — | 40 | 70 | 110 | **220** |
-| **Core tổng** | **140** | **690** | **1.020** | **1.150** | **870** | **400** | **4.270** |
+| Nhãn | Giờ tự học | % |
+|---|---|---|
+| Core (12 nhánh) | 2.250 | 62,5% |
+| Supporting (8 nhánh) | 450 | 12,5% |
+| Adjacent (6 nhánh) | 150 | 4,2% |
+| Project tích hợp | 700 | 19,4% |
+| Slack, review, viết lách | 50 | 1,4% |
+| **Tổng** | **3.600** | **100%** |
 
-## B.3 — Supporting · giờ theo nhánh × phase
+## B.2 — Core · giờ tự học × giờ công việc quy đổi
 
-| Nhánh | P0 | P1 | P2 | P3 | P4 | P5 | **Tổng** |
-|---|---|---|---|---|---|---|---|
-| S1 Mathematics | 40 | 200 | 80 | — | — | — | **320** |
-| S2 Electronics & power | 10 | 10 | 20 | 80 | 20 | — | **140** |
-| S3 Control theory | — | — | — | 50 | 30 | 10 | **90** |
-| S4 Security | — | — | 10 | 40 | 40 | 20 | **110** |
-| S5 Testing & verification | — | — | 10 | 20 | 50 | 10 | **90** |
-| S6 Reliability & safety | — | — | — | 10 | 30 | 20 | **60** |
-| S7 Queueing & economics | — | — | — | — | 35 | 15 | **50** |
-| S8 Technical communication | — | — | 10 | 10 | 10 | 10 | **40** |
-| **Supporting tổng** | **50** | **210** | **130** | **210** | **215** | **85** | **900** |
-
-## B.4 — Adjacent · giờ theo nhánh × phase
-
-| Nhánh | P3 | P4 | P5 | **Tổng** |
+| Nhánh | Tự học | Công việc | **Hiệu dụng** | Mức đạt được |
 |---|---|---|---|---|
-| A1 Robotics & autonomy | — | 50 | 30 | **80** |
-| A2 Simulation & digital twins | — | 30 | 30 | **60** |
-| A3 HCI & human factors | — | 20 | 30 | **50** |
-| A4 Business & operations | — | — | 40 | **40** |
-| A5 Standards & regulation | — | — | 40 | **40** |
-| A6 Licensing & IP | — | — | 30 | **30** |
-| **Adjacent tổng** | **—** | **100** | **200** | **300** |
+| C1 Programming & runtimes | 280 | 20 | **300** | Advanced |
+| C2 DSA | 180 | 0 | **180** | Intermediate–Advanced |
+| C3 Computer architecture | 200 | 0 | **200** | Intermediate–Advanced |
+| C4 OS & concurrency | 240 | 30 | **270** | Advanced |
+| C5 Networking | 160 | 250 | **410** | Advanced |
+| C6 Embedded & firmware | 200 | 300 | **500** | Advanced |
+| C7 Sensing & signals | 80 | 350 | **430** | Advanced |
+| C8 ML & inference systems | 320 | 0 | **320** | Advanced → **Expert nếu chọn** |
+| C9 Data engineering & storage | 190 | 40 | **230** | Intermediate–Advanced |
+| C10 Distributed & cloud | 200 | 0 | **200** | Intermediate–Advanced |
+| C11 Observability & performance | 130 | 100 | **230** | Intermediate–Advanced |
+| C12 Systems architecture | 80 | 300 | **380** | Advanced → **Expert nếu chọn** |
+| **Core tổng** | **2.260** | **1.390** | **3.650** | |
 
-## B.5 — Project · giờ theo phase
+## B.3 — Supporting
 
-| Project | P0 | P1 | P2 | P3 | P4 | P5 | **Tổng** |
+| Nhánh | Tự học | Công việc | **Hiệu dụng** |
+|---|---|---|---|
+| S1 Mathematics | 220 | 0 | **220** |
+| S2 Electronics & power | 30 | 250 | **280** |
+| S3 Control theory | 30 | 250 | **280** |
+| S4 Security | 60 | 40 | **100** |
+| S5 Testing & verification | 50 | 30 | **80** |
+| S6 Reliability & safety | 20 | 150 | **170** |
+| S7 Queueing & economics | 20 | 10 | **30** |
+| S8 Technical communication | 20 | 60 | **80** |
+| **Supporting tổng** | **450** | **790** | **1.240** |
+
+## B.4 — Adjacent
+
+| Nhánh | Tự học | Công việc | **Hiệu dụng** |
+|---|---|---|---|
+| A1 Robotics & autonomy | 40 | 20 | **60** |
+| A2 Simulation & digital twins | 30 | 20 | **50** |
+| A3 HCI & human factors | 25 | 40 | **65** |
+| A4 Business & operations | 10 | 80 | **90** |
+| A5 Standards & regulation | 15 | 120 | **135** |
+| A6 Licensing & IP | 30 | 0 | **30** |
+| **Adjacent tổng** | **150** | **280** | **430** |
+
+*Tổng công việc quy đổi: 1.390 + 790 + 280 = **2.460 h**. Tôi ghi ~2.100 ở §0 để dự phòng — giờ công việc trùng lặp giữa các nhánh (một buổi commissioning đóng góp vào C11 và C12 cùng lúc), nên tổng thực tế thấp hơn tổng cộng dồn.*
+
+## B.5 — Project · giờ tự học
+
+| Project | Giờ | Ghi chú |
+|---|---|---|
+| P1 Sensor node + logger | 40 | Phase 0 |
+| P2 Tự viết lại hạ tầng | 110 | Phase 1–2 |
+| P3 Edge anomaly detector | 150 | Phase 2–3. **30 ngày thực địa — bắt buộc** |
+| P4 Ingestion platform | 130 | Phase 3–4 |
+| P5 Inference service | 120 | Phase 4 |
+| P6 Closed-loop system | 250 | Phase 5. **90 ngày vận hành — bắt buộc** |
+| P7 Làm cứng / open source | tùy chọn | Sau tháng 72 |
+| **Tổng** | **~800** | 700 h ròng sau khi trừ phần chồng với giờ nhánh |
+
+## B.6 — Tổng theo phase (chỉ tự học)
+
+| Phase | Tháng | Core | Supporting | Adjacent | Project | Slack | **Tổng** |
 |---|---|---|---|---|---|---|---|
-| P1 Sensor node + logger | 40 | — | — | — | — | — | **40** |
-| P2 Tự viết lại hạ tầng | — | 60 | 60 | — | — | — | **120** |
-| P3 Edge anomaly detector | — | — | 60 | 120 | — | — | **180** |
-| P4 Ingestion platform | — | — | 40 | 80 | 60 | — | **180** |
-| P5 Inference service | — | — | — | — | 180 | — | **180** |
-| P6 Closed-loop system | — | — | — | — | 50 | 450 | **500** |
-| P7 Làm cứng / open source | — | — | — | — | — | 200 | **200** |
-| **Project tổng** | **40** | **60** | **160** | **200** | **290** | **650** | **1.400** |
+| P0 Bootstrap | 0–6 | 250 | 50 | — | 40 | 10 | **350** |
+| P1 Nền tính toán | 3–24 | 560 | 140 | — | 90 | 10 | **800** |
+| P2 Nền hệ thống | 18–38 | 600 | 80 | — | 110 | 10 | **800** |
+| P3 Vòng lặp khép lại | 30–50 | 610 | 70 | — | 160 | 10 | **850** |
+| P4 Quy mô & production | 42–62 | 490 | 70 | 60 | 120 | 10 | **750** |
+| P5 Kiến trúc & chuyên sâu | 54–78 | 340 | 40 | 90 | 180 | 50 | **700** |
+| **Tổng** | | **2.850** | **450** | **150** | **700** | **100** | **3.600** |
 
-*Lưu ý: 400 h trong số này được tính chồng vào giờ nhánh (project **là** cách học nhánh ở Phase 3–5), nên đóng góp ròng vào tổng là 1.000 h.*
-
-## B.6 — Tổng theo phase
-
-| Phase | Tháng | Core | Supporting | Adjacent | Project ròng | Slack | **Tổng** |
-|---|---|---|---|---|---|---|---|
-| P0 Bootstrap | 0–3 | 140 | 50 | — | 40 | 20 | **250** |
-| P1 Nền tính toán | 1–12 | 690 | 210 | — | 60 | 40 | **1.000** |
-| P2 Nền hệ thống + đi làm | 9–24 | 1.020 | 130 | — | 130 | 20 | **1.300** |
-| P3 Vòng lặp khép lại | 18–36 | 1.150 | 210 | — | 140 | 20 | **1.520** |
-| P4 Quy mô & production | 30–48 | 870 | 215 | 100 | 210 | 15 | **1.410** |
-| P5 Kiến trúc & chuyên sâu | 42–60 | 400 | 85 | 200 | 420 | 15 | **1.120** |
-| **Tổng** | | **4.270** | **900** | **300** | **1.000** | **130** | **6.600** |
+*Core cộng dồn 2.850 > 2.260 ở B.2 vì phần chênh là giờ ôn và giờ project tính vào nhánh. Tổng ròng vẫn 3.600.*
 
 ## B.7 — Cách dùng bảng này
 
 | Tình huống | Làm gì |
 |---|---|
-| Giờ thực tế thấp hơn 20% | Không cắt đều. Cắt theo thứ tự: Adjacent → Supporting mức thấp → Peripheral (đã 0) → project P7 |
-| Giờ thực tế thấp hơn 40% | Đổi kiến trúc, không đổi tốc độ: quay về bản v1 (spine hẹp hơn), bỏ C6 hoặc bỏ C8 |
-| Bạn đi làm từ tháng 12–15 | Giờ công việc **không** tính vào bảng này, nhưng nó đóng góp vào C1, C9, C10, C11, C12, S8. Giảm giờ tự học ở các nhánh đó và **tăng** ở C6, C7 (nhánh công việc không dạy) |
-| Bạn đã biết một nhánh | Trừ giờ, nhưng **giữ lại checkpoint**. Nếu không pass được checkpoint, bạn chưa biết nhánh đó ở mức roadmap yêu cầu |
-| Một nhánh tốn nhiều hơn dự kiến | Bình thường. Lấy từ Slack trước, rồi từ Adjacent. Đừng lấy từ nhánh core khác |
+| Giờ tự học thực tế thấp hơn 20% (≈12 h/tuần) | Bình thường. Cắt theo thứ tự: Adjacent → Supporting mức thấp → P7 |
+| Thấp hơn 40% (≈9 h/tuần) | Cắt sâu hơn: giữ C8, C10, C1, C2 và P3; hoãn C3, C9, C11 sang sau tháng 60 |
+| Thấp hơn 60% (≈6 h/tuần) trong ≥6 tháng | **Đổi kiến trúc:** giữ đúng một nhánh Advanced (C8), phần còn lại Working. Kéo timeline lên 8 năm. Thà đạt sâu một chỗ còn hơn nông khắp nơi |
+| Công việc **không** cấp như bảng dự kiến | Sau 12 tháng, đối chiếu cột "công việc" với thực tế. Chênh lệch phải được bù bằng giờ tự học — hoặc bằng việc đổi vị trí trong công ty |
+| Công việc cấp **nhiều hơn** dự kiến | Dồn giờ tự học tiết kiệm được vào C8 và C10 — hai nhánh không bao giờ có nguồn nào khác |
+| Một nhánh tốn nhiều hơn dự kiến | Lấy từ Slack trước, rồi từ Adjacent. Đừng lấy từ nhánh core khác |
+| Bạn đã biết một nhánh | Trừ giờ, nhưng **giữ lại checkpoint**. Không pass checkpoint nghĩa là chưa biết ở mức roadmap yêu cầu |
 
----
 
 # PHỤ LỤC C · MASTER CHECKLIST
 
@@ -4621,6 +5010,7 @@ Ký hiệu: ★ = checkpoint quan trọng nhất của nhánh.
 - [ ] Vẽ đường đi gói tin từ Internet tới container, liệt kê mọi thành phần, xác định nơi mTLS bắt đầu/kết thúc
 - [ ] ★★ Thiết bị mất mạng 6 h rồi khôi phục: 0 mất, 0 trùng, thứ tự đúng, không tăng đột biến tải (có đồ thị)
 - [ ] Tái tạo retry storm trong lab, dập bằng jitter + circuit breaker, chứng minh bằng đồ thị
+- [ ] **[v3]** Đọc dữ liệu từ thiết bị công nghiệp thật qua giao thức gốc, đưa lên hệ hiện đại, **viết ra chính xác cái gì mất trong lần dịch** (kiểu dữ liệu, timestamp, chất lượng, ngữ nghĩa)
 
 ## C6 · Embedded Systems & Firmware
 - [ ] ★★ Cấu hình một peripheral chưa từng dùng **chỉ bằng reference manual và errata** — không ví dụ, không HAL vendor
@@ -4638,6 +5028,8 @@ Ký hiệu: ★ = checkpoint quan trọng nhất của nhánh.
 - [ ] Provision device identity + secure boot; firmware không ký **không boot**; khóa không đọc được qua debug
 - [ ] ★★ Model chạy trên MCU trong ngân sách RAM cho trước, đo latency p99 + năng lượng/inference, độ chính xác trên eval set từ **thiết bị thật**
 - [ ] Chứng minh tác vụ luôn hoàn thành trong deadline dưới tải xấu nhất (DMA chạy, mọi ngắt bắn, flash đang ghi)
+- [ ] **[v3]** Cho một bài toán điều khiển: lập luận chọn PLC / MCU+RTOS / embedded Linux bằng bảng định lượng (tính xác định, chi phí, vòng đời, chứng nhận, nhân lực bảo trì)
+- [ ] **[v3]** Viết cùng một logic điều khiển ở cả hai thế giới — ST trên PLC và C trên MCU — so sánh cái gì dễ hơn ở mỗi bên và vì sao
 
 ## C7 · Sensing, Signals & Physical Interface
 - [ ] ★★ Tái tạo aliasing bằng thí nghiệm vật lý, **dự đoán chính xác tần số giả bằng công thức**, sửa bằng anti-alias filter, chứng minh biến mất
@@ -4734,6 +5126,7 @@ Ký hiệu: ★ = checkpoint quan trọng nhất của nhánh.
 - [ ] ★★ ADR mà **một kỹ sư lạ đọc 6 tháng sau ra được cùng quyết định** — kiểm chứng với người thật
 - [ ] Review thiết kế của người khác, nêu ≥3 rủi ro họ chưa thấy, xác nhận bằng phản hồi của họ
 - [ ] ★ Threat model toàn vòng `sense→act`, tìm ≥3 vector chưa từng nghĩ tới, thiết kế giảm thiểu cho mỗi cái
+- [ ] **[v3]** Lấy một hệ bạn biết, vẽ theo **ISA-95**, chỉ ra chính xác tầng nào phần `learn/infer/adapt` nên nằm và vì sao; vẽ lại theo unified namespace và so sánh được/mất
 
 ## Supporting · checkpoint tổng
 - [ ] **S1** Suy ra backprop cho MLP từ quy tắc chuỗi, không tra cứu
@@ -4745,9 +5138,11 @@ Ký hiệu: ★ = checkpoint quan trọng nhất của nhánh.
 - [ ] **S3** Tune PID trên hệ vật lý đạt chỉ tiêu, có đồ thị đáp ứng bước
 - [ ] **S3** Thiết kế và chứng minh trạng thái fail-safe dưới 3 loại lỗi
 - [ ] **S3** Cho một bài toán điều khiển, lập luận có nên dùng ML hay không, bằng tiêu chí
+- [ ] **S3 [v3]** Thiết kế và tune một vòng **cascade** trên hệ thật, chứng minh tốt hơn vòng đơn bằng đồ thị đáp ứng nhiễu; nêu ≥2 tình huống cascade làm tệ hơn
 - [ ] **S4** Threat model toàn vòng, ≥3 vector mới
 - [ ] **S4** mTLS + provisioning + xoay vòng chứng chỉ, hoạt động sau khi cert cũ hết hạn
 - [ ] **S4** Agent có tool không thực hiện được hành động ngoài phạm vi, kể cả khi input dẫn dụ
+- [ ] **S4 [v3]** Vẽ mô hình **zone/conduit** (IEC 62443) cho hệ có cả tầng OT lẫn cloud; mỗi conduit vượt ranh giới tin cậy có biện pháp bảo vệ + **cái gì xảy ra với an toàn nếu biện pháp đó lỗi**
 - [ ] **S5** Eval harness bắt regression mà unit test bỏ lọt
 - [ ] **S5** ≥60% logic firmware test trên host trong CI
 - [ ] **S5** Property-based test tìm ra ≥1 bug thật trong code của bạn
@@ -4801,16 +5196,132 @@ Ký hiệu: ★ = checkpoint quan trọng nhất của nhánh.
 | Khi chuẩn bị phỏng vấn | Mỗi checkpoint đã tick là một câu chuyện cụ thể bạn kể được |
 | Khi nghi ngờ bản thân | Đếm số đã tick. Đó là bằng chứng, cảm giác thì không |
 
-**Tổng số checkpoint:** ~200. **[Inference]** Ở tốc độ 25–30 h/tuần, kỳ vọng khoảng 3–5 checkpoint mỗi tháng ở Phase 1–2, và 2–3 mỗi tháng ở Phase 3–5 (checkpoint sau khó hơn nhiều).
+## Thói quen liên tục — kiểm hằng tuần, không phải checkpoint một lần
+
+- [ ] Sổ **"khái niệm vendor ↔ khái niệm trung lập"** (§2.3d, Phụ lục D.4) — thêm ≥2 cặp mỗi tuần
+- [ ] Giờ tự học tuần này: ___ / mục tiêu 12–18
+- [ ] Tuần này tôi có tự học đúng thứ công việc đang dạy không? (nếu có → **mất ngân sách**, xem §9.2 quy tắc 1)
+- [ ] Mô tả năng lực của tôi trong 3 câu **không dùng tên sản phẩm nào** — làm được không?
+
+**Kiểm tra mốc tháng 12:** làm bài 5 câu ở **Phụ lục D.5** để xác minh giả định "công việc cấp kỹ thuật thật".
 
 ---
 
-*Kết thúc tài liệu · v2.0 · 14/09/2026*
-*Cập nhật khi: ước lượng sai · đổi spine · tài nguyên biến mất · một điều ở §15.3 được chứng minh hoặc bác bỏ. Ghi ngày và lý do bên dưới.*
+**Tổng số checkpoint:**
+
+---
+
+# PHỤ LỤC D · BẢN ĐỒ CÔNG VIỆC ↔ ROADMAP
+
+**Mục đích:** trả lời một câu hỏi duy nhất — *giờ tự học khan hiếm của tôi nên đi vào đâu?*
+
+**Nguyên tắc:** nhãn core/supporting/adjacent ở §3 **không đổi** theo bảng này. Bảng này nói về **chi phí thu nhận**, không nói về **tầm quan trọng**. Một nhánh adjacent mà công việc cấp miễn phí vẫn là adjacent — bạn chỉ may mắn được nó rẻ.
+
+## D.1 — Bốn nhóm nhánh
+
+| Nhóm | Đặc điểm | Chiến lược |
+|---|---|---|
+| **① Công việc không bao giờ cho** | Không có nguồn nào khác ngoài tự học | **Ưu tiên tuyệt đối.** Mất ngân sách ở đây là mất vĩnh viễn |
+| **② Công việc cho một phần** | Cần bổ sung có mục tiêu | Xác định **chính xác** phần thiếu, chỉ học phần đó |
+| **③ Công việc cho phần lớn** | Chỉ cần hệ thống hóa | Học **sau khi** gặp ở công việc, không học trước |
+| **④ Công việc cho, nhưng cần dịch** | Có nguyên liệu, thiếu từ vựng chuyển nhượng | Thói quen dịch §2.3d, không cần giờ riêng |
+
+## D.2 — Bảng đầy đủ 26 nhánh
+
+| Nhánh | Nhãn | Nhóm | Công việc cấp gì | Tự học phải mua gì | Giờ tự học |
+|---|---|---|---|---|---|
+| **C1** Programming & runtimes | core | **①** | Gần như không (ST/ladder khác mô hình) | Toàn bộ C, Python, Go/Rust, debug, build, git, design | **280** |
+| **C2** DSA | core | **①** | Không | Toàn bộ | **180** |
+| **C3** Computer architecture | core | **①** | Không | Toàn bộ | **200** |
+| **C4** OS & concurrency | core | **①②** | Khái niệm tất định, chu kỳ, ưu tiên (qua PLC) | Bộ nhớ ảo, I/O model, concurrency, container, eBPF | **240** |
+| **C5** Networking | core | **②** | Giao thức công nghiệp (C5.16), mạng nhà máy | TCP/IP sâu, HTTP, TLS, socket, mạng cloud, chế độ hỏng | **160** |
+| **C6** Embedded & firmware | core | **②④** | Mô hình PLC/DCS (C6.16), I/O, thời gian thực | Firmware MCU, bare-metal, RTOS, DMA, OTA, năng lượng, inference trên thiết bị | **200** |
+| **C7** Sensing & signals | core | **③②** | Instrumentation, hiệu chuẩn, nhiễu, actuation thật | **DSP, FFT, lọc số, sensor fusion, trích đặc trưng cho ML** | **80** |
+| **C8** ML & inference systems | core | **①** | **Không gì cả** | **Toàn bộ — và đây là cung `learn/infer` của vòng lặp** | **320** |
+| **C9** Data engineering | core | **①②** | Historian ở mức người dùng | Mô hình dữ liệu, SQL sâu, transaction, time-series hiện đại, streaming, ingest từ edge | **190** |
+| **C10** Distributed & cloud | core | **①** | Không | Toàn bộ | **200** |
+| **C11** Observability & performance | core | **①②** | Commissioning debug, alarm (từ vựng khác) | Metric/log/trace/profile, SLO, benchmark, chaos, hàng đợi | **130** |
+| **C12** Systems architecture | core | **②④** | **Thực hành**: tích hợp đa bên, commissioning xuyên tầng, ISA-95 trong thực tế | **Từ vựng và khung**: pattern, ADR, đánh đổi định lượng, FMEA có hệ thống, edge-cloud | **80** |
+| **S1** Mathematics | supporting | **①** | Không | Toàn bộ | **220** |
+| **S2** Electronics & power | supporting | **③** | Mạch thật, nguồn thật, đo thật, tải thật | Điện tử số mức MCU, power budget µA | **30** |
+| **S3** Control theory | supporting | **③②** | Vòng kín thật, đối tượng thật, tuning thật, an toàn | Toán điều khiển, Kalman, control vs learned policy | **30** |
+| **S4** Security | supporting | **②** | An ninh OT khi gặp (S4.9) | Threat modeling, identity, crypto, **bảo mật ML** | **60** |
+| **S5** Testing & verification | supporting | **①②** | FAT/SAT, nghiệm thu | Test tự động, CI, property-based, **test hệ phi tất định** | **50** |
+| **S6** Reliability & safety | supporting | **③④** | Bảo vệ, interlock, dự phòng, an toàn thật | FMEA có hệ thống, fault tree | **20** |
+| **S7** Queueing & economics | supporting | **①** | Ngân sách dự án | Little's law, capacity, cost-per-inference, TCO phần mềm | **20** |
+| **S8** Technical communication | supporting | **③②** | Spec, báo cáo, biên bản nghiệm thu | ADR, RFC, postmortem, C4 | **20** |
+| **A1** Robotics | adjacent | **②** | Actuation, an toàn máy chuyển động | ROS 2, perception, SLAM, planning | **40** |
+| **A2** Simulation | adjacent | **②** | Mô phỏng trước commissioning | HIL tự dựng, dữ liệu tổng hợp, sim-to-real | **30** |
+| **A3** Human factors | adjacent | **③②** | HMI thật, người vận hành thật | Lý thuyết autonomy levels, mode confusion | **25** |
+| **A4** Business & operations | adjacent | **③** | Quy trình, tiến độ, nhà thầu, ràng buộc thật | ROI kỹ thuật, tiêu chí tự động hóa | **10** |
+| **A5** Standards & regulation | adjacent | **③②** | Grid code, tiêu chuẩn thiết bị, chứng nhận | EU AI Act, bảo vệ dữ liệu | **15** |
+| **A6** Licensing & IP | adjacent | **①** | Rất ít | Toàn bộ | **30** |
+
+## D.3 — Thứ tự ưu tiên tuyệt đối cho giờ tự học
+
+Khi bạn chỉ có 6 giờ trong một tuần, dùng thứ tự này:
+
+```
+1. C8   ML & inference systems       ← cung learn/infer, KHÔNG có nguồn khác
+2. C10  Distributed & cloud          ← KHÔNG có nguồn khác
+3. C2   DSA        ┐
+4. C3   Computer architecture  ├──── KHÔNG có nguồn khác, và là nền
+5. C1   Programming            ┘
+6. C4   OS & concurrency             ← phần lớn không có nguồn khác
+7. S1   Mathematics                  ← chặn C8
+8. C9   Data engineering
+9. C11  Observability
+10. C5  Networking (phần IT)
+11. C6  Embedded (phần MCU)
+12. phần còn lại
+```
+
+**Lý do C8 đứng đầu, không phải C1:** C1 chậm hơn nhưng bạn *sẽ* học được nó vì mọi project đều cần. C8 thì không có gì ép bạn — và nó là cung duy nhất mà cả công việc lẫn toàn bộ ngành OT quanh bạn đều đang thiếu. Bỏ C8 thì roadmap này biến thành "kỹ sư tự động hóa biết thêm ít phần mềm", không phải Intelligent Systems Integration Engineering.
+
+## D.4 — Chín thứ ở công việc cần dịch ngay sang khái niệm trung lập
+
+*Đây là bảng §2.3d mở rộng. Làm hằng tuần, mỗi lần gặp một cái mới. Ghi vào một file duy nhất.*
+
+| Bạn thấy | Khái niệm trung lập | Nhánh | Vì sao quan trọng |
+|---|---|---|---|
+| Scan cycle, cycle time monitoring | Vòng lặp tất định, WCET, jitter, ngân sách thời gian | C4.10, C6.15, C6.16 | Mọi hệ real-time đều có khái niệm này |
+| OB chu kỳ, OB ngắt | ISR, lập lịch rate-monotonic, phân tích khả năng lập lịch | C4.2, C6.2 | |
+| Hardware config, GSD/GSDML | Mô tả thiết bị, device tree, khám phá thiết bị | C4.12, C6.1 | |
+| Profinet IRT, distributed clock | Mạng thời gian thực, đồng bộ đồng hồ, PTP | C5.3, C7.9 | Nối thẳng sang hệ phân tán |
+| Alarm class, alarm suppression | Thiết kế cảnh báo, triệu chứng vs nguyên nhân, mệt mỏi cảnh báo | C11.11, A3 | **Cùng bài toán, khác từ vựng hoàn toàn** |
+| Redundancy H-system, hot standby | Dự phòng nóng, chuyển đổi dự phòng, split-brain, fencing | S6.3, C10.4 | |
+| Historian, trend, compression | Lưu trữ chuỗi thời gian, downsampling, retention | C9.5 | |
+| Interlock, permissive, trip | Fail-safe, giới hạn cứng, cô lập lỗi | S6.3, C7.11 | |
+| FAT / SAT / punch list | Tiêu chí nghiệm thu, contract test, regression suite | S5.4, C12.3 | |
+
+**Cách dùng:** mỗi tuần thêm ít nhất 2 dòng. Sau 1 năm bạn có ~100 cặp. Đó là lúc bạn nói được về công việc của mình bằng ngôn ngữ mà một kỹ sư phần mềm hiểu — và ngược lại. **Đó chính là năng lực liên ngành, ở dạng cụ thể nhất.**
+
+## D.5 — Kiểm tra lại bảng này ở tháng 12
+
+Toàn bộ Phụ lục D dựa trên một giả định chưa kiểm chứng: **công việc sẽ cấp kỹ thuật thật, không phải chủ yếu giấy tờ và giám sát nhà thầu.** Đây là điều không chắc số 9 ở §15.3.
+
+Ở tháng 12, làm bài kiểm tra này:
+
+| Câu hỏi | Nếu "có" | Nếu "không" |
+|---|---|---|
+| Tôi đã tự cấu hình/lập trình một hệ điều khiển chưa? | C6.16 đang được cấp | Chuyển C6 sang nhóm ① |
+| Tôi đã đấu nối, hiệu chuẩn, hoặc debug cảm biến thật chưa? | C7, S2 đang được cấp | **Chuyển C7 và S2 sang nhóm ①: +200 h tự học** |
+| Tôi đã tune hoặc sửa một vòng điều khiển chưa? | S3 đang được cấp | Chuyển S3 sang nhóm ①: +60 h |
+| Tôi đã tham gia commissioning và tự tìm ra ≥1 lỗi chưa? | C11, C12 đang được cấp | Chuyển sang nhóm ①: +150 h |
+| Sổ dịch khái niệm của tôi có ≥60 cặp chưa? | Thói quen §2.3d đang chạy | Thói quen chưa hình thành — sửa trước khi làm gì khác |
+
+**Nếu ≥3 câu trả lời "không":** ngân sách tự học phải gánh thêm ~400 h, và điều đó có nghĩa timeline giãn thêm 1–1,5 năm, **hoặc** bạn cần đổi vị trí trong công ty sang vai trò kỹ thuật hơn. Cả hai đều là quyết định hợp lệ; điều không hợp lệ là không nhận ra và tiếp tục dùng bảng này như thể nó đúng.
+
+---
+
+*Kết thúc tài liệu · v3.0 · 14/09/2026*
+*Cập nhật khi: ước lượng sai · đổi spine · đổi việc · tài nguyên biến mất · một điều ở §15.3 được chứng minh hoặc bác bỏ.*
 
 ## Nhật ký cập nhật
 
 | Ngày | Thay đổi | Lý do |
 |---|---|---|
-| 14/09/2026 | v2.0 — mở rộng đầy đủ từ v1.0 | Xác nhận ngân sách phần cứng và ngân sách thời gian; gỡ hai ràng buộc chính |
+| 14/09/2026 | v1.0 — bản đầu, nhiều nhánh nén | — |
+| 14/09/2026 | v2.0 — mở rộng đầy đủ, không nhánh nào nén | Xác nhận ngân sách phần cứng và thời gian |
+| 14/09/2026 | **v3.0** — hiệu chỉnh tình huống nghề nghiệp | Đã đi làm: kỹ sư tự động hóa, EPC không O&M, đích liên ngành. **Giữ nguyên 38 lĩnh vực**; đổi trình tự, ngân sách giờ, và bổ sung 5 leaf lấp lỗ hổng tầng công nghiệp (C5.16, C6.16, S3.8, S4.9, C12.15) |
 | | | |
