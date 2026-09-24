@@ -6,8 +6,8 @@
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.3-Trees&BalancedTrees.md` theo quy ước bên dưới
-(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.4 → C2.13.
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.4-Heaps&PriorityQueues.md` theo quy ước bên dưới
+(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.5 → C2.13.
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -30,7 +30,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 |---|---|
 | C2.1 ComplexityAnalysis | ✅ 2026-09-24 (93 KB; anchor mục lục đã kiểm) |
 | C2.2 Arrays&HashTables | ✅ 2026-09-24 (95 KB; checkpoint oaht + kiểm thử vi sai) |
-| C2.3 Trees&BalancedTrees | ☐ |
+| C2.3 Trees&BalancedTrees | ✅ 2026-09-24 (67 KB; checkpoint đo trên SQLite + mô phỏng BST trên đĩa) |
 | C2.4 Heaps&PriorityQueues | ☐ |
 | C2.5 Graphs&Traversal | ☐ |
 | C2.6 ShortestPaths&Flow | ☐ |
@@ -54,5 +54,6 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-24: C2.3 — số trang đọc/truy vấn SQLite đếm bằng /proc/self/io syscr; anchor OK.
 - 2026-09-24: C2.2 — oaht.h qua kiểm thử vi sai 3×10⁶ thao tác vs std::unordered_map dưới ASan+UBSan; anchor OK.
 - 2026-09-24: C2.1 — mọi output trong tài liệu chạy thật; assemble.py kiểm anchor mục lục (0 hỏng), code fence chẵn, CRLF.
