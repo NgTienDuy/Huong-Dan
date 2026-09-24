@@ -6,8 +6,8 @@
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.5-Graphs&Traversal.md` theo quy ước bên dưới
-(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.6 → C2.13.
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.6-ShortestPaths&Flow.md` theo quy ước bên dưới
+(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.7 → C2.13.
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -32,7 +32,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.2 Arrays&HashTables | ✅ 2026-09-24 (95 KB; checkpoint oaht + kiểm thử vi sai) |
 | C2.3 Trees&BalancedTrees | ✅ 2026-09-24 (67 KB; checkpoint đo trên SQLite + mô phỏng BST trên đĩa) |
 | C2.4 Heaps&PriorityQueues | ✅ 2026-09-24 (58 KB; checkpoint scheduler RM/EDF khớp RTA) |
-| C2.5 Graphs&Traversal | ☐ |
+| C2.5 Graphs&Traversal | ✅ 2026-09-24 (60 KB; checkpoint mbuild.py, so với make/tsort/graphlib) |
 | C2.6 ShortestPaths&Flow | ☐ |
 | C2.7 Sorting&Selection | ☐ |
 | C2.8 DynamicProgramming | ☐ |
@@ -54,6 +54,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-24: C2.5 — mbuild.py chạy trên 4 bộ thử (hợp lệ, vòng, nhiều lỗi, 10⁵ đích); anchor OK.
 - 2026-09-24: C2.4 — toysched.c: 960.000 quyết định khớp quét tuyến tính, max đáp ứng = RTA 20/20; ASan+UBSan sạch.
 - 2026-09-24: C2.3 — số trang đọc/truy vấn SQLite đếm bằng /proc/self/io syscr; anchor OK.
 - 2026-09-24: C2.2 — oaht.h qua kiểm thử vi sai 3×10⁶ thao tác vs std::unordered_map dưới ASan+UBSan; anchor OK.
