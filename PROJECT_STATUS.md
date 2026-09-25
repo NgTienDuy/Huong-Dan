@@ -2,12 +2,12 @@
 
 **State:** IN PROGRESS
 **Updated:** 2026-09-25
-**Last session:** claude-code (Opus 5.5), 2026-09-25, viết xong C2.6, C2.7, C2.8; tiếp theo C2.9
+**Last session:** claude-code (Opus 5.5), 2026-09-25, viết xong C2.6 → C2.9; tiếp theo C2.10
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.9-Greedy&Correctness.md` theo quy ước bên dưới
-(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.10 → C2.13.
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.10-ProbabilisticDataStructures.md` theo quy ước bên dưới
+(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.11 → C2.13.
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -36,7 +36,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.6 ShortestPaths&Flow | ✅ 2026-09-25 (122 KB; checkpoint dijkstra.py + 2 trường hợp sai; dữ liệu thật DIMACS NY) |
 | C2.7 Sorting&Selection | ✅ 2026-09-25 (85 KB; checkpoint sắp xếp ngoài 10 GiB: đo 40,00 GiB I/O = dự đoán C2.1 §6.4; khớp GNU sort từng byte) |
 | C2.8 DynamicProgramming | ✅ 2026-09-25 (67 KB; checkpoint: quy trình 20 phút + 3 bài nghề (pin PV, cân bằng dây chuyền, điểm đổi chế độ), mỗi bài khớp vét cạn) |
-| C2.9 Greedy&Correctness | ☐ |
+| C2.9 Greedy&Correctness | ✅ 2026-09-25 (55 KB; checkpoint greedy_check.py: tìm + thu nhỏ phản ví dụ, 4 chứng minh exchange, 3 phản ví dụ giải thích) |
 | C2.10 ProbabilisticDataStructures | ☐ |
 | C2.11 CacheAwareAlgorithms | ☐ |
 | C2.12 Online&StreamingAlgorithms | ☐ |
@@ -57,6 +57,8 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-25: C2.9 — mọi output chạy thật; ví dụ chặt của list scheduling/LPT đạt đúng cận; AGV dùng lại đúng bản đồ C2.8
+  (tối ưu khớp); 11/11 anchor, 12 bảng, CRLF.
 - 2026-09-25: C2.8 — mọi output chạy thật; mọi DP khớp vét cạn (400/1000/300/2000 bộ thử); lru_cache 3.331 tầng trên Python 3.12
   kiểm với ghi chú phát hành; 13/13 anchor, 16 bảng, CRLF.
 - 2026-09-25: C2.7 — mọi output chạy thật; extsort 10 GiB (O_DIRECT) đo 20,00 + 20,00 GiB, M=256 MiB/k=8 đo 60 GiB, kết quả
