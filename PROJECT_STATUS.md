@@ -2,14 +2,12 @@
 
 **State:** IN PROGRESS
 **Updated:** 2026-09-25
-**Last session:** claude-code (Opus 5.5), 2026-09-25, viết xong C2.6; tiếp theo C2.7
+**Last session:** claude-code (Opus 5.5), 2026-09-25, viết xong C2.6 và C2.7; tiếp theo C2.8
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.7-Sorting&Selection.md` theo quy ước bên dưới
-(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.8 → C2.13.
-Checkpoint C2.7 cần sắp xếp file 10 GB với RAM giới hạn: `/` (ext4 WSL) còn ~79 GB, `/mnt/d` ~119 GB;
-giới hạn RAM cho tiến trình (ví dụ `systemd-run --scope -p MemoryMax=` hoặc `ulimit -v`) phải kiểm tra được trước.
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.8-DynamicProgramming.md` theo quy ước bên dưới
+(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.9 → C2.13.
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -36,7 +34,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.4 Heaps&PriorityQueues | ✅ 2026-09-24 (58 KB; checkpoint scheduler RM/EDF khớp RTA) |
 | C2.5 Graphs&Traversal | ✅ 2026-09-24 (60 KB; checkpoint mbuild.py, so với make/tsort/graphlib) |
 | C2.6 ShortestPaths&Flow | ✅ 2026-09-25 (122 KB; checkpoint dijkstra.py + 2 trường hợp sai; dữ liệu thật DIMACS NY) |
-| C2.7 Sorting&Selection | ☐ |
+| C2.7 Sorting&Selection | ✅ 2026-09-25 (85 KB; checkpoint sắp xếp ngoài 10 GiB: đo 40,00 GiB I/O = dự đoán C2.1 §6.4; khớp GNU sort từng byte) |
 | C2.8 DynamicProgramming | ☐ |
 | C2.9 Greedy&Correctness | ☐ |
 | C2.10 ProbabilisticDataStructures | ☐ |
@@ -59,6 +57,8 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-25: C2.7 — mọi output chạy thật; extsort 10 GiB (O_DIRECT) đo 20,00 + 20,00 GiB, M=256 MiB/k=8 đo 60 GiB, kết quả
+  trùng từng byte với GNU sort 9.4; khẳng định về thư viện kiểm bằng mã nguồn đúng phiên bản; 14/14 anchor, 25 bảng, CRLF.
 - 2026-09-25: C2.6 — mọi output chạy thật (road.c, bf.c, fw.c, flowbench.c và các script Python); dijkstra.py khớp
   Bellman-Ford + vét cạn trên 20.000 đồ thị, 2 đột biến bị bắt; 12/12 anchor mục lục OK, 20 bảng đủ cột, code fence chẵn, CRLF.
 - 2026-09-24: C2.5 — mbuild.py chạy trên 4 bộ thử (hợp lệ, vòng, nhiều lỗi, 10⁵ đích); anchor OK.
