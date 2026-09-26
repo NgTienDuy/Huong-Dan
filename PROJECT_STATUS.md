@@ -1,16 +1,14 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS
+**State:** C2 HOÀN TẤT (chờ người dùng chọn nhánh tiếp theo)
 **Updated:** 2026-09-26
-**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10–C2.13; đang rà soát toàn bộ C2
+**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10–C2.13 và rà soát toàn bộ C2 lần cuối
 
 ## NEXT ACTION
 
-Rà soát toàn bộ C2 (C2.1 → C2.13) lần cuối — yêu cầu người dùng 2026-09-26: nhất quán, chi tiết, chuyên sâu, đầy đủ, khoa học.
-Cách làm: (1) kiểm máy: doccheck.py trên 13 file (anchor, fence, bảng, CRLF), tham chiếu chéo "C2.x §y" trỏ đúng mục tồn tại
-và đúng chủ đề, lời hứa "(C2.x)" ở leaf trước đã được trả; (2) đọc từng file tìm mâu thuẫn số liệu/thuật ngữ giữa các leaf, khẳng định
-chưa kiểm, cấu trúc lệch mẫu (mục lục, §0, Checkpoint, Tự chấm, Mở rộng, Phụ lục A–D, Tổng kết, chân trang); (3) sửa, commit từng
-đợt. Công cụ: `doccheck.py` trong scratchpad (mất thì viết lại, ~50 dòng Python).
+Nhánh C2 (C2.1 → C2.13) đã viết xong và rà soát lần cuối (2026-09-26). Việc kế tiếp: hỏi người dùng nhánh nào làm tiếp
+(theo roadmap, các nhánh phụ thuộc trực tiếp vào C2 là C3/C4; `C2.0-INDEX.md` vẫn để nguyên như quy ước). Khi bắt đầu nhánh mới,
+dùng cùng quy ước ở mục dưới và công cụ `doccheck.py` + `xref.py` (scratchpad; mất thì viết lại theo mô tả trong mục Last verification).
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -61,6 +59,14 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-26: RÀ SOÁT CUỐI C2 — (1) máy: doccheck 13/13 file 0 lỗi (anchor, fence, số cột bảng, CRLF); xref: mọi "C2.x §y" trỏ tới mục
+  tồn tại và đúng chủ đề (7 cảnh báo còn lại là số mục của sách/C1.1 — dương tính giả); khung mẫu đồng đều (mục tiêu, tiên quyết,
+  điều kiện hoàn thành, §0.1–0.3, Tự chấm, Mở rộng, Phụ lục A–D, 10 điều tổng kết, chân trang); mức Lv khớp INDEX. (2) đọc toàn văn,
+  sửa: C2.4 §1.3 số so sánh dòng n = 16·10⁶ chép nhầm 19.95 → 21.95 (chạy lại xác nhận); C2.6 tham chiếu vector hóa (C2.11 → C3.8 +
+  C2.11 §4.2); C2.3 tiêu đề `In → Ad` → `In→Ad`; C2.1/C2.7 "C2.11 đo trực tiếp" → nói rõ đo bằng thời gian + mô phỏng; C2.1/C2.7 ghi chú
+  L3 hiệu dụng ~5 MiB (C2.11 §1.3); C2.1/C2.4 ghi rõ numpy 2.5.3 cài riêng (Python hệ thống không có); C2.3 ghi chú chênh 81 vs 70,5 ns
+  giữa hai lần chạy LPM; mọi tham chiếu tới trước "(C2.12)", "(C2.13)" ở C2.1/2/4/7/8/10/11 trỏ về mục cụ thể; C2.9 §5.3 nối list
+  scheduling với tỷ lệ cạnh tranh C2.12 §5.4.
 - 2026-09-26: C2.13 — mọi output chạy thật (counter, queues, aba, reclaim [ASan], rcu/rcu_bug/rcu_nofence [ASan, TSan], litmus, orders -S,
   fencecost, spsc_test + mutants.sh [TSan qua setarch -R]); ánh xạ ARMv8 lấy từ bảng Sewell (không có máy ARM); kfifo, liburcu, P2530/P2545
   kiểm trên nguồn; doccheck 0 lỗi, 21 bảng, CRLF.
