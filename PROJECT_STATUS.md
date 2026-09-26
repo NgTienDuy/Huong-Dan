@@ -2,14 +2,15 @@
 
 **State:** IN PROGRESS
 **Updated:** 2026-09-26
-**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10, C2.11; tiếp theo C2.12
+**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10, C2.11, C2.12; tiếp theo C2.13
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.12-Online&StreamingAlgorithms.md` (thí nghiệm trong scratchpad, dán output thật;
-checkpoint: p99 của luồng 10⁸ mẫu, sai số < 1%, không lưu toàn bộ — dùng lại t-digest/histogram log của C2.10 §6), rồi C2.13; sau C2.13 rà soát toàn bộ C2 lần cuối (yêu cầu người dùng 2026-09-26: nhất quán, chi tiết, chuyên sâu,
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.13-ConcurrentDataStructures.md` (thí nghiệm trong scratchpad, dán output thật;
+checkpoint: lock-free SPSC ring buffer, chạy đúng dưới TSan — nhớ `setarch $(uname -m) -R` — và lập luận bằng lời vì sao đúng
+với mô hình bộ nhớ C11). Sau C2.13: rà soát toàn bộ C2 lần cuối (yêu cầu người dùng 2026-09-26: nhất quán, chi tiết, chuyên sâu,
 đầy đủ, khoa học). Công cụ kiểm cấu trúc: `doccheck.py` (anchor slug GitHub, code fence, số cột bảng, CRLF, liên kết file) —
-nằm trong scratchpad, mất thì viết lại (~80 dòng Python).
+nằm trong scratchpad, mất thì viết lại (~50 dòng Python).
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -41,7 +42,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.9 Greedy&Correctness | ✅ 2026-09-25 (55 KB; checkpoint greedy_check.py: tìm + thu nhỏ phản ví dụ, 4 chứng minh exchange, 3 phản ví dụ giải thích) |
 | C2.10 ProbabilisticDataStructures | ✅ 2026-09-26 (129 KB; checkpoint Bloom trước SQLite: Tranco 1M × blocklist StevenBlack, truy vấn DB −99,0%, FP 0,822% ± 0,011% vs lý thuyết 0,819% qua 20 hạt giống) |
 | C2.11 CacheAwareAlgorithms | ✅ 2026-09-26 (87 KB; checkpoint: Jacobi trên mạng đường DIMACS E-USA 3,6 triệu nút, chỉ đánh số lại nút → ×2,8–3,2, kết quả trùng từng bit, mô hình dự đoán đúng số trượt cache) |
-| C2.12 Online&StreamingAlgorithms | ☐ |
+| C2.12 Online&StreamingAlgorithms | ✅ 2026-09-26 (134 KB; checkpoint: p99 của 10⁸ độ trễ `getppid` thật qua pipe — histogram log α=0,5% 8,3 KB, sai +0,031%, có chứng minh biên; 3 luồng đối nghịch ≤ 0,475%; đối chứng 783 MB) |
 | C2.13 ConcurrentDataStructures | ☐ |
 
 ## Known problems
@@ -60,6 +61,10 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-26: C2.12 — mọi output chạy thật (consume/welford, onepass.py, slidesum/slidemax/oplat/slidemed, deadband.py, totalizer,
+  variance.py, merge.py, qbench, cusum, nab.py/nab2.py, skirental.py, paging.py, morris.py, sdt.py, latsrc/gen2/p99/exact); dữ liệu thật:
+  NAB machine_temperature + nhãn, War and Peace (Gutenberg #2600); khẳng định về PostgreSQL float.c, CPython statistics.py, DataSketches
+  KLL kiểm trên mã nguồn/tài liệu; PI swinging door theo tài liệu AVEVA; doccheck 0 lỗi, 22 bảng, CRLF.
 - 2026-09-26: C2.11 — mọi output chạy thật (latency/l3probe/tlb/spread/stride/padding/matmul/aos/veb/prefetch/batch/
   falseshare/graphorder, rowcol.py); dữ liệu DIMACS USA-road-d.E và NY tải lại vào scratchpad; phát hiện L3 hiệu dụng ~5 MiB
   (ghi rõ chưa rõ nguyên nhân); khẳng định về libstdc++/Folly kiểm trên mã nguồn, Khuong & Morin trên tóm tắt; doccheck 0 lỗi, 19 bảng, CRLF.
