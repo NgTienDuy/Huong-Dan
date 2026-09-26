@@ -1,13 +1,15 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
 **State:** IN PROGRESS
-**Updated:** 2026-09-25
-**Last session:** claude-code (Opus 5.5), 2026-09-25, viết xong C2.6 → C2.9; tiếp theo C2.10
+**Updated:** 2026-09-26
+**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10 (làm lại toàn bộ thí nghiệm vì scratchpad phiên trước đã mất); tiếp theo C2.11
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.10-ProbabilisticDataStructures.md` theo quy ước bên dưới
-(thí nghiệm chạy trong scratchpad, dán output thật vào tài liệu), rồi lần lượt C2.11 → C2.13.
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.11-CacheAwareAlgorithms.md` (thí nghiệm C trong scratchpad, dán output thật),
+rồi C2.12 → C2.13; sau C2.13 rà soát toàn bộ C2 lần cuối (yêu cầu người dùng 2026-09-26: nhất quán, chi tiết, chuyên sâu,
+đầy đủ, khoa học). Công cụ kiểm cấu trúc: `doccheck.py` (anchor slug GitHub, code fence, số cột bảng, CRLF, liên kết file) —
+nằm trong scratchpad, mất thì viết lại (~80 dòng Python).
 
 ## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
 
@@ -37,7 +39,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.7 Sorting&Selection | ✅ 2026-09-25 (85 KB; checkpoint sắp xếp ngoài 10 GiB: đo 40,00 GiB I/O = dự đoán C2.1 §6.4; khớp GNU sort từng byte) |
 | C2.8 DynamicProgramming | ✅ 2026-09-25 (67 KB; checkpoint: quy trình 20 phút + 3 bài nghề (pin PV, cân bằng dây chuyền, điểm đổi chế độ), mỗi bài khớp vét cạn) |
 | C2.9 Greedy&Correctness | ✅ 2026-09-25 (55 KB; checkpoint greedy_check.py: tìm + thu nhỏ phản ví dụ, 4 chứng minh exchange, 3 phản ví dụ giải thích) |
-| C2.10 ProbabilisticDataStructures | ☐ |
+| C2.10 ProbabilisticDataStructures | ✅ 2026-09-26 (129 KB; checkpoint Bloom trước SQLite: Tranco 1M × blocklist StevenBlack, truy vấn DB −99,0%, FP 0,822% ± 0,011% vs lý thuyết 0,819% qua 20 hạt giống) |
 | C2.11 CacheAwareAlgorithms | ☐ |
 | C2.12 Online&StreamingAlgorithms | ☐ |
 | C2.13 ConcurrentDataStructures | ☐ |
@@ -57,6 +59,10 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-26: C2.10 — mọi output chạy thật (bloom*.c, cbf.c, cuckoo.c, hll.c, pv.c, reservoir*, qbench.c, tdmerge.c, lsh.c,
+  simhash.c, checkpoint.py, sqlitecfg.py); dữ liệu thật: Tranco L5PZ4, StevenBlack hosts 25/09/2026, Wikimedia pageviews
+  2024-03-01 12h, stdlib CPython 3.12, 10⁷ độ trễ pread; khẳng định về LevelDB/RocksDB/Redis/coreutils shuf/t-digest/
+  cuckoofilter kiểm trên mã nguồn hoặc tài liệu chính thức, trích dẫn bài báo đã kiểm; doccheck: 0 lỗi, 16 bảng, CRLF.
 - 2026-09-25: C2.9 — mọi output chạy thật; ví dụ chặt của list scheduling/LPT đạt đúng cận; AGV dùng lại đúng bản đồ C2.8
   (tối ưu khớp); 11/11 anchor, 12 bảng, CRLF.
 - 2026-09-25: C2.8 — mọi output chạy thật; mọi DP khớp vét cạn (400/1000/300/2000 bộ thử); lru_cache 3.331 tầng trên Python 3.12
