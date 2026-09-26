@@ -2,12 +2,12 @@
 
 **State:** IN PROGRESS
 **Updated:** 2026-09-26
-**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10 (làm lại toàn bộ thí nghiệm vì scratchpad phiên trước đã mất); tiếp theo C2.11
+**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10, C2.11; tiếp theo C2.12
 
 ## NEXT ACTION
 
-Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.11-CacheAwareAlgorithms.md` (thí nghiệm C trong scratchpad, dán output thật),
-rồi C2.12 → C2.13; sau C2.13 rà soát toàn bộ C2 lần cuối (yêu cầu người dùng 2026-09-26: nhất quán, chi tiết, chuyên sâu,
+Viết `E2E-SYSTEM/C2-DataStructures&Algorithms/C2.12-Online&StreamingAlgorithms.md` (thí nghiệm trong scratchpad, dán output thật;
+checkpoint: p99 của luồng 10⁸ mẫu, sai số < 1%, không lưu toàn bộ — dùng lại t-digest/histogram log của C2.10 §6), rồi C2.13; sau C2.13 rà soát toàn bộ C2 lần cuối (yêu cầu người dùng 2026-09-26: nhất quán, chi tiết, chuyên sâu,
 đầy đủ, khoa học). Công cụ kiểm cấu trúc: `doccheck.py` (anchor slug GitHub, code fence, số cột bảng, CRLF, liên kết file) —
 nằm trong scratchpad, mất thì viết lại (~80 dòng Python).
 
@@ -40,7 +40,7 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.8 DynamicProgramming | ✅ 2026-09-25 (67 KB; checkpoint: quy trình 20 phút + 3 bài nghề (pin PV, cân bằng dây chuyền, điểm đổi chế độ), mỗi bài khớp vét cạn) |
 | C2.9 Greedy&Correctness | ✅ 2026-09-25 (55 KB; checkpoint greedy_check.py: tìm + thu nhỏ phản ví dụ, 4 chứng minh exchange, 3 phản ví dụ giải thích) |
 | C2.10 ProbabilisticDataStructures | ✅ 2026-09-26 (129 KB; checkpoint Bloom trước SQLite: Tranco 1M × blocklist StevenBlack, truy vấn DB −99,0%, FP 0,822% ± 0,011% vs lý thuyết 0,819% qua 20 hạt giống) |
-| C2.11 CacheAwareAlgorithms | ☐ |
+| C2.11 CacheAwareAlgorithms | ✅ 2026-09-26 (87 KB; checkpoint: Jacobi trên mạng đường DIMACS E-USA 3,6 triệu nút, chỉ đánh số lại nút → ×2,8–3,2, kết quả trùng từng bit, mô hình dự đoán đúng số trượt cache) |
 | C2.12 Online&StreamingAlgorithms | ☐ |
 | C2.13 ConcurrentDataStructures | ☐ |
 
@@ -54,11 +54,15 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 - Thay đổi C1 và các thư mục mới (`90-PROJECTS/`, `99-TAI-LIEU-CHUNG/`) là của người dùng, chưa
   commit — không đụng tới, chỉ commit file C2 + file này.
 - Python hệ thống không có numpy/scipy/networkx (2026-09-25) — thí nghiệm dùng Python thuần hoặc C.
+- WSL2: một luồng chỉ thấy ~5 MiB L3 (hệ báo 24 MiB); vùng < 2 MiB không được cấp huge page qua madvise (C2.11 §1.3–1.4).
   Có internet (curl): C2.6 tải dữ liệu DIMACS vào scratchpad; scratchpad mất sau phiên, muốn chạy lại thì tải lại
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
 
+- 2026-09-26: C2.11 — mọi output chạy thật (latency/l3probe/tlb/spread/stride/padding/matmul/aos/veb/prefetch/batch/
+  falseshare/graphorder, rowcol.py); dữ liệu DIMACS USA-road-d.E và NY tải lại vào scratchpad; phát hiện L3 hiệu dụng ~5 MiB
+  (ghi rõ chưa rõ nguyên nhân); khẳng định về libstdc++/Folly kiểm trên mã nguồn, Khuong & Morin trên tóm tắt; doccheck 0 lỗi, 19 bảng, CRLF.
 - 2026-09-26: C2.10 — mọi output chạy thật (bloom*.c, cbf.c, cuckoo.c, hll.c, pv.c, reservoir*, qbench.c, tdmerge.c, lsh.c,
   simhash.c, checkpoint.py, sqlitecfg.py); dữ liệu thật: Tranco L5PZ4, StevenBlack hosts 25/09/2026, Wikimedia pageviews
   2024-03-01 12h, stdlib CPython 3.12, 10⁷ độ trễ pread; khẳng định về LevelDB/RocksDB/Redis/coreutils shuf/t-digest/
