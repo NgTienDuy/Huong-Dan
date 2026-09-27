@@ -1,16 +1,37 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C2 HOÀN TẤT (chờ người dùng chọn nhánh tiếp theo)
-**Updated:** 2026-09-26
-**Last session:** claude-code (Opus 5.5), 2026-09-26, viết xong C2.10–C2.13 và rà soát toàn bộ C2 lần cuối
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14)
+**Updated:** 2026-09-27
+**Last session:** claude-code (Opus 5.5), 2026-09-27, bắt đầu nhánh C3
 
 ## NEXT ACTION
 
-Nhánh C2 (C2.1 → C2.13) đã viết xong và rà soát lần cuối (2026-09-26). Việc kế tiếp: hỏi người dùng nhánh nào làm tiếp
-(theo roadmap, các nhánh phụ thuộc trực tiếp vào C2 là C3/C4; `C2.0-INDEX.md` vẫn để nguyên như quy ước). Khi bắt đầu nhánh mới,
-dùng cùng quy ước ở mục dưới và công cụ `doccheck.py` + `xref.py` (scratchpad; mất thì viết lại theo mô tả trong mục Last verification).
+Viết C3.2 (Logic tuần tự, FSM) theo quy ước C1/C2; checkpoint cần MCU → dùng QEMU Cortex-M3 (mps2-an385) + ghi rõ giới hạn. Sau đó C3.3 → C3.14, mỗi file một commit.
+Công cụ dựng lại được theo mục "Môi trường C3" (scratchpad mất sau phiên).
 
-## Việc đang làm — viết nhánh C2 (C2.1 → C2.13)
+## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
+
+Yêu cầu (người dùng, 2026-09-27): "Kiểm tra trạng thái Project. Sau đó thực hiện C3-ComputerArchitecture&DigitalLogic,
+bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ước với C2; **không** sửa `C3.0-INDEX.md`.
+
+| File | Trạng thái |
+|---|---|
+| C3.1 BooleanLogic&CombinationalCircuits | ✅ 2026-09-27 (80 KB; checkpoint: 21/21 test chính thức trên mạch NAND tự mô phỏng + 20/20 trên HardwareSimulator chính thức qua .hdl phẳng; độ phủ stuck-at của ALU.tst 85,6%; SAT chứng minh tương đương 2³⁸ đầu vào) |
+| C3.2 SequentialLogic&FSM | ⏳ tiếp theo |
+| C3.3 → C3.14 | ☐ |
+
+### Môi trường C3 (không cần sudo)
+
+- `apt download` + `dpkg -x` vào `scratchpad/root`: qemu-user-static, qemu-system-arm/misc (8.2.2), iverilog 12, yosys 0.33,
+  gcc-arm-none-eabi 13.2.1 + newlib, gcc-aarch64/riscv64-linux-gnu 13 (+ libc6-dev-*-cross), valgrind 3.22, openjdk-21-jdk.
+  Cross gcc Linux cần `--sysroot=$R`; JDK: các symlink conf trỏ /etc → sửa trỏ `$R/etc`.
+- nand2tetris: mã nguồn bộ công cụ Java (Drive id 1stcWUSeAixCRHWOjc9sgBhq5voSLvun8) — biên dịch bằng javac 21 sau khi đổi
+  định danh `enum`→`enumr` và bỏ `import Hack.*;`; file .tst/.cmp chính thức lấy từ repo `nand2tetris/web-ide`
+  (projects/src/project_0x/*.ts) + script thêm `output-file` và định dạng `%B1.W.1` cho simulator cũ. Không đăng lời giải .hdl
+  (tác giả khóa học đề nghị không công khai; repo này public) — dùng trình mô phỏng cổng tự viết + test chính thức.
+- Phần cứng: không có PMU (perf_event HW → ENOENT), không RAPL; có GPU RTX 4060 Laptop (nvidia-smi: công suất/nhiệt/xung thật).
+
+## Nhánh C2 (C2.1 → C2.13) — HOÀN TẤT 2026-09-26
 
 Yêu cầu (người dùng, 2026-09-24): "Đã viết xong C1 (trừ C1.0-INDEX.md). Tiếp theo là C2.
 Bám theo roadmap.md và C1 đã viết để thực hiện tương tự." → **Không** sửa `C2.0-INDEX.md` (giống C1).
@@ -44,6 +65,8 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 | C2.13 ConcurrentDataStructures | ✅ 2026-09-26 (88 KB; checkpoint: SPSC ring release/acquire, 0 sai/10⁸ + TSan sạch; 5 đột biến — 3 đột biến memory order đúng 100% trên x86 nhưng TSan bắt cả 3, đột biến logic bị kiểm thử bắt, chỉ số thường treo ở -O2; lập luận happens-before 6 bước) |
 
 ## Known problems
+
+- C3.1: iverilog giải nén cục bộ cần `-B$R/usr/lib/x86_64-linux-gnu/ivl` và `vvp -M$R/usr/lib/x86_64-linux-gnu/ivl`.
 
 - TSan trên kernel WSL này báo `FATAL: ThreadSanitizer: unexpected memory mapping` → chạy
   binary qua `setarch $(uname -m) -R ./prog`.
