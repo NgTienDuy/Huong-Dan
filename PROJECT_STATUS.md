@@ -1,12 +1,15 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
 **State:** ĐANG VIẾT C3 (C3.1 → C3.14)
-**Updated:** 2026-09-27
-**Last session:** claude-code (Opus 5.5), 2026-09-27, bắt đầu nhánh C3
+**Updated:** 2026-09-28
+**Last session:** claude-code (Opus 5.5), 2026-09-28, tiếp nhánh C3 (C3.2 →)
 
 ## NEXT ACTION
 
-Viết C3.2 (Logic tuần tự, FSM) theo quy ước C1/C2; checkpoint cần MCU → dùng QEMU Cortex-M3 (mps2-an385) + ghi rõ giới hạn. Sau đó C3.3 → C3.14, mỗi file một commit.
+Viết C3.3 (Datapath, control unit, tự dựng CPU — nand2tetris project 4–6) theo quy ước C1/C2/C3.1–C3.2: CPU Hack từ NAND + DFF
+trong `seq.py` (C3.2 §2.1), test chính thức project 5 (CPU, Memory, Computer*) trên runner + HardwareSimulator; assembler Python
+so với Assembler chính thức (Add/Max/Rect/Pong); không đăng lời giải project 4 (Mult/Fill) — dùng chương trình khác.
+Sau đó C3.4 → C3.14, mỗi file một commit; xong C3.14 thì rà soát toàn bộ C3 (yêu cầu người dùng 2026-09-28).
 Công cụ dựng lại được theo mục "Môi trường C3" (scratchpad mất sau phiên).
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
@@ -17,8 +20,9 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | File | Trạng thái |
 |---|---|
 | C3.1 BooleanLogic&CombinationalCircuits | ✅ 2026-09-27 (80 KB; checkpoint: 21/21 test chính thức trên mạch NAND tự mô phỏng + 20/20 trên HardwareSimulator chính thức qua .hdl phẳng; độ phủ stuck-at của ALU.tst 85,6%; SAT chứng minh tương đương 2³⁸ đầu vào) |
-| C3.2 SequentialLogic&FSM | ⏳ tiếp theo |
-| C3.3 → C3.14 | ☐ |
+| C3.2 SequentialLogic&FSM | ✅ 2026-09-28 (142 KB; project 3: 8/8 test trên runner + 8/8 trên HardwareSimulator, 4/4 đột biến runner; checkpoint: FSM khung UART (SOF+LEN+CRC-16/MODBUS) bằng C trên QEMU Cortex-M3 khớp mô hình tham chiếu khai báo 2.295/2.295 sự kiện ×3 lần, 10⁶ khung thử 0 lệch, 760.428/760.438 khung tốt (10 mất đều giải thích được); lỗi thật tìm được: xóa cờ ngắt sau khi đọc, bộ thử gom byte, CRC lọt 1/256 với 0x7E chèn sau LEN=1) |
+| C3.3 Datapath&BuildingACPU | ⏳ tiếp theo |
+| C3.4 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -29,7 +33,17 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   định danh `enum`→`enumr` và bỏ `import Hack.*;`; file .tst/.cmp chính thức lấy từ repo `nand2tetris/web-ide`
   (projects/src/project_0x/*.ts) + script thêm `output-file` và định dạng `%B1.W.1` cho simulator cũ. Không đăng lời giải .hdl
   (tác giả khóa học đề nghị không công khai; repo này public) — dùng trình mô phỏng cổng tự viết + test chính thức.
-- Phần cứng: không có PMU (perf_event HW → ENOENT), không RAPL; có GPU RTX 4060 Laptop (nvidia-smi: công suất/nhiệt/xung thật).
+- Phần cứng: không có PMU (dmesg: "unsupported CPU family 6 model 183 no PMU driver, software events only"; CPUID thiếu
+  arch_perfmon), MSR PMU (tsc/pperf) → EINVAL; pin trong WSL là "Hyper-V Virtual Battery" (giả). CÓ số đo thật phía Windows qua
+  interop: `powershell.exe Get-Counter '\Energy Meter(*)\Power'` (RAPL pkg/pp0/pp1, mW), `'\Processor Information(_Total)\Actual
+  Frequency'`, `'\Thermal Zone Information(*)\High Precision Temperature'` (0,1 K) — không cần admin → dùng cho C3.10/C3.13.
+  GPU RTX 4060 Laptop (driver 610.88, CUDA UMD 13.3; nvidia-smi: công suất/nhiệt/xung thật).
+- nand2tetris bản mới: `git clone --depth 1 --filter=blob:none --sparse https://github.com/nand2tetris/web-ide` + `sparse-checkout set
+  projects/src` (GitHub REST API bị giới hạn lượt khi chưa đăng nhập); tách hdl/tst/cmp từ các file .ts. Simulator Java chạy:
+  `cd InstallDir && java -Djava.awt.headless=true -cp <classes> HardwareSimulatorMain X.tst` (tst cần thêm output-file + %B1.W.1).
+- Plugin QEMU đếm lệnh: lấy include/qemu/qemu-plugin.h tag v8.2.2 (raw.githubusercontent.com), glib.h giả (typedef gboolean...),
+  `gcc -shared -fPIC`; chạy `-plugin libicount.so,lo=..,hi=.. -d plugin`.
+- pdftotext: apt download poppler-utils (+ libpoppler134) → dpkg -x.
 
 ## Nhánh C2 (C2.1 → C2.13) — HOÀN TẤT 2026-09-26
 
@@ -66,6 +80,10 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Known problems
 
+- Icarus: `@(d)` trên cổng nối vào một bit của vector kích hoạt khi BẤT KỲ bit nào của vector đổi → so với giá trị trước;
+  biểu thức tổ hợp `cnt ^ (cnt >> 1)` sinh glitch độ rộng 0 (C3.2 §4 dùng làm bài học). `pkill -f "<mẫu>"` có thể giết chính
+  shell đang chạy lệnh (mẫu nằm trong dòng lệnh) → dùng `pkill -x qemu-system-arm`.
+
 - C3.1: iverilog giải nén cục bộ cần `-B$R/usr/lib/x86_64-linux-gnu/ivl` và `vvp -M$R/usr/lib/x86_64-linux-gnu/ivl`.
 
 - TSan trên kernel WSL này báo `FATAL: ThreadSanitizer: unexpected memory mapping` → chạy
@@ -82,6 +100,11 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-28: C3.2 — mọi output chạy thật (latch/latch2/race/setuphold/skew trên evsim; meta/mtbf; lfsr n=2..20 khớp φ(2^n−1)/n;
+  counters/cdc/pulse/seqdet trên Icarus; yosys 4 biến thể + seu_tb trên netlist; fsm_sw x86 + Cortex-M3; runtst 8/8 + HardwareSimulator
+  8/8 + phép thử ngược; checkpoint: diff.py 40k + 10⁶ khung, lost.py, vét cạn CRC 1/256, run_qemu ×3 + plugin icount, run_ovf, mutants.sh
+  + khoảng nghỉ biên); đọc lại toàn văn so từng khối output, sửa 15 chỗ (độ sâu đọc/ghi RAM16K, B3→B5, §7.5→§7.4, "7 mẫu" → 4,
+  kích thước cụm 838 byte, dự đoán COBS ghi rõ chưa đo...); doccheck 0 lỗi, 19 bảng, CRLF.
 - 2026-09-26: RÀ SOÁT CUỐI C2 — (1) máy: doccheck 13/13 file 0 lỗi (anchor, fence, số cột bảng, CRLF); xref: mọi "C2.x §y" trỏ tới mục
   tồn tại và đúng chủ đề (7 cảnh báo còn lại là số mục của sách/C1.1 — dương tính giả); khung mẫu đồng đều (mục tiêu, tiên quyết,
   điều kiện hoàn thành, §0.1–0.3, Tự chấm, Mở rộng, Phụ lục A–D, 10 điều tổng kết, chân trang); mức Lv khớp INDEX. (2) đọc toàn văn,
