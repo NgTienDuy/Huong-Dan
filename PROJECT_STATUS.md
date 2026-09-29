@@ -1,16 +1,16 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
 **State:** ĐANG VIẾT C3 (C3.1 → C3.14)
-**Updated:** 2026-09-28
-**Last session:** claude-code (Opus 5.5), 2026-09-28, tiếp nhánh C3 (C3.2 →)
+**Updated:** 2026-09-29
+**Last session:** claude-code (Opus 5.5), 2026-09-29, tiếp nhánh C3 (C3.3 →)
 
 ## NEXT ACTION
 
-Viết C3.3 (Datapath, control unit, tự dựng CPU — nand2tetris project 4–6) theo quy ước C1/C2/C3.1–C3.2: CPU Hack từ NAND + DFF
-trong `seq.py` (C3.2 §2.1), test chính thức project 5 (CPU, Memory, Computer*) trên runner + HardwareSimulator; assembler Python
-so với Assembler chính thức (Add/Max/Rect/Pong); không đăng lời giải project 4 (Mult/Fill) — dùng chương trình khác.
-Sau đó C3.4 → C3.14, mỗi file một commit; xong C3.14 thì rà soát toàn bộ C3 (yêu cầu người dùng 2026-09-28).
-Công cụ dựng lại được theo mục "Môi trường C3" (scratchpad mất sau phiên).
+Viết C3.4 (ISA & assembly, `In→Ad`) theo quy ước C1/C2/C3.1–C3.3: 8 sub-leaf (RISC vs CISC; RISC-V; Cortex-M Thumb-2 + ngoại lệ;
+đọc disassembly x86-64; quy ước gọi hàm; prologue/epilogue; C → assembly; lệnh nguyên tử). Checkpoint: đọc disassembly `-O2` của
+một hàm C và giải thích mọi thay đổi so với `-O0` (inline, unroll, vectorize, loại bỏ). Công cụ: gcc x86-64, arm-none-eabi-gcc +
+QEMU, cross gcc RISC-V/aarch64 + qemu-user (dựng lại theo "Môi trường C3"). Phải trả các "nợ" C3.3 để lại (mục "Tham chiếu tới
+trước" bên dưới). Sau đó C3.5 → C3.14, mỗi file một commit; xong C3.14 thì rà soát toàn bộ C3 (yêu cầu người dùng 2026-09-28/29).
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -21,8 +21,9 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 |---|---|
 | C3.1 BooleanLogic&CombinationalCircuits | ✅ 2026-09-27 (80 KB; checkpoint: 21/21 test chính thức trên mạch NAND tự mô phỏng + 20/20 trên HardwareSimulator chính thức qua .hdl phẳng; độ phủ stuck-at của ALU.tst 85,6%; SAT chứng minh tương đương 2³⁸ đầu vào) |
 | C3.2 SequentialLogic&FSM | ✅ 2026-09-28 (142 KB; project 3: 8/8 test trên runner + 8/8 trên HardwareSimulator, 4/4 đột biến runner; checkpoint: FSM khung UART (SOF+LEN+CRC-16/MODBUS) bằng C trên QEMU Cortex-M3 khớp mô hình tham chiếu khai báo 2.295/2.295 sự kiện ×3 lần, 10⁶ khung thử 0 lệch, 760.428/760.438 khung tốt (10 mất đều giải thích được); lỗi thật tìm được: xóa cờ ngắt sau khi đọc, bộ thử gom byte, CRC lọt 1/256 với 0x7E chèn sau LEN=1) |
-| C3.3 Datapath&BuildingACPU | ⏳ tiếp theo |
-| C3.4 → C3.14 | ☐ |
+| C3.3 Datapath&BuildingACPU | ✅ 2026-09-29 (140 KB; máy Hack thuần NAND+DFF 3,27 triệu NAND: project 5 6/6 runner + 6/6 HardwareSimulator chính thức; assembler 7/7 + 1.000/1.000 ngẫu nhiên trùng từng bit với bản Java; CRC-16/XMODEM chạy trên CPU tự dựng = 0x31C3; CPU chứng minh SAT tương đương đặc tả 2⁸¹ đầu vào; 4 hiện thực ISA bất đồng ở 5 vùng; assembler Java sai im lặng 6/21 ca biên) |
+| C3.4 ISA&Assembly | ⏳ tiếp theo |
+| C3.5 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -44,6 +45,29 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 - Plugin QEMU đếm lệnh: lấy include/qemu/qemu-plugin.h tag v8.2.2 (raw.githubusercontent.com), glib.h giả (typedef gboolean...),
   `gcc -shared -fPIC`; chạy `-plugin libicount.so,lo=..,hi=.. -d plugin`.
 - pdftotext: apt download poppler-utils (+ libpoppler134) → dpkg -x.
+- C3.3: file test/asm lấy theo bảng CHIPS trong `index.ts` từng project (đừng glob — `06_alu_all.ts` không phải test chính thức);
+  project 6 ở `projects/src/samples/project_06/*.ts`. Assembler chính thức không có main: tự viết OfficialAsm.java gọi
+  `new Hack.Assembler.HackAssembler(f, 32768, HackAssemblerTranslator.NOP, true)`. Test v2 cho simulator cũ: thêm output-file.
+  Nhìn trộm `DRegister[]`, `PC[]`, `RAM16K[i]` chỉ tìm chip DỰNG SẴN (GatesManager) → bản xuất phải dùng ARegister/DRegister/PC/RAM16K.
+  Web-ide (Node 22 có sẵn): simulator/src/cpu/{cpu,alu}.ts, languages/asm.ts (sparse-checkout add simulator/src/...).
+- Web-ide chạy thật: `npm install esbuild ohm-js@17 @davidsouther/jiffies@2.2.5` trong scratchpad/webasm, `ln -s .../node_modules
+  web-ide/simulator/node_modules`, entry.ts import `ASM` (languages/asm.ts) + lớp `CPU` (cpu.ts) + `ROM` (memory.ts) — PHẢI dùng
+  RAM/ROM gốc (đọc ngoài vùng trả 0xFFFF), không tự viết bộ nhớ; esbuild --bundle --platform=node --format=esm.
+- Memory.tst trên HardwareSimulator không giao diện: vá Keyboard.java (+pressVirtual) và HackController.doEchoCommand (echo "'K'" →
+  nhấn phím) — chú thích Java chỉ dùng ASCII (javac -encoding ISO-8859-1). CPUEmulator headless: `CPUEmulatorMain script.tst`
+  (tên file không có '_').
+- apt download thêm: gcc-arm-none-eabi binutils-arm-none-eabi qemu-system-arm qemu-system-common qemu-system-data gcc-avr
+  binutils-avr avr-libc + libfdt1 libpmem1 libnuma1 librdmacm1t64 libslirp0 liburing2 libaio1t64 libibverbs1 libndctl6
+  libdaxctl1 (QEMU cần LD_LIBRARY_PATH=$R/usr/lib/x86_64-linux-gnu và -L $R/usr/share/qemu); poppler cần libopenjp2-7 liblcms2-2
+  libnss3 libnspr4. avr-gcc: -B/-I/-L trỏ $R/usr/lib/avr/.
+- doccheck.py (dựng lại 2026-09-29): slug GitHub = giữ ký tự loại L/M/N + ' -_'; bỏ qua §x.y.z (mục chuẩn C11) khi kiểm §-tham chiếu.
+
+### Tham chiếu tới trước mà C3.3 để lại (phải trả ở leaf sau; kiểm lại ở rà soát cuối C3)
+- C3.4: x86 dài 1–15 byte cần bộ giải mã độ dài + CPU x86 giữ ROM vi mã cho lệnh hiếm/phức tạp (§3.3); đọc thanh ghi, chế độ địa
+  chỉ, quy ước gọi hàm trên RISC-V/ARM/x86 (D.3); ARM phải tự đồng bộ I-cache/D-cache sau khi ghi mã (§5.5, cùng C3.7).
+- C3.5: pipeline hai tầng Hack (Mở rộng 1 "điểm khởi đầu của C3.5"); tệp thanh ghi nhiều cổng → bank/bản sao (§2.2–2.3);
+  xung đột cấu trúc/điều khiển (§4.4); chia đường dài bằng pipeline (§1.4).
+- C3.6/C3.11: vùng thiết bị không cache (§6.5, C.3); C3.11: giao dịch AHB/APB, I²C cực máng hở (§2.5, §6.5).
 
 ## Nhánh C2 (C2.1 → C2.13) — HOÀN TẤT 2026-09-26
 
@@ -100,6 +124,16 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-09-29: C3.3 — mọi output chạy thật: runtst p1–p3 30/30 (khớp số cổng C3.1/C3.2) + p5 6/6; HardwareSimulator 6/6 (+ bản thuần
+  Nand/DFF qua CPU-external; đột biến bị bắt); trace1/critpath/bench/regfile/buscount/cpuparts/diverge(4 hiện thực)/udf(QEMU)/runmc/
+  Pong-startup/avr/smc/diag/kbd/mmio(QEMU)/readfx/asmcheck/fuzzrun/edge/runcrc/mutcpu/lockstep 10⁶/satcpu/faultcpu+satfaults.
+  Đọc lại toàn văn, sửa ~20 chỗ (đường tới hạn ROM đi qua bit a chứ không qua bit điều khiển ALU; 78% là của CPU không phải datapath;
+  CRC-XMODEM khác đa thức MODBUS; bộ nhớ web-ide phải là lớp gốc — đọc ngoài vùng 0xFFFF; nhóm ca biên 9/5/7; chips.py có thêm
+  name/words; "đọc là lấy ra" thay bằng số đo QEMU; §8.x đánh số lại...). Thêm ví dụ Max.asm chính thức sai với ±20000 (tràn).
+  Nguồn đã đối chiếu văn bản gốc: ARM DDI 0479C bảng 4-7, AMBA IHI 0011A §3.2/§3.10/ch.4, Intel SDM 3A "Self-Modifying Code",
+  RISC-V unpriv RV32I, Rixner HPCA 2000, mã nguồn Java 2.5 + web-ide 52611ad. doccheck 0 lỗi, 26 bảng, CRLF.
+- Ghi chú rà soát cuối C3: "dòng so khớp" — C3.1 và C3.3 KHÔNG tính dòng tiêu đề, C3.2 CÓ tính (Bit 215, Register 149, PC 31, RAM8 173,
+  RAM64…RAM16K 320) → sửa C3.2 thành 214/148/30/172/319 (đã chạy lại 2026-09-29: đúng các số đó).
 - 2026-09-28: C3.2 — mọi output chạy thật (latch/latch2/race/setuphold/skew trên evsim; meta/mtbf; lfsr n=2..20 khớp φ(2^n−1)/n;
   counters/cdc/pulse/seqdet trên Icarus; yosys 4 biến thể + seu_tb trên netlist; fsm_sw x86 + Cortex-M3; runtst 8/8 + HardwareSimulator
   8/8 + phép thử ngược; checkpoint: diff.py 40k + 10⁶ khung, lost.py, vét cạn CRC 1/256, run_qemu ×3 + plugin icount, run_ovf, mutants.sh
