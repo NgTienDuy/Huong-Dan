@@ -1,16 +1,22 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
 **State:** ĐANG VIẾT C3 (C3.1 → C3.14)
-**Updated:** 2026-09-29
-**Last session:** claude-code (Opus 5.5), 2026-09-29, tiếp nhánh C3 (C3.3 →)
+**Updated:** 2026-10-01
+**Last session:** claude-code (Opus 5.5), 2026-09-30 → 10-01, tiếp nhánh C3 (C3.4 →)
 
 ## NEXT ACTION
 
-Viết C3.4 (ISA & assembly, `In→Ad`) theo quy ước C1/C2/C3.1–C3.3: 8 sub-leaf (RISC vs CISC; RISC-V; Cortex-M Thumb-2 + ngoại lệ;
-đọc disassembly x86-64; quy ước gọi hàm; prologue/epilogue; C → assembly; lệnh nguyên tử). Checkpoint: đọc disassembly `-O2` của
-một hàm C và giải thích mọi thay đổi so với `-O0` (inline, unroll, vectorize, loại bỏ). Công cụ: gcc x86-64, arm-none-eabi-gcc +
-QEMU, cross gcc RISC-V/aarch64 + qemu-user (dựng lại theo "Môi trường C3"). Phải trả các "nợ" C3.3 để lại (mục "Tham chiếu tới
-trước" bên dưới). Sau đó C3.5 → C3.14, mỗi file một commit; xong C3.14 thì rà soát toàn bộ C3 (yêu cầu người dùng 2026-09-28/29).
+C3.4 ĐÃ VIẾT XONG BẢN NHÁP (211 KB, 11 phần p0–p10 trong `E2E-SYSTEM/C3-.../.draft-C3.4/`, chưa commit, chưa chép vào
+`C3.4-ISA&Assembly.md`). Việc còn lại: (1) sửa các lỗi đã tìm khi đọc lại (danh sách dưới); (2) đọc tiếp từ §5 (dòng ~918 của bản
+ghép) tới hết; (3) ghép `cat p0..p10`, chạy doccheck (lần cuối: 0 lỗi, 31 bảng, 15 tham chiếu chéo đúng chủ đề), lưu CRLF vào
+`C3.4-ISA&Assembly.md`, xóa `.draft-C3.4/`, commit; rồi C3.5.
+Lỗi đã tìm, CHƯA sửa: p0 "sáu biến thể" → "bảy cấu hình" (2 chỗ: mục tiêu, §0.1); p1 "gấp 5 lần" → "gấp hơn 4 lần" (73.543/16.850);
+§1.4 tiêu đề "bảy tập lệnh" → "sáu cấu hình"; khối mix.py: tách dòng rv64gc/m3/m0 thành từng dòng nguyên văn, thêm dòng top mnemonic
+a64 (cmp 12.1%, mov 9.9%, add 8.7%, ldr 8.6%, b.ne 7.3%...); §1.6 "bts mem 6,5" → "6,8"; §2.1 câu x0: bỏ `mv` (mv = addi rd,rs,0);
+§2.2 "chỉ đến từ một hoặc hai vị trí" → "ít vị trí"; §2.3 đột biến 1 hỏng nhánh lùi VÀ nhánh tới > 2 KiB; §3.4 câu "8 thanh ghi AAPCS
+cho phép phá hủy" → r0–r3, r12, lr + pc, xPSR; §3.7 "gây năm lỗi" → năm thí nghiệm, bốn lỗi; §4.1 REX: đặc tả AMD64 2000, CPU 2003;
+"dài nhất trong libc" → "độ dài lớn nhất gặp"; §4.3 bỏ "C3.5 nhắc lại,"; §4.4 SDM: tập 2 nêu trần 15 B, tập 3A liệt kê vượt trần là
+nguyên nhân #GP. Các số liệu khác đã đối chiếu output tới §4.6.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -61,6 +67,15 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   libdaxctl1 (QEMU cần LD_LIBRARY_PATH=$R/usr/lib/x86_64-linux-gnu và -L $R/usr/share/qemu); poppler cần libopenjp2-7 liblcms2-2
   libnss3 libnspr4. avr-gcc: -B/-I/-L trỏ $R/usr/lib/avr/.
 - doccheck.py (dựng lại 2026-09-29): slug GitHub = giữ ký tự loại L/M/N + ' -_'; bỏ qua §x.y.z (mục chuẩn C11) khi kiểm §-tham chiếu.
+
+### C3.4 — số liệu đã đo (2026-09-30/10-01, trước khi viết văn bản)
+- CoreMark (EEMBC, không sửa core_*.c, port bare-metal semihosting): mỗi vòng x86-64 338.524 lệnh (1,05 MB, TB 3,11 B),
+  AArch64 303.203, RV64GC 358.929 (+Zba/Zbb/Zbs 318.370), Thumb-2 M3 294.565 (71,8% lệnh 16 bit), M0 389.090; x86 load-op 1,2% + RMW 1,0%,
+  mov 24%, chép thanh ghi 13,5% (A64 7,3%); truy cập dữ liệu/vòng x86 74,0K vs A64 68,0K; .text -O2: x86 5775, A64 6228, RV64GC 5124,
+  RV64G 7184, M3 4036, M0 4504. Plugin QEMU 8.2.2 Ubuntu: lọc MEM_R/MEM_W lệch một bậc (đã hiệu chỉnh).
+- RV64IM decoder 51.730/51.730 khớp objdump trên Lua 5.4.7; x86 len15: 15 B chạy, 16 B → SIGSEGV si_code 128; split lock 2,55 µs vs 3,9 ns,
+  làm luồng khác quét DRAM chậm 4×; ABI probe theo thẻ vị trí cho 6 ABI; checkpoint filt.c: -O0 202 ns/khối, -O2 23,3 ns, 8 biến thể
+  khớp -O0 trên 10^6 khối.
 
 ### Tham chiếu tới trước mà C3.3 để lại (phải trả ở leaf sau; kiểm lại ở rà soát cuối C3)
 - C3.4: x86 dài 1–15 byte cần bộ giải mã độ dài + CPU x86 giữ ROM vi mã cho lệnh hiếm/phức tạp (§3.3); đọc thanh ghi, chế độ địa
