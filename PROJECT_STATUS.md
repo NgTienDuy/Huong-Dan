@@ -1,22 +1,15 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
 **State:** ĐANG VIẾT C3 (C3.1 → C3.14)
-**Updated:** 2026-10-01
-**Last session:** claude-code (Opus 5.5), 2026-09-30 → 10-01, tiếp nhánh C3 (C3.4 →)
+**Updated:** 2026-10-02
+**Last session:** claude-code (Opus 5.5), 2026-10-02, hoàn tất C3.4, tiếp C3.5 →
 
 ## NEXT ACTION
 
-C3.4 ĐÃ VIẾT XONG BẢN NHÁP (211 KB, 11 phần p0–p10 trong `E2E-SYSTEM/C3-.../.draft-C3.4/`, chưa commit, chưa chép vào
-`C3.4-ISA&Assembly.md`). Việc còn lại: (1) sửa các lỗi đã tìm khi đọc lại (danh sách dưới); (2) đọc tiếp từ §5 (dòng ~918 của bản
-ghép) tới hết; (3) ghép `cat p0..p10`, chạy doccheck (lần cuối: 0 lỗi, 31 bảng, 15 tham chiếu chéo đúng chủ đề), lưu CRLF vào
-`C3.4-ISA&Assembly.md`, xóa `.draft-C3.4/`, commit; rồi C3.5.
-Lỗi đã tìm, CHƯA sửa: p0 "sáu biến thể" → "bảy cấu hình" (2 chỗ: mục tiêu, §0.1); p1 "gấp 5 lần" → "gấp hơn 4 lần" (73.543/16.850);
-§1.4 tiêu đề "bảy tập lệnh" → "sáu cấu hình"; khối mix.py: tách dòng rv64gc/m3/m0 thành từng dòng nguyên văn, thêm dòng top mnemonic
-a64 (cmp 12.1%, mov 9.9%, add 8.7%, ldr 8.6%, b.ne 7.3%...); §1.6 "bts mem 6,5" → "6,8"; §2.1 câu x0: bỏ `mv` (mv = addi rd,rs,0);
-§2.2 "chỉ đến từ một hoặc hai vị trí" → "ít vị trí"; §2.3 đột biến 1 hỏng nhánh lùi VÀ nhánh tới > 2 KiB; §3.4 câu "8 thanh ghi AAPCS
-cho phép phá hủy" → r0–r3, r12, lr + pc, xPSR; §3.7 "gây năm lỗi" → năm thí nghiệm, bốn lỗi; §4.1 REX: đặc tả AMD64 2000, CPU 2003;
-"dài nhất trong libc" → "độ dài lớn nhất gặp"; §4.3 bỏ "C3.5 nhắc lại,"; §4.4 SDM: tập 2 nêu trần 15 B, tập 3A liệt kê vượt trần là
-nguyên nhân #GP. Các số liệu khác đã đối chiếu output tới §4.6.
+Viết C3.5 Pipelining&BranchPrediction (roadmap §C3.5; checkpoint: hai phiên bản vòng lặp — nhánh khó đoán vs branchless — đo
+chênh lệch, xác nhận nguyên nhân bằng `branch-misses`). Không có PMU trong WSL2 → `branch-misses` thật không đọc được; dùng
+mô phỏng (cachegrind --branch-sim, bộ dự đoán tự viết) + đo thời gian, nói rõ giới hạn. Scratchpad phiên 2026-10-02 mới:
+phải dựng lại môi trường C3 (apt download + dpkg -x, xem "Môi trường C3").
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -28,8 +21,9 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.1 BooleanLogic&CombinationalCircuits | ✅ 2026-09-27 (80 KB; checkpoint: 21/21 test chính thức trên mạch NAND tự mô phỏng + 20/20 trên HardwareSimulator chính thức qua .hdl phẳng; độ phủ stuck-at của ALU.tst 85,6%; SAT chứng minh tương đương 2³⁸ đầu vào) |
 | C3.2 SequentialLogic&FSM | ✅ 2026-09-28 (142 KB; project 3: 8/8 test trên runner + 8/8 trên HardwareSimulator, 4/4 đột biến runner; checkpoint: FSM khung UART (SOF+LEN+CRC-16/MODBUS) bằng C trên QEMU Cortex-M3 khớp mô hình tham chiếu khai báo 2.295/2.295 sự kiện ×3 lần, 10⁶ khung thử 0 lệch, 760.428/760.438 khung tốt (10 mất đều giải thích được); lỗi thật tìm được: xóa cờ ngắt sau khi đọc, bộ thử gom byte, CRC lọt 1/256 với 0x7E chèn sau LEN=1) |
 | C3.3 Datapath&BuildingACPU | ✅ 2026-09-29 (140 KB; máy Hack thuần NAND+DFF 3,27 triệu NAND: project 5 6/6 runner + 6/6 HardwareSimulator chính thức; assembler 7/7 + 1.000/1.000 ngẫu nhiên trùng từng bit với bản Java; CRC-16/XMODEM chạy trên CPU tự dựng = 0x31C3; CPU chứng minh SAT tương đương đặc tả 2⁸¹ đầu vào; 4 hiện thực ISA bất đồng ở 5 vùng; assembler Java sai im lặng 6/21 ca biên) |
-| C3.4 ISA&Assembly | ⏳ tiếp theo |
-| C3.5 → C3.14 | ☐ |
+| C3.4 ISA&Assembly | ✅ 2026-10-02 (215 KB; CoreMark trên 7 cấu hình tập lệnh cùng CRC, đếm lệnh/byte/truy cập bằng plugin QEMU + valgrind; bộ giải mã RV64IM 51.730/51.730 khớp binutils; ABI quan sát bằng thẻ vị trí trên 6 ABI; checkpoint filt.c: 9 biến thể cờ, mỗi biến đổi có -fopt-info + thí nghiệm tắt, kiểm vi sai 10⁶ khối 0 khác; -O2 nhanh 8,7× -O0) |
+| C3.5 Pipelining&BranchPrediction | ⏳ tiếp theo |
+| C3.6 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -138,6 +132,12 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
+
+- 2026-10-02: C3.4 — phiên trước (09-30 → 10-01) chạy mọi thí nghiệm và đọc lại §0–§4.6; phiên này sửa 17 lỗi đã ghi + đọc lại §5–hết,
+  sửa thêm: §8.5 đọc rách là `lo` CŨ + `hi` MỚI (sai 2³¹ với bước 2³¹, không phải 2³²); §5.4 Win64↔SysV còn hỏng ở vùng bóng 32 B;
+  tổng kết 5 + §3.4 khung 8 từ = r0–r3, r12, lr (thanh ghi được phá) + pc, xPSR; tham chiếu fuzz assembler C3.3 §7.3 → §7.2;
+  khối mix.py tách dòng nguyên văn (`…` = lược). doccheck.py dựng lại (anchor, fence, cột bảng, CRLF, mọi § nội bộ + Cx.y §z tồn tại):
+  0 lỗi, 31 bảng, 199 tham chiếu §; 15 tham chiếu chéo kiểm đúng chủ đề bằng tay. C3.1–C3.3 chạy lại doccheck: 0 lỗi.
 
 - 2026-09-29: C3.3 — mọi output chạy thật: runtst p1–p3 30/30 (khớp số cổng C3.1/C3.2) + p5 6/6; HardwareSimulator 6/6 (+ bản thuần
   Nand/DFF qua CPU-external; đột biến bị bắt); trace1/critpath/bench/regfile/buscount/cpuparts/diverge(4 hiện thực)/udf(QEMU)/runmc/
