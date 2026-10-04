@@ -1,15 +1,16 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14)
-**Updated:** 2026-10-02
-**Last session:** claude-code (Opus 5.5), 2026-10-02, hoàn tất C3.4, tiếp C3.5 →
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.5 xong
+**Updated:** 2026-10-04
+**Last session:** claude-code (Opus 5.5), 2026-10-04, hoàn tất C3.5 (commit), tiếp C3.6 →
 
 ## NEXT ACTION
 
-Viết C3.5 Pipelining&BranchPrediction (roadmap §C3.5; checkpoint: hai phiên bản vòng lặp — nhánh khó đoán vs branchless — đo
-chênh lệch, xác nhận nguyên nhân bằng `branch-misses`). Không có PMU trong WSL2 → `branch-misses` thật không đọc được; dùng
-mô phỏng (cachegrind --branch-sim, bộ dự đoán tự viết) + đo thời gian, nói rõ giới hạn. Scratchpad phiên 2026-10-02 mới:
-phải dựng lại môi trường C3 (apt download + dpkg -x, xem "Môi trường C3").
+Viết C3.6 MemoryHierarchy (roadmap §C3.6, `Ad→Ex` ★; checkpoint: workload thật — nhân ma trận hoặc vòng xử lý tín hiệu —
+xác định memory-bound/compute-bound, blocking/tiling đạt ≥3×, giải thích speedup bằng số cache miss trước/sau). Không có PMU →
+cache miss đếm bằng cachegrind (--cache-sim=yes, cấu hình theo cache thật: L1d 48K/12 đường, L2 1,25M/10 đường, L3 24M) + mô hình;
+thời gian đo bằng bench.h kiểu C3.5 (hiệu chuẩn kề bên). Trả các tham chiếu tới trước C3.5 → C3.6 (xem dưới). Môi trường: dựng lại
+theo "Môi trường C3"; công cụ đo C3.5 + doccheck.py ở `.draft-C3.5/src/`.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -22,7 +23,7 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.2 SequentialLogic&FSM | ✅ 2026-09-28 (142 KB; project 3: 8/8 test trên runner + 8/8 trên HardwareSimulator, 4/4 đột biến runner; checkpoint: FSM khung UART (SOF+LEN+CRC-16/MODBUS) bằng C trên QEMU Cortex-M3 khớp mô hình tham chiếu khai báo 2.295/2.295 sự kiện ×3 lần, 10⁶ khung thử 0 lệch, 760.428/760.438 khung tốt (10 mất đều giải thích được); lỗi thật tìm được: xóa cờ ngắt sau khi đọc, bộ thử gom byte, CRC lọt 1/256 với 0x7E chèn sau LEN=1) |
 | C3.3 Datapath&BuildingACPU | ✅ 2026-09-29 (140 KB; máy Hack thuần NAND+DFF 3,27 triệu NAND: project 5 6/6 runner + 6/6 HardwareSimulator chính thức; assembler 7/7 + 1.000/1.000 ngẫu nhiên trùng từng bit với bản Java; CRC-16/XMODEM chạy trên CPU tự dựng = 0x31C3; CPU chứng minh SAT tương đương đặc tả 2⁸¹ đầu vào; 4 hiện thực ISA bất đồng ở 5 vùng; assembler Java sai im lặng 6/21 ca biên) |
 | C3.4 ISA&Assembly | ✅ 2026-10-02 (215 KB; CoreMark trên 7 cấu hình tập lệnh cùng CRC, đếm lệnh/byte/truy cập bằng plugin QEMU + valgrind; bộ giải mã RV64IM 51.730/51.730 khớp binutils; ABI quan sát bằng thẻ vị trí trên 6 ABI; checkpoint filt.c: 9 biến thể cờ, mỗi biến đổi có -fopt-info + thí nghiệm tắt, kiểm vi sai 10⁶ khối 0 khác; -O2 nhanh 8,7× -O0) |
-| C3.5 Pipelining&BranchPrediction | ⏳ tiếp theo |
+| C3.5 Pipelining&BranchPrediction | ✅ 2026-10-04 (169 KB; rv5.v pipeline 5 tầng RV32IM tự viết: 111/111 vết retire trùng iss.py, 4 đột biến, lỗi `sra` thật chỉ CoreMark lộ; CPI × tầng NAND cho 8 cấu hình; x86 đo bằng thời gian quy đổi (không PMU): phạt đoán sai 21–27, RAS 16, ROB 512 → 256 khi anh em SMT hoạt động (robwin.exe trên Windows), SMT 0,77×–2,03×; checkpoint: có nhánh 14,25 vs mặt nạ 0,99 chu kỳ/pt ở p = 0,5, xác nhận bằng đối chứng + cachegrind + mô hình P đo độc lập + kế toán chính xác rv5 dư 0) |
 | C3.6 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
@@ -62,6 +63,25 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   libnss3 libnspr4. avr-gcc: -B/-I/-L trỏ $R/usr/lib/avr/.
 - doccheck.py (dựng lại 2026-09-29): slug GitHub = giữ ký tự loại L/M/N + ' -_'; bỏ qua §x.y.z (mục chuẩn C11) khi kiểm §-tham chiếu.
 
+### C3.5 — số liệu đã đo (2026-10-02/03)
+- rv5 (Verilog, iverilog): 72+18+48+20 lần chạy khớp vết retire iss.py (Python, iss khớp qemu-riscv32 ở output 5 chương trình); lỗi thật:
+  `alt ? $signed(x) >>> sh : x >> sh` → dịch logic (vế unsigned kéo cả biểu thức) — CoreMark bắt ở lệnh 60.804, 4 chương trình nhỏ không bắt.
+- CPI CoreMark (FASTMIS=0): nofwd EX not-taken 1,831 … fwd EX BHT2+RAS 1,102; fwd ID BHT 1,168 (ID tệ hơn EX vì stall toán hạng 0,083);
+  RAS không sửa khi đoán sai: sort jalr sai 879 (EX) vs 2 (ID).
+- Độ sâu NAND (yosys 0.33 + abc -g NAND -fast; abc mặc định gập cộng Brent-Kung 18 tầng thành ripple 67): rv1 79; rv5 FASTMIS=0 80;
+  FASTMIS=1 (+ đích JALR riêng) 64 = vòng ALU+bypass (kết thúc ở m_res); nofwd 54; BHT 72 (+RREG 67); ID 64 (+BHT 70).
+- Checkpoint rv5 (Δ 4 lượt × 2048): nhánh p=0,5: 5,511 chu kỳ/pt (lệnh 4,504 + hủy 1,007), mặt nạ 7,009 mọi p; dư 0 tuyệt đối.
+- bpsim (8 KiB): TAGE tốt nhất (CoreMark RV 0,88% vs gshare 4,27%); vết x86 btrace 4M nhánh python/gzip/sort, grep 1M.
+
+- 2026-10-04 (đo lại khi máy rảnh, out2/): xung nhịp turbo trôi 4,2–4,8 GHz → bench.h mới: mỗi lần đo kẹp giữa 2 lần hiệu chuẩn chuỗi add,
+  trung vị 9 tỉ số (nạp L1 5,04–5,10; imul 3,0/1,0). brpen2 21–22 chu kỳ, brpen 27; RAS gãy giữa D=16 và 18; ROB: rob2 gãy N=504–508;
+  robwin.exe (Windows, LP 4): anh em rảnh → gãy N≈512, anh em chạy pause/add → gãy N≈248–256 (ROB chia đôi tĩnh). smtwin.exe (mingw,
+  LP 2+3 thật): ALU 1,03×, imul 2,03×, đuổi 1 MiB 0,77× (L2 1,25 MB chung); ALU+add nối đuôi A 2,17×, ALU+pause A 1,13×. smt.c trong WSL:
+  vCPU 2+3 KHÔNG phải anh em thật (mọi tỉ số ≈1). CoreMark x86 IPC 2,57–2,73 (338.520 lệnh/vòng cachegrind; ipc.sh). ck: nhánh p=0,5 14,25,
+  cmov 2,0, mặt nạ 1,0, SIMD 1,0; ckfit.py: mô hình 2p(1−p) khớp nhất (RMS 0,39–0,45; a 0,84–0,94; P 25). Lõi: Raptor Cove B0 (CPUID 6/B7/1)
+  nhưng L2 lõi P 1.280 KB 10 đường (Windows Win32_CacheMemory; Notebookcheck). k_* dựng lại: build.sh (cachegrind khớp từng số với lần cũ).
+- Lỗi đo đã sửa: smt.c dùng `add $1` (bị gộp ở rename) cho tải ALU → đổi sang add thanh ghi; pkill -f "xout2" giết luôn shell (đã ghi Known problems).
+
 ### C3.4 — số liệu đã đo (2026-09-30/10-01, trước khi viết văn bản)
 - CoreMark (EEMBC, không sửa core_*.c, port bare-metal semihosting): mỗi vòng x86-64 338.524 lệnh (1,05 MB, TB 3,11 B),
   AArch64 303.203, RV64GC 358.929 (+Zba/Zbb/Zbs 318.370), Thumb-2 M3 294.565 (71,8% lệnh 16 bit), M0 389.090; x86 load-op 1,2% + RMW 1,0%,
@@ -77,6 +97,11 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 - C3.5: pipeline hai tầng Hack (Mở rộng 1 "điểm khởi đầu của C3.5"); tệp thanh ghi nhiều cổng → bank/bản sao (§2.2–2.3);
   xung đột cấu trúc/điều khiển (§4.4); chia đường dài bằng pipeline (§1.4).
 - C3.6/C3.11: vùng thiết bị không cache (§6.5, C.3); C3.11: giao dịch AHB/APB, I²C cực máng hở (§2.5, §6.5).
+- C3.5 để lại (kiểm ở rà soát cuối C3): C3.6 — độ trễ DRAM "hàng trăm chu kỳ" (§5.1), MLP/bộ đệm trượt L1/băng thông DRAM (§6.4),
+  L2 dùng chung giữa hai luồng SMT (§7.3, D.3); C3.8 — AVX2 cho hàm checkpoint (§8.3, §8.9); C3.12 — đổi thứ tự cộng số thực (§6.6,
+  C.1); C3.14 — top-down phân rã IPC (§6.5), luồng anh em SMT khi đo (§7.5).
+- C3.1 §6.5 hứa "phép nhân chia 3 tầng pipeline (C3.5)" → đã trả ở C3.5 §2.6 (imul độ trễ 3, thông lượng 1).
+
 
 ## Nhánh C2 (C2.1 → C2.13) — HOÀN TẤT 2026-09-26
 
@@ -133,6 +158,13 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-10-04: C3.5 — mọi output chạy thật; đo x86 lại khi máy rảnh với bench.h hiệu chuẩn kề bên (out2/). Đọc lại toàn văn, sửa: §1.3
+  "bắt ở srai đầu tiên" → lệnh retire thứ 11.548 (241 phép dịch số học trước đó vô hại); 450 lệnh sai = 216 + 216 + 4 srai + 1 mv;
+  §4.3 TAGE hòa tournament ở crc; §4.4 trỏ mô phỏng i.i.d. §4.5; §6.5 nguyên nhân IPC ghi là ứng viên; §8.4 cmov 8 lệnh vs mặt nạ 7;
+  RAS khớp R = 15/16 → điểm gãy phân định 16; §0.3 tiên quyết ghi rõ C3.3 §4/§1.4, C3.4 §7.2. Kiểm lại bằng chạy mới: 24 đột biến
+  (output + dòng vết đầu tiên khác khớp bảng §1.3), rv1 6/6, khối tổng hợp (cộng 22/346, slt 28/239, eq 14/127, sra 11/439),
+  ck rv5 tái tạo đúng chu kỳ (89.346 / 104.677). doccheck.py (dựng lại, ở .draft-C3.5/src/): 0 lỗi, 35 bảng, 253 tham chiếu §, CRLF;
+  17 tham chiếu chéo Cx.y §z kiểm đúng chủ đề bằng tay.
 - 2026-10-02: C3.4 — phiên trước (09-30 → 10-01) chạy mọi thí nghiệm và đọc lại §0–§4.6; phiên này sửa 17 lỗi đã ghi + đọc lại §5–hết,
   sửa thêm: §8.5 đọc rách là `lo` CŨ + `hi` MỚI (sai 2³¹ với bước 2³¹, không phải 2³²); §5.4 Win64↔SysV còn hỏng ở vùng bóng 32 B;
   tổng kết 5 + §3.4 khung 8 từ = r0–r3, r12, lr (thanh ghi được phá) + pc, xPSR; tham chiếu fuzz assembler C3.3 §7.3 → §7.2;
