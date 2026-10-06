@@ -1,16 +1,18 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.5 xong
-**Updated:** 2026-10-04
-**Last session:** claude-code (Opus 5.5), 2026-10-04, hoàn tất C3.5 (commit), tiếp C3.6 →
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.6 xong; TẠM DỪNG theo yêu cầu người dùng (2026-10-06)
+**Updated:** 2026-10-06
+**Last session:** claude-code (Opus 5.5), 2026-10-06, hoàn tất C3.6 (commit); xóa `.draft-C3.5/` và `.draft-C3.6/` theo yêu cầu; dừng (người dùng cần Claude Code cho việc khác)
 
 ## NEXT ACTION
 
-Viết C3.6 MemoryHierarchy (roadmap §C3.6, `Ad→Ex` ★; checkpoint: workload thật — nhân ma trận hoặc vòng xử lý tín hiệu —
-xác định memory-bound/compute-bound, blocking/tiling đạt ≥3×, giải thích speedup bằng số cache miss trước/sau). Không có PMU →
-cache miss đếm bằng cachegrind (--cache-sim=yes, cấu hình theo cache thật: L1d 48K/12 đường, L2 1,25M/10 đường, L3 24M) + mô hình;
-thời gian đo bằng bench.h kiểu C3.5 (hiệu chuẩn kề bên). Trả các tham chiếu tới trước C3.5 → C3.6 (xem dưới). Môi trường: dựng lại
-theo "Môi trường C3"; công cụ đo C3.5 + doccheck.py ở `.draft-C3.5/src/`.
+(Người dùng yêu cầu dừng sau C3.6 — chỉ làm tiếp khi được yêu cầu.) Khi tiếp tục: viết C3.7 MemoryConsistency&Coherence (roadmap §C3.7;
+checkpoint: code đồng bộ chạy đúng trên x86 nhưng hỏng trên ARM, giải thích, sửa bằng barrier). ⚠️ Cần quyết định nguồn ARM thật trước khi
+viết: qemu-aarch64 (TCG) chạy trên host x86 KHÔNG tái hiện được mô hình yếu của ARM một cách đáng tin → phương án: (a) herd7/litmus7 (mô hình
+chính thức ARMv8 của diy7, cài qua opam) để chứng minh kết quả cấm/cho phép; (b) máy ARM thật (Raspberry Pi 4/5, máy ảo Graviton) nếu
+người dùng có; (c) GPU RTX 4060 (mô hình bộ nhớ yếu của PTX) như một nền yếu thật có sẵn. Hỏi người dùng (b) trước khi bắt đầu.
+Dựng lại môi trường theo "Môi trường C3" (mọi nháp/công cụ của C3.5–C3.6 đã bị xóa; doccheck.py phải viết lại theo mô tả bên dưới).
+Dùng lại số đo C3.6 cho C3.7: chuyển dòng lõi–lõi 15,8 ns (SMT) / 32–61 (P–P) / 57–95 (E–E), lock xadd tranh chấp (§8.2, §9).
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -24,7 +26,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.3 Datapath&BuildingACPU | ✅ 2026-09-29 (140 KB; máy Hack thuần NAND+DFF 3,27 triệu NAND: project 5 6/6 runner + 6/6 HardwareSimulator chính thức; assembler 7/7 + 1.000/1.000 ngẫu nhiên trùng từng bit với bản Java; CRC-16/XMODEM chạy trên CPU tự dựng = 0x31C3; CPU chứng minh SAT tương đương đặc tả 2⁸¹ đầu vào; 4 hiện thực ISA bất đồng ở 5 vùng; assembler Java sai im lặng 6/21 ca biên) |
 | C3.4 ISA&Assembly | ✅ 2026-10-02 (215 KB; CoreMark trên 7 cấu hình tập lệnh cùng CRC, đếm lệnh/byte/truy cập bằng plugin QEMU + valgrind; bộ giải mã RV64IM 51.730/51.730 khớp binutils; ABI quan sát bằng thẻ vị trí trên 6 ABI; checkpoint filt.c: 9 biến thể cờ, mỗi biến đổi có -fopt-info + thí nghiệm tắt, kiểm vi sai 10⁶ khối 0 khác; -O2 nhanh 8,7× -O0) |
 | C3.5 Pipelining&BranchPrediction | ✅ 2026-10-04 (169 KB; rv5.v pipeline 5 tầng RV32IM tự viết: 111/111 vết retire trùng iss.py, 4 đột biến, lỗi `sra` thật chỉ CoreMark lộ; CPI × tầng NAND cho 8 cấu hình; x86 đo bằng thời gian quy đổi (không PMU): phạt đoán sai 21–27, RAS 16, ROB 512 → 256 khi anh em SMT hoạt động (robwin.exe trên Windows), SMT 0,77×–2,03×; checkpoint: có nhánh 14,25 vs mặt nạ 0,99 chu kỳ/pt ở p = 0,5, xác nhận bằng đối chứng + cachegrind + mô hình P đo độc lập + kế toán chính xác rv5 dư 0) |
-| C3.6 → C3.14 | ☐ |
+| C3.6 MemoryHierarchy | ✅ 2026-10-06 (172 KB; khoảng cách dùng lại (rd.c, thuật toán Mattson) trên 9 tải thật khớp cache 12 đường ±0,28 điểm %; L1 12 đường — phép đo đầu cho 10 vì bộ tiền nạp theo bước chiếm 2 đường (pfprobe: 2 dòng phía trước, bước ≤ 8 KiB, qua trang, lúc bật lúc không); L2 10 đường + huge page khách liền nhau về vật lý; L3 hiệu dụng 10–12 MiB rảnh / 2–3 MiB khi hàng xóm quét 32 MiB; DTLB 16 set × 6 đường; huge page WSL không nới tầm TLB nhưng đi bảng trang 196 → 58 chu kỳ; RFO đo bằng thời gian (ghi thường = 2× lưu lượng); chuyển dòng lõi–lõi 16–95 ns; trần FMA 32 FLOP/chu kỳ, đợt ngắn ~75%; checkpoint: dàn lọc FIR 16 băng × 128 hệ số trên dữ liệu vòng bi CWRU, tile L1 ×3,26–3,46, tile thanh ghi ×5,2–5,5, số trượt L2 giảm 121 lần, v0 chạy đúng ở trần băng thông L3) |
+| C3.7 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -62,6 +65,24 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   libdaxctl1 (QEMU cần LD_LIBRARY_PATH=$R/usr/lib/x86_64-linux-gnu và -L $R/usr/share/qemu); poppler cần libopenjp2-7 liblcms2-2
   libnss3 libnspr4. avr-gcc: -B/-I/-L trỏ $R/usr/lib/avr/.
 - doccheck.py (dựng lại 2026-09-29): slug GitHub = giữ ký tự loại L/M/N + ' -_'; bỏ qua §x.y.z (mục chuẩn C11) khi kiểm §-tham chiếu.
+  Kiểm: anchor mục lục, số dòng ``` chẵn, số cột mỗi bảng, CRLF, mọi '§x.y' nội bộ tồn tại, mọi 'Cx.y §z' tồn tại trong file Cx.y (file khung →
+  cảnh báo 'tham chiếu tới trước'). ⚠️ 2026-10-06: `.draft-C3.5/` và `.draft-C3.6/` (mọi nguồn thí nghiệm, bench.h, doccheck.py) ĐÃ XÓA theo
+  yêu cầu người dùng → leaf sau phải viết lại công cụ. Công thức dựng nhanh: `apt download valgrind gcc-mingw-w64-x86-64-win32 gcc-mingw-w64-base
+  binutils-mingw-w64-x86-64 mingw-w64-x86-64-dev mingw-w64-common gcc-mingw-w64-x86-64-win32-runtime libisl23 libmpc3 libmpfr6` → dpkg -x vào
+  $S/root; mingw: `x86_64-w64-mingw32-gcc-win32 -B$R/usr/lib/gcc/x86_64-w64-mingw32/13-win32/ -B$R/usr/x86_64-w64-mingw32/bin/
+  -L$R/usr/x86_64-w64-mingw32/lib -isystem $R/usr/x86_64-w64-mingw32/include`; valgrind cần VALGRIND_LIB=$R/usr/libexec/valgrind.
+  bench.h: hiệu chuẩn = 10^7 lệnh `add %reg,%reg` nối đuôi (KHÔNG `add $1`), kẹp mỗi phép đo giữa 2 lần, trung vị 9 tỉ số.
+
+### C3.6 — số đo đáng dùng lại cho leaf sau (2026-10-05/06; chi tiết trong chính tài liệu C3.6)
+- Lõi P: L1 5 / L2 15–16 / L3 65–70 / DRAM 400–660 chu kỳ; băng thông 1 luồng L1 ~54, L2 ~38, L3 13–17, DRAM ~5,5 B/chu kỳ (21–24 GB/s);
+  cả chip đọc ~61 GB/s (80% của 76,8). Trần FMA 4/16/32 FLOP/chu kỳ (vô hướng/AVX2 double/float), đợt AVX < ~10 µs chỉ ~75% (C3.8 dùng).
+- Lõi E: L1 32 KiB 3 chu kỳ, L2 2 MiB/cụm ~20 chu kỳ, DRAM ~3 B/chu kỳ. Chuyển dòng E–E trong cùng cụm CHẬM hơn khác cụm (69–95 vs 57–82 ns),
+  người đọc cùng cụm với người ghi 17–51 ns/lần đọc vs khác cụm 5,5 — chưa giải thích được (C3.7 có thể đào tiếp).
+- Máy chủ: VBS + HVCI bật (Windows cũng là phân vùng gốc Hyper-V). Tải nền (backgrounddownload, memory compression, Edge, sqlservr) làm
+  số đo DRAM/L3 dao động 20–90% → luôn in hostload.sh cạnh số đo; báo theo chu kỳ.
+- Bẫy gặp trong C3.6: bộ tiền nạp theo bước (đo độ liên kết phải dùng thứ tự ngẫu nhiên); `pause` trong vòng chờ cộng ~5 ns vào c2c;
+  malloc lớn ≡ 16 mod 64 (căn bằng aligned_alloc); gcc -O3 tự unroll-and-jam ×2, tắt nó thì gcc đổi chỗ vòng (interchange) → vô hướng;
+  `long` của mingw 32 bit (bộ đếm > 2^31, tích độ dời); chia vùng cho T luồng phải căn 4 KiB (vmovdqa); đọc vùng mmap chưa ghi = trang 0.
 
 ### C3.5 — số liệu đã đo (2026-10-02/03)
 - rv5 (Verilog, iverilog): 72+18+48+20 lần chạy khớp vết retire iss.py (Python, iss khớp qemu-riscv32 ở output 5 chương trình); lỗi thật:
@@ -157,6 +178,16 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
+
+- 2026-10-06: C3.6 — mọi output chạy thật (WSL + thẳng trên Windows qua mingw); script đối chiếu từng dòng của mọi khối ✅ với file output
+  (mọi dòng khớp; các output chỉ có trong terminal được chép lại vào out/ trước khi xóa nháp). Đọc lại toàn văn, sửa: số tải 8 → 9 (7 chương
+  trình); l1plru dùng trang 0..K−1 (không phải ngẫu nhiên) + ghi chú; lần đo L1 đầu: 3/5 set trượt hẳn ở K = 11 (không phải "cả năm set");
+  L1 48K/12 đường có từ Sunny Cove; "4,5–5,0" → 4,5–4,9 (SMT); E-core L2 23,0–25,8; mái L1 cho v2/v3 (I tính theo byte đọc L1: 0,33/0,49);
+  bản nojam là interchange chứ không phải "nhiều lưu lượng hơn" (cachegrind lộ ra: 25,8·10⁹ lệnh, trượt ÷43, vẫn chậm 3×); cgdemo phải căn
+  64 B (malloc ≡ 16 mod 64 làm số trượt bản xáo trộn gấp đôi); `sum_unused` bị xóa cả lời gọi (không chỉ còn ret); C3.4 §8 → §9 (checkpoint).
+  doccheck: 0 lỗi, 40 bảng, 307 tham chiếu §, CRLF; 25 tham chiếu chéo Cx.y §z kiểm đúng chủ đề bằng tay. Trả tham chiếu tới trước:
+  C3.5 §5.1/§6.4 (DRAM hàng trăm chu kỳ, MLP, băng thông) → C3.6 §2.2, §7; C3.3 §6.5 (vùng thiết bị không cache) → §4.1; C3.2 §2.2 (bank/
+  hàng/cột) → §7.5; C3.4 (bẫy đo roadmap C3.6) → §10.3.
 
 - 2026-10-04: C3.5 — mọi output chạy thật; đo x86 lại khi máy rảnh với bench.h hiệu chuẩn kề bên (out2/). Đọc lại toàn văn, sửa: §1.3
   "bắt ở srai đầu tiên" → lệnh retire thứ 11.548 (241 phép dịch số học trước đó vô hại); 450 lệnh sai = 216 + 216 + 4 srai + 1 mv;
