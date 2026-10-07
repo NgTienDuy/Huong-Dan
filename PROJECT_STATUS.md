@@ -1,22 +1,21 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.8 xong; tiếp C3.9 (2026-10-07)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.9 xong; tiếp C3.10 (2026-10-07)
 **Updated:** 2026-10-07
 **Last session:** claude-code (Opus 5.5), 2026-10-07, bắt đầu phiên dài: C3.7 → C3.14 rồi rà soát toàn bộ C3 (yêu cầu người dùng)
 
 ## NEXT ACTION
 
-Viết C3.9 GPUArchitecture (roadmap §C3.9; checkpoint: lấy một kernel GPU, xác định memory-bound hay compute-bound bằng công cụ
-profiling, giải thích bằng roofline). GPU: RTX 4060 Laptop (driver 610.88, CUDA UMD 13.3, libcuda trong /usr/lib/wsl/lib). Chưa có
-nvcc: tải tarball redist chính thức của NVIDIA (developer.download.nvidia.com/compute/cuda/redist/: cuda_nvcc, cuda_cudart, cuda_cccl,
-libcublas, cuda_cupti, nsight_compute nếu được) vào scratchpad — KHÔNG cài hệ thống. ⚠️ Bộ đếm hiệu năng GPU trong WSL cần Windows bật
-"Allow access to GPU performance counters to all users" (mặc định chỉ admin) → nếu ncu báo ERR_NVGPUCTRPERM: đo roofline bằng thời gian
-(cudaEvent) + đếm byte/FLOP tính tay, và hỏi người dùng có muốn bật quyền không (một câu, gộp với câu hỏi khác nếu có).
-Công thức chung giữ nguyên: draft ở `.draft-C3.9/`, doccheck.py + blockcheck.py ở `.draft-C3.7/src/`, mọi output trích phải nằm trong out/.
+Viết C3.10 NPU&Accelerators (roadmap §C3.10; checkpoint: cùng một model trên hai phần cứng, đo latency **và năng lượng**, giải thích
+chênh lệch bằng đặc điểm kiến trúc). Kế hoạch: model nhỏ (ví dụ MLP/CNN 1-D cho phân loại lỗi vòng bi CWRU — nối C3.6/C3.9) chạy trên
+CPU [i7] và RTX 4060 (tensor core = accelerator có trên máy; NPU thật: không có — nói rõ, mô phỏng mảng tâm thu bằng Python/Verilog);
+năng lượng: CPU qua `powershell.exe Get-Counter '\Energy Meter(*)\Power'` (RAPL), GPU qua `nvidia-smi --query-gpu=power.draw`
+(lấy mẫu dày) — trừ nền lúc rảnh. Draft ở `.draft-C3.10/`, cùng công thức (blockcheck/doccheck ở `.draft-C3.7/src/`).
+Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
+⚠️ GPU tự tăng xung 2100 → ~2650 MHz: mọi phép đo warmup() + in MHz. ncu bị chặn (ERR_NVGPUCTRPERM) — người dùng chọn làm tiếp không
+bộ đếm; nếu họ bật quyền: chạy C3.9 §11.7 trong lần rà soát cuối và sửa §11.4 theo số đo.
 Repo scratch ARM: https://github.com/NgTienDuy/c3-arm-lab (public; workflow chạy run.sh trên ubuntu-24.04-arm + ubuntu-24.04).
-⚠️ Runner x86 KHÔNG cố định CPU: run1–3 EPYC 7763, run5 AMD (cờ có avx512_vp2intersect + avx_vnni, không ghi tên), run6 Xeon
-Platinum 8573C → luôn in `lscpu | grep "Model name"` cùng output. 2026-10-07 15:10–15:17 UTC GitHub trả 500 cho mọi thao tác ghi
-(push, API, tạo repo) ~7 phút rồi tự hết — nếu gặp lại: làm việc tại chỗ, thử lại sau.
+⚠️ Runner x86 KHÔNG cố định CPU → luôn in `lscpu | grep "Model name"` cùng output. GitHub từng trả 500 ~7 phút (2026-10-07) rồi tự hết.
 Phần cứng người dùng có (2026-10-07): ESP32 DevKit + Arduino Uno (chưa nối vào máy này); sẽ mua STM32, Raspberry Pi sau → C3.11/C3.13 dùng
 mô phỏng + chính laptop, ghi ESP32 là bước phần cứng thật tiếp theo.
 
@@ -35,7 +34,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.6 MemoryHierarchy | ✅ 2026-10-06 (172 KB; khoảng cách dùng lại (rd.c, thuật toán Mattson) trên 9 tải thật khớp cache 12 đường ±0,28 điểm %; L1 12 đường — phép đo đầu cho 10 vì bộ tiền nạp theo bước chiếm 2 đường (pfprobe: 2 dòng phía trước, bước ≤ 8 KiB, qua trang, lúc bật lúc không); L2 10 đường + huge page khách liền nhau về vật lý; L3 hiệu dụng 10–12 MiB rảnh / 2–3 MiB khi hàng xóm quét 32 MiB; DTLB 16 set × 6 đường; huge page WSL không nới tầm TLB nhưng đi bảng trang 196 → 58 chu kỳ; RFO đo bằng thời gian (ghi thường = 2× lưu lượng); chuyển dòng lõi–lõi 16–95 ns; trần FMA 32 FLOP/chu kỳ, đợt ngắn ~75%; checkpoint: dàn lọc FIR 16 băng × 128 hệ số trên dữ liệu vòng bi CWRU, tile L1 ×3,26–3,46, tile thanh ghi ×5,2–5,5, số trượt L2 giảm 121 lần, v0 chạy đúng ở trần băng thông L3) |
 | C3.7 MemoryConsistency&Coherence | ✅ 2026-10-07 (153 KB; ARM thật = runner GitHub Neoverse-N2, x86 = i7 + runner EPYC 7763; litmus.c 29 phép thử khớp herd7 7.58 (SC/TSO/ARMv8/RC11), đối chiếu litmus7; QEMU 8.2.2 sai cả hai chiều (MP 0; stlr/ldar SB 127/triệu — lỗi mã nguồn TCG); mesi.py 4 giao thức + bất biến + 3 đột biến; coh.c: E đắt như M, S rẻ 2,5×; smc.c: DIC=IDC=1 vẫn 999.998/10^6 mã cũ nếu thiếu dsb+isb; checkpoint ring.c: x86 0/10^9 ×2 máy, N2 0,12–47,5 lỗi/triệu, sửa bằng ishst+2×ishld+ctrl (herd7 cần & đủ), C11 ldapr nhanh 8,3× ldar; volatile-only hỏng ngay trên x86 vì gcc) |
 | C3.8 SIMD&Vectorization | ✅ 2026-10-07 (94 KB; [i7] AVX2/FMA/AVX-VNNI + runner N2 NEON/SVE(VL 128) + runner x86 Xeon 8573C; RVV qua QEMU 3 VLEN; 12 vòng tự vector hóa + lý do gcc (vect-details); bẫy: "vectorized" = fold-left vaddss, _mm256_load_ps không chắc lỗi, SSE cũ addps lỗi căn lề, AVX2 pack trong nửa 128 bit (10006 sai), vpmaddubsw bão hòa (22/32 khối sai; reduce_range 7 bit — tài liệu ORT), OoO chồng lần gọi làm phép đo độ trễ 1,6 < 2,0; trả nợ C3.4 sat16 packssdw 2,8× compiler, C3.5 sum_ge AVX2 vpmovsxdq 1,4× vs intrinsics 32-bit theo khối 4,2×; checkpoint FIR 128 nhịp CWRU: intrinsics 17,1× [i7] (71% trần), 8,7× N2, SVE chậm hơn NEON trừ -mcpu=neoverse-n2) |
-| C3.9 → C3.14 | ☐ |
+| C3.9 GPUArchitecture | ✅ 2026-10-07 (101 KB; RTX 4060 Laptop qua WSL, CUDA 13.3 redist; ncu bị chặn quyền → trần đo riêng + đếm lệnh SASS + biến thể có kiểm soát; xung 2100→2650 phải đo (bẫy §2.3), bẫy CSE 94 TFLOP/s; phân kỳ ×P trong warp; độ trễ shared 24/L1 40/L2 262/DRAM ~620 ck; DRAM 231, L2 1260, shared 7,78 TB/s; LSU ~1 lệnh nạp/2 ck; gộp kernel ×3,05 = 6:2; GEMM 0,86→31,2 TFLOP/s, sai số FP16/TF32 = làm tròn đầu vào (mô phỏng khớp); PCIe 12,4–13,0 GB/s; checkpoint FIR 0,30→10,7 TFLOP/s cùng bit: nhóm LSU, nhóm ULDC (cpath: không mở rộng theo occupancy), bản nhanh nhất bị chặn phía tính toán dù AI 60 < 66 (bound.cu)) |
+| C3.10 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -138,6 +138,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   L2 dùng chung giữa hai luồng SMT (§7.3, D.3); C3.8 — AVX2 cho hàm checkpoint (§8.3, §8.9); C3.12 — đổi thứ tự cộng số thực (§6.6,
   C.1); C3.14 — top-down phân rã IPC (§6.5), luồng anh em SMT khi đo (§7.5).
 - C3.1 §6.5 hứa "phép nhân chia 3 tầng pipeline (C3.5)" → đã trả ở C3.5 §2.6 (imul độ trễ 3, thông lượng 1).
+- C3.9 để lại: C3.12 — FP16/BF16/FP8, chỗ chúng hỏng (§6.2, §8.3); C3.10 — mảng tâm thu / NPU (D.3). C3.9 đã trả: C3.1 §6.3 và
+  C3.8 §3.2 (quét tiền tố Kogge-Stone trên GPU, §2.5), C3.8 §1.1 (SIMT, §2).
 
 
 ## Nhánh C2 (C2.1 → C2.13) — HOÀN TẤT 2026-09-26
@@ -195,6 +197,13 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-10-07: C3.9 — mọi output chạy thật trên RTX 4060 Laptop (run_gpu.sh + các lần chạy riêng cpath/bound/occ/inerr, kèm hostload và
+  nvidia-smi trước/sau; 4 file "chép lại từ terminal" ghi rõ). blockcheck 30 khối ✅ / 191 dòng 0 lệch; doccheck 0 lỗi, 15 bảng, 159 tham
+  chiếu §, 33 chéo (kiểm đúng chủ đề). run_gpu.sh ONLY_BUILD=1 dịch đủ 13 chương trình. Lỗi/giả thuyết sai tìm được khi làm: fuse.cu đếm
+  thiếu một lượt DRAM (5 → 6, tỉ lệ đo ×2,97 lộ ra); giải thích §3.2 cũ "LDS chậm vì lệnh tính địa chỉ" bị bác bởi 3 kernel FIR cùng
+  ~2 ck/lệnh nạp → sửa; tile32 trần 1/4 → 1/10 (tính lại theo nhịp LSU); fir_reg3 "~80 thanh ghi" → 94 (occ.cu); giả thuyết "8 KiB hằng
+  tràn bộ đệm" bị bác (4/8/16 băng cùng tốc độ); "ghi float4 nhanh hơn" bị bác (chậm hơn 7%); ncu lệnh -c 8 sai (chỉ bắt fir_direct) →
+  vòng theo tên. Chưa giải thích (ghi rõ trong tài liệu): ULDC ở F = 16, bản duỗi hết (icache vs IMC), float4 chậm hơn.
 - 2026-10-07: C3.8 — mọi output chạy thật ([i7] run_i7.sh với hostload; runner run5/run6, log trong .draft-C3.8/out/run5|run6). blockcheck 37 khối
   ✅ / 209 dòng 0 lệch; doccheck 0 lỗi, 16 bảng, 125 tham chiếu §, 38 chéo (24 khác nhau, kiểm đúng chủ đề). Lỗi tìm được khi làm: tích lũy
   reduce trên stack (thiếu unroll) → K=4 chậm hơn K=2; OoO chồng lần gọi (giữ lại thành §6.2); align bản đầu: imul trong địa chỉ + 64 trang cùng
