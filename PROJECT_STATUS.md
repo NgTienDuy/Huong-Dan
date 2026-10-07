@@ -1,18 +1,19 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.6 xong; TẠM DỪNG theo yêu cầu người dùng (2026-10-06)
-**Updated:** 2026-10-06
-**Last session:** claude-code (Opus 5.5), 2026-10-06, hoàn tất C3.6 (commit); xóa `.draft-C3.5/` và `.draft-C3.6/` theo yêu cầu; dừng (người dùng cần Claude Code cho việc khác)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.7 xong; tiếp C3.8 (2026-10-07)
+**Updated:** 2026-10-07
+**Last session:** claude-code (Opus 5.5), 2026-10-07, bắt đầu phiên dài: C3.7 → C3.14 rồi rà soát toàn bộ C3 (yêu cầu người dùng)
 
 ## NEXT ACTION
 
-(Người dùng yêu cầu dừng sau C3.6 — chỉ làm tiếp khi được yêu cầu.) Khi tiếp tục: viết C3.7 MemoryConsistency&Coherence (roadmap §C3.7;
-checkpoint: code đồng bộ chạy đúng trên x86 nhưng hỏng trên ARM, giải thích, sửa bằng barrier). ⚠️ Cần quyết định nguồn ARM thật trước khi
-viết: qemu-aarch64 (TCG) chạy trên host x86 KHÔNG tái hiện được mô hình yếu của ARM một cách đáng tin → phương án: (a) herd7/litmus7 (mô hình
-chính thức ARMv8 của diy7, cài qua opam) để chứng minh kết quả cấm/cho phép; (b) máy ARM thật (Raspberry Pi 4/5, máy ảo Graviton) nếu
-người dùng có; (c) GPU RTX 4060 (mô hình bộ nhớ yếu của PTX) như một nền yếu thật có sẵn. Hỏi người dùng (b) trước khi bắt đầu.
-Dựng lại môi trường theo "Môi trường C3" (mọi nháp/công cụ của C3.5–C3.6 đã bị xóa; doccheck.py phải viết lại theo mô tả bên dưới).
-Dùng lại số đo C3.6 cho C3.7: chuyển dòng lõi–lõi 15,8 ns (SMT) / 32–61 (P–P) / 57–95 (E–E), lock xadd tranh chấp (§8.2, §9).
+Viết C3.8 SIMD&Vectorization (roadmap §C3.8; checkpoint: vector hóa convolution 1-D, đo speedup so với vô hướng, xác nhận bằng disassembly
+rằng lệnh SIMD thật sự được sinh). Có sẵn: [i7] AVX2 (C3.6 §11: trần FMA 32 FLOP/chu kỳ float), runner ARM N2 (NEON + SVE2 128 bit —
+`Features: ... asimd sve sve2`), QEMU cho RVV. Dùng lại khung C3.7: draft ở `.draft-C3.8/`, repo scratch ARM, doccheck.py + blockcheck.py
+(chép từ `.draft-C3.7/src/`). C3.5 để lại: AVX2 cho hàm checkpoint (§8.3, §8.9) → trả ở C3.8.
+Repo scratch ARM: https://github.com/NgTienDuy/c3-arm-lab (public; `.github/workflows/run.yml` chạy `run.sh` trên ubuntu-24.04-arm +
+ubuntu-24.04; đổi run.sh rồi push; `gh run download <id> -R NgTienDuy/c3-arm-lab`). Bản sao run1–4 + workflow: `.draft-C3.7/src/runner/`.
+Phần cứng người dùng có (2026-10-07): ESP32 DevKit + Arduino Uno (chưa nối vào máy này); sẽ mua STM32, Raspberry Pi sau → C3.11/C3.13 dùng
+mô phỏng + chính laptop, ghi ESP32 là bước phần cứng thật tiếp theo.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -27,7 +28,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.4 ISA&Assembly | ✅ 2026-10-02 (215 KB; CoreMark trên 7 cấu hình tập lệnh cùng CRC, đếm lệnh/byte/truy cập bằng plugin QEMU + valgrind; bộ giải mã RV64IM 51.730/51.730 khớp binutils; ABI quan sát bằng thẻ vị trí trên 6 ABI; checkpoint filt.c: 9 biến thể cờ, mỗi biến đổi có -fopt-info + thí nghiệm tắt, kiểm vi sai 10⁶ khối 0 khác; -O2 nhanh 8,7× -O0) |
 | C3.5 Pipelining&BranchPrediction | ✅ 2026-10-04 (169 KB; rv5.v pipeline 5 tầng RV32IM tự viết: 111/111 vết retire trùng iss.py, 4 đột biến, lỗi `sra` thật chỉ CoreMark lộ; CPI × tầng NAND cho 8 cấu hình; x86 đo bằng thời gian quy đổi (không PMU): phạt đoán sai 21–27, RAS 16, ROB 512 → 256 khi anh em SMT hoạt động (robwin.exe trên Windows), SMT 0,77×–2,03×; checkpoint: có nhánh 14,25 vs mặt nạ 0,99 chu kỳ/pt ở p = 0,5, xác nhận bằng đối chứng + cachegrind + mô hình P đo độc lập + kế toán chính xác rv5 dư 0) |
 | C3.6 MemoryHierarchy | ✅ 2026-10-06 (172 KB; khoảng cách dùng lại (rd.c, thuật toán Mattson) trên 9 tải thật khớp cache 12 đường ±0,28 điểm %; L1 12 đường — phép đo đầu cho 10 vì bộ tiền nạp theo bước chiếm 2 đường (pfprobe: 2 dòng phía trước, bước ≤ 8 KiB, qua trang, lúc bật lúc không); L2 10 đường + huge page khách liền nhau về vật lý; L3 hiệu dụng 10–12 MiB rảnh / 2–3 MiB khi hàng xóm quét 32 MiB; DTLB 16 set × 6 đường; huge page WSL không nới tầm TLB nhưng đi bảng trang 196 → 58 chu kỳ; RFO đo bằng thời gian (ghi thường = 2× lưu lượng); chuyển dòng lõi–lõi 16–95 ns; trần FMA 32 FLOP/chu kỳ, đợt ngắn ~75%; checkpoint: dàn lọc FIR 16 băng × 128 hệ số trên dữ liệu vòng bi CWRU, tile L1 ×3,26–3,46, tile thanh ghi ×5,2–5,5, số trượt L2 giảm 121 lần, v0 chạy đúng ở trần băng thông L3) |
-| C3.7 → C3.14 | ☐ |
+| C3.7 MemoryConsistency&Coherence | ✅ 2026-10-07 (153 KB; ARM thật = runner GitHub Neoverse-N2, x86 = i7 + runner EPYC 7763; litmus.c 29 phép thử khớp herd7 7.58 (SC/TSO/ARMv8/RC11), đối chiếu litmus7; QEMU 8.2.2 sai cả hai chiều (MP 0; stlr/ldar SB 127/triệu — lỗi mã nguồn TCG); mesi.py 4 giao thức + bất biến + 3 đột biến; coh.c: E đắt như M, S rẻ 2,5×; smc.c: DIC=IDC=1 vẫn 999.998/10^6 mã cũ nếu thiếu dsb+isb; checkpoint ring.c: x86 0/10^9 ×2 máy, N2 0,12–47,5 lỗi/triệu, sửa bằng ishst+2×ishld+ctrl (herd7 cần & đủ), C11 ldapr nhanh 8,3× ldar; volatile-only hỏng ngay trên x86 vì gcc) |
+| C3.8 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -72,6 +74,14 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   $S/root; mingw: `x86_64-w64-mingw32-gcc-win32 -B$R/usr/lib/gcc/x86_64-w64-mingw32/13-win32/ -B$R/usr/x86_64-w64-mingw32/bin/
   -L$R/usr/x86_64-w64-mingw32/lib -isystem $R/usr/x86_64-w64-mingw32/include`; valgrind cần VALGRIND_LIB=$R/usr/libexec/valgrind.
   bench.h: hiệu chuẩn = 10^7 lệnh `add %reg,%reg` nối đuôi (KHÔNG `add $1`), kẹp mỗi phép đo giữa 2 lần, trung vị 9 tỉ số.
+
+- C3.7 (2026-10-07): herdtools7 7.58 qua opam KHÔNG cần sudo: `apt download opam libglpk40 libamd3 libcolamd3 libsuitesparseconfig7 libltdl7
+  libgmp-dev` → dpkg -x vào $R; `ln -sf /usr/lib/x86_64-linux-gnu/libgmp.so.10 $R/usr/lib/x86_64-linux-gnu/libgmp.so`; OPAMROOT=$S/opam
+  `opam init --bare --disable-sandboxing -y -n && opam switch create herd ocaml-base-compiler.4.14.2 && C_INCLUDE_PATH=$R/usr/include:$R/usr/include/x86_64-linux-gnu
+  LIBRARY_PATH=$R/usr/lib/x86_64-linux-gnu opam install --assume-depexts herdtools7` (~10 phút). Model: -I $OPAMROOT/herd/share/herdtools7/herd.
+  litmus7 cho LDAPR cần GCCOPTS thêm -march=armv8.4-a. RISC-V cross: gcc-13-riscv64-linux-gnu cpp-13-riscv64-linux-gnu binutils-riscv64-linux-gnu
+  libgcc-13-dev-riscv64-cross libc6-dev-riscv64-cross. Công cụ kiểm: `.draft-C3.7/src/doccheck.py` (cấu trúc + § + Cx.y §z) và `blockcheck.py`
+  (mọi dòng khối ✅ phải có trong out/ — bắt được 1 dòng chép nhầm ở C3.7). Bài học: ghi ra out/ MỌI output sẽ trích (kể cả kết quả pipeline grep).
 
 ### C3.6 — số đo đáng dùng lại cho leaf sau (2026-10-05/06; chi tiết trong chính tài liệu C3.6)
 - Lõi P: L1 5 / L2 15–16 / L3 65–70 / DRAM 400–660 chu kỳ; băng thông 1 luồng L1 ~54, L2 ~38, L3 13–17, DRAM ~5,5 B/chu kỳ (21–24 GB/s);
@@ -178,6 +188,14 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
+
+- 2026-10-07: C3.7 — mọi output chạy thật: [i7] (WSL + Windows mingw), runner [N2] run1–run4 + [EPYC] run1–run3 (log trong .draft-C3.7/out/runN),
+  QEMU, herd7 (63 test), litmus7 (29 test trên N2). blockcheck: 42 khối ✅, 431 dòng, 0 không khớp (một dòng chép nhầm ở §2.3 đã sửa trước khi
+  kiểm). doccheck: 0 lỗi, 19 bảng, 226 tham chiếu §, 52 tham chiếu chéo — kiểm đúng chủ đề bằng tay (bảng trong phiên). Đọc lại: sửa
+  sfence 9.585→9.583/triệu, ~15%→~16%, dải N2 M/E (6/7 lần 21–24, một lần 29–37), RMW 60–76, "mọi giao thức có E" → E/UC, đột biến thứ ba
+  của mesi_mut, thêm ⚠️ K=512 (tập làm việc vượt L1 lõi E). Khẳng định ngoài đã kiểm: Go memory model 2022, Rustonomicon "inherits C++20",
+  Linux x86 __smp_mb = lock addl, QEMU v8.2.2 + master trans_LDAR/STLR + tcg_out_mb, AMD MOESI (qua nguồn thứ cấp — ghi rõ).
+  Trả tham chiếu: C2.13 §6.1/§8.5/§8.8 (ARM thật), C3.3 §5.5 + C3.4 §1.7 (mã cũ trên ARM thật), C3.6 §8.2/§9.4 (E–E cùng cụm: sạch 5,3 ns, bẩn 38,8).
 
 - 2026-10-06: C3.6 — mọi output chạy thật (WSL + thẳng trên Windows qua mingw); script đối chiếu từng dòng của mọi khối ✅ với file output
   (mọi dòng khớp; các output chỉ có trong terminal được chép lại vào out/ trước khi xóa nháp). Đọc lại toàn văn, sửa: số tải 8 → 9 (7 chương
