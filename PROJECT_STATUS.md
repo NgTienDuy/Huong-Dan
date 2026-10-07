@@ -1,17 +1,22 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.7 xong; tiếp C3.8 (2026-10-07)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.8 xong; tiếp C3.9 (2026-10-07)
 **Updated:** 2026-10-07
 **Last session:** claude-code (Opus 5.5), 2026-10-07, bắt đầu phiên dài: C3.7 → C3.14 rồi rà soát toàn bộ C3 (yêu cầu người dùng)
 
 ## NEXT ACTION
 
-Viết C3.8 SIMD&Vectorization (roadmap §C3.8; checkpoint: vector hóa convolution 1-D, đo speedup so với vô hướng, xác nhận bằng disassembly
-rằng lệnh SIMD thật sự được sinh). Có sẵn: [i7] AVX2 (C3.6 §11: trần FMA 32 FLOP/chu kỳ float), runner ARM N2 (NEON + SVE2 128 bit —
-`Features: ... asimd sve sve2`), QEMU cho RVV. Dùng lại khung C3.7: draft ở `.draft-C3.8/`, repo scratch ARM, doccheck.py + blockcheck.py
-(chép từ `.draft-C3.7/src/`). C3.5 để lại: AVX2 cho hàm checkpoint (§8.3, §8.9) → trả ở C3.8.
-Repo scratch ARM: https://github.com/NgTienDuy/c3-arm-lab (public; `.github/workflows/run.yml` chạy `run.sh` trên ubuntu-24.04-arm +
-ubuntu-24.04; đổi run.sh rồi push; `gh run download <id> -R NgTienDuy/c3-arm-lab`). Bản sao run1–4 + workflow: `.draft-C3.7/src/runner/`.
+Viết C3.9 GPUArchitecture (roadmap §C3.9; checkpoint: lấy một kernel GPU, xác định memory-bound hay compute-bound bằng công cụ
+profiling, giải thích bằng roofline). GPU: RTX 4060 Laptop (driver 610.88, CUDA UMD 13.3, libcuda trong /usr/lib/wsl/lib). Chưa có
+nvcc: tải tarball redist chính thức của NVIDIA (developer.download.nvidia.com/compute/cuda/redist/: cuda_nvcc, cuda_cudart, cuda_cccl,
+libcublas, cuda_cupti, nsight_compute nếu được) vào scratchpad — KHÔNG cài hệ thống. ⚠️ Bộ đếm hiệu năng GPU trong WSL cần Windows bật
+"Allow access to GPU performance counters to all users" (mặc định chỉ admin) → nếu ncu báo ERR_NVGPUCTRPERM: đo roofline bằng thời gian
+(cudaEvent) + đếm byte/FLOP tính tay, và hỏi người dùng có muốn bật quyền không (một câu, gộp với câu hỏi khác nếu có).
+Công thức chung giữ nguyên: draft ở `.draft-C3.9/`, doccheck.py + blockcheck.py ở `.draft-C3.7/src/`, mọi output trích phải nằm trong out/.
+Repo scratch ARM: https://github.com/NgTienDuy/c3-arm-lab (public; workflow chạy run.sh trên ubuntu-24.04-arm + ubuntu-24.04).
+⚠️ Runner x86 KHÔNG cố định CPU: run1–3 EPYC 7763, run5 AMD (cờ có avx512_vp2intersect + avx_vnni, không ghi tên), run6 Xeon
+Platinum 8573C → luôn in `lscpu | grep "Model name"` cùng output. 2026-10-07 15:10–15:17 UTC GitHub trả 500 cho mọi thao tác ghi
+(push, API, tạo repo) ~7 phút rồi tự hết — nếu gặp lại: làm việc tại chỗ, thử lại sau.
 Phần cứng người dùng có (2026-10-07): ESP32 DevKit + Arduino Uno (chưa nối vào máy này); sẽ mua STM32, Raspberry Pi sau → C3.11/C3.13 dùng
 mô phỏng + chính laptop, ghi ESP32 là bước phần cứng thật tiếp theo.
 
@@ -29,7 +34,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.5 Pipelining&BranchPrediction | ✅ 2026-10-04 (169 KB; rv5.v pipeline 5 tầng RV32IM tự viết: 111/111 vết retire trùng iss.py, 4 đột biến, lỗi `sra` thật chỉ CoreMark lộ; CPI × tầng NAND cho 8 cấu hình; x86 đo bằng thời gian quy đổi (không PMU): phạt đoán sai 21–27, RAS 16, ROB 512 → 256 khi anh em SMT hoạt động (robwin.exe trên Windows), SMT 0,77×–2,03×; checkpoint: có nhánh 14,25 vs mặt nạ 0,99 chu kỳ/pt ở p = 0,5, xác nhận bằng đối chứng + cachegrind + mô hình P đo độc lập + kế toán chính xác rv5 dư 0) |
 | C3.6 MemoryHierarchy | ✅ 2026-10-06 (172 KB; khoảng cách dùng lại (rd.c, thuật toán Mattson) trên 9 tải thật khớp cache 12 đường ±0,28 điểm %; L1 12 đường — phép đo đầu cho 10 vì bộ tiền nạp theo bước chiếm 2 đường (pfprobe: 2 dòng phía trước, bước ≤ 8 KiB, qua trang, lúc bật lúc không); L2 10 đường + huge page khách liền nhau về vật lý; L3 hiệu dụng 10–12 MiB rảnh / 2–3 MiB khi hàng xóm quét 32 MiB; DTLB 16 set × 6 đường; huge page WSL không nới tầm TLB nhưng đi bảng trang 196 → 58 chu kỳ; RFO đo bằng thời gian (ghi thường = 2× lưu lượng); chuyển dòng lõi–lõi 16–95 ns; trần FMA 32 FLOP/chu kỳ, đợt ngắn ~75%; checkpoint: dàn lọc FIR 16 băng × 128 hệ số trên dữ liệu vòng bi CWRU, tile L1 ×3,26–3,46, tile thanh ghi ×5,2–5,5, số trượt L2 giảm 121 lần, v0 chạy đúng ở trần băng thông L3) |
 | C3.7 MemoryConsistency&Coherence | ✅ 2026-10-07 (153 KB; ARM thật = runner GitHub Neoverse-N2, x86 = i7 + runner EPYC 7763; litmus.c 29 phép thử khớp herd7 7.58 (SC/TSO/ARMv8/RC11), đối chiếu litmus7; QEMU 8.2.2 sai cả hai chiều (MP 0; stlr/ldar SB 127/triệu — lỗi mã nguồn TCG); mesi.py 4 giao thức + bất biến + 3 đột biến; coh.c: E đắt như M, S rẻ 2,5×; smc.c: DIC=IDC=1 vẫn 999.998/10^6 mã cũ nếu thiếu dsb+isb; checkpoint ring.c: x86 0/10^9 ×2 máy, N2 0,12–47,5 lỗi/triệu, sửa bằng ishst+2×ishld+ctrl (herd7 cần & đủ), C11 ldapr nhanh 8,3× ldar; volatile-only hỏng ngay trên x86 vì gcc) |
-| C3.8 → C3.14 | ☐ |
+| C3.8 SIMD&Vectorization | ✅ 2026-10-07 (94 KB; [i7] AVX2/FMA/AVX-VNNI + runner N2 NEON/SVE(VL 128) + runner x86 Xeon 8573C; RVV qua QEMU 3 VLEN; 12 vòng tự vector hóa + lý do gcc (vect-details); bẫy: \"vectorized\" = fold-left vaddss, _mm256_load_ps không chắc lỗi, SSE cũ addps lỗi căn lề, AVX2 pack trong nửa 128 bit (10006 sai), vpmaddubsw bão hòa (22/32 khối sai; reduce_range 7 bit — tài liệu ORT), OoO chồng lần gọi làm phép đo độ trễ 1,6 < 2,0; trả nợ C3.4 sat16 packssdw 2,8× compiler, C3.5 sum_ge AVX2 vpmovsxdq 1,4× vs intrinsics 32-bit theo khối 4,2×; checkpoint FIR 128 nhịp CWRU: intrinsics 17,1× [i7] (71% trần), 8,7× N2, SVE chậm hơn NEON trừ -mcpu=neoverse-n2) |
+| C3.9 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -188,6 +194,12 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
+
+- 2026-10-07: C3.8 — mọi output chạy thật ([i7] run_i7.sh với hostload; runner run5/run6, log trong .draft-C3.8/out/run5|run6). blockcheck 37 khối
+  ✅ / 209 dòng 0 lệch; doccheck 0 lỗi, 16 bảng, 125 tham chiếu §, 38 chéo (24 khác nhau, kiểm đúng chủ đề). Lỗi tìm được khi làm: tích lũy
+  reduce trên stack (thiếu unroll) → K=4 chậm hơn K=2; OoO chồng lần gọi (giữ lại thành §6.2); align bản đầu: imul trong địa chỉ + 64 trang cùng
+  set L1 → viết lại; dot8 khối kiểm 64 khi vòng bước 128; fplat ARM: mov #100000 không mã hóa được. Khẳng định ngoài đã kiểm: tài liệu ORT
+  (VPMADDUBSW, reduce_range), C3.4 BLOCK=16.
 
 - 2026-10-07: C3.7 — mọi output chạy thật: [i7] (WSL + Windows mingw), runner [N2] run1–run4 + [EPYC] run1–run3 (log trong .draft-C3.7/out/runN),
   QEMU, herd7 (63 test), litmus7 (29 test trên N2). blockcheck: 42 khối ✅, 431 dòng, 0 không khớp (một dòng chép nhầm ở §2.3 đã sửa trước khi
