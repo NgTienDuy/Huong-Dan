@@ -1,23 +1,20 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.11 xong; C3.12 đang làm thí nghiệm (2026-10-08)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.12 xong; C3.13 bắt đầu (2026-10-08)
 **Updated:** 2026-10-08
-**Last session:** claude-code (Opus 5.5), 2026-10-08 (phiên 2): bắt đầu C3.12 — dựng môi trường, tải ImageNetV2 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
+**Last session:** claude-code (Opus 5.5), 2026-10-08 (phiên 3): xong C3.12 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
 
 ## NEXT ACTION
 
-C3.12 đang làm thí nghiệm (2026-10-08, phiên 2). Xong: §1 số nguyên (out/int), §2 IEEE 754 (out/fp: denorm + bản đồ 2499 ô + mô hình 0 lệch,
-lõi E ~270–310 ck và CỘNG cũng chậm, GPU không phạt, IIR kẹt 0x1F4, -Ofast/-mdaz-ftz, NaN, FMA co, libm 4 bản + mpmath), §3/§4 (out/lp_*:
-fp16/bf16 hỏng trên dữ liệu thật, FP8 256 mã, GEMM cuBLASLt 6 kiểu × 2 phân bố), §5 engine số nguyên khớp TFLite ref 0 lệch (out/q_engine.txt:
-conv kép gemmlowp, FC ref lượng tử lại bằng double, XNNPACK = làm tròn đơn), §7 AVR simavr (out/fx_*), §8 Patriot/velo, §9 OpenMP/GPU, §10 CIC/satwrap.
-Checkpoint: MobileNetV3Large int8 PTQ trên ImageNetV2 (1.000 ảnh hiệu chuẩn / 9.000 ảnh kiểm): 63,13% → 12,80% (out/ck1_*); kernel ref cũng ~11% (ck2) →
-do lượng tử hóa, không do kernel. Đang chạy: `src/ck/ck3_ablate.py MobileNetV3Large float 1000` (giữ từng nút float; tới nút 76/124 chưa nút nào cứu được)
-→ tiếp `... only 1000` (chỉ lượng tử hóa 1 nút), rồi phân tích lớp; §6 `src/q/granularity.py` (MobileNetV2 per-tensor 3% vs per-channel 78%; int4 thử ResNet50
-và chế độ `pw`); runner run7 (NgTienDuy/c3-arm-lab) đang chạy. Sau đó: viết C3.12 vào `.draft-C3.12/doc/`, blockcheck/doccheck, ghi file, commit.
-Môi trường: `.draft-C3.12/src/setup_env.sh S` (gồm C3.10 + chéo aarch64/armhf/riscv64 + avr/simavr + mingw + ImageNetV2 + Keras weights;
-`. S/tools/env12.sh`, CUDA `. S/tools/cuda.sh`; ImageNetV2 tiền xử lý bằng `src/ck/prep_inv2.py S/inv2/... S/inv2p`). Công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`.
-⚠️ Bài học phiên này: tiến trình nền phải chạy bằng run_in_background (nohup & bị giết khi lệnh kết thúc); hàm đo không được ghi đè đầu vào
-(denorm5: "dải chéo" giả); Pool spawn cần `if __name__ == "__main__"` và lỗi ở initializer làm Pool treo.
+C3.13 Power&Thermal (bắt đầu 2026-10-08, phiên 3): khảo sát công cụ đo (RAPL qua `powershell.exe Get-Counter '\Energy Meter(*)'`,
+xung `\Processor Information(_Total)\Actual Frequency`, nhiệt `\Thermal Zone Information(*)`, nvidia-smi/NVML), dựng `.draft-C3.13/`
+(src/setup_env.sh + out/), chạy thí nghiệm theo roadmap §C3.13, rồi viết. Checkpoint roadmap muốn SBC 30 phút — máy này không có SBC:
+dùng laptop (CPU + RTX 4060) làm "thiết bị", ghi rõ; ESP32 là bước phần cứng thật kế tiếp. Chỉ đo năng lượng khi hostload ≤ ~8%.
+Sau C3.13: C3.14, rồi rà soát toàn bộ C3 (yêu cầu người dùng 2026-10-08).
+Môi trường C3.12 (dùng lại): `.draft-C3.12/src/setup_env.sh S` (S = scratchpad/S; ImageNetV2 đã giải nén ở `.draft-C3.12/data/` → symlink
+`S/inv2/imagenetv2-matched-frequency-format-val`). Công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`.
+⚠️ Bài học: tiến trình nền phải chạy bằng run_in_background; WSL có thể khởi động lại giữa phiên (mất /tmp → scratchpad) — mọi output ghi
+thẳng vào out/; một lần chạy lỗi có thể GHI ĐÈ output thật (fx_avr.txt bị thay bằng thông báo lỗi) → blockcheck trước khi ghi file.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
@@ -37,7 +34,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.9 GPUArchitecture | ✅ 2026-10-07 (101 KB; RTX 4060 Laptop qua WSL, CUDA 13.3 redist; ncu bị chặn quyền → trần đo riêng + đếm lệnh SASS + biến thể có kiểm soát; xung 2100→2650 phải đo (bẫy §2.3), bẫy CSE 94 TFLOP/s; phân kỳ ×P trong warp; độ trễ shared 24/L1 40/L2 262/DRAM ~620 ck; DRAM 231, L2 1260, shared 7,78 TB/s; LSU ~1 lệnh nạp/2 ck; gộp kernel ×3,05 = 6:2; GEMM 0,86→31,2 TFLOP/s, sai số FP16/TF32 = làm tròn đầu vào (mô phỏng khớp); PCIe 12,4–13,0 GB/s; checkpoint FIR 0,30→10,7 TFLOP/s cùng bit: nhóm LSU, nhóm ULDC (cpath: không mở rộng theo occupancy), bản nhanh nhất bị chặn phía tính toán dù AI 60 < 66 (bound.cu)) |
 | C3.10 NPU&Accelerators | ✅ 2026-10-08 (154 KB; pJ/phép & pJ/lệnh đo bằng RAPL (đơn vị pWh hiệu chuẩn) + NVML: CPU 1,4–2,2 nJ/lệnh dù 2 hay 64 phép, GPU INT8 tensor 0,54 pJ/phép (÷43 so với VNNI); mảng tâm thu Verilog 3 cỡ + 2 lỗi thật (x lan, ?: không dấu) + diện tích PE yosys; CNN CWRU 1-D 100% test → Vela U55/U65/U85 + Edge TPU 14.1: bước 4 tách 250 phép 0,4% đỉnh, viết lại tương đương từng bit ×11–17; Edge TPU không tất định (EXPAND_DIMS 2/10 vs 10/10, Fisher p 3,6e-4), GELU mã 150 → "builtin_code 127", cắt-một-lần; quant 9 kiểu: hiệu chuẩn chỉ lớp bình thường → 75% mà 4 trình biên dịch vẫn nhận; arena tham lam = cận dưới = Vela 1.470 KiB; checkpoint: CPU 8,56 µs/194 µJ vs GPU 96 µs/2.982 µJ batch 1 (chép 19,7 + khởi chạy 39,7 + tính 32,8 µs @1,26 GHz, 79% năng lượng ở CPU điều khiển), batch lớn GPU ×3,8–4,4 thông lượng, ×3,1–3,9 năng lượng (kernel 9% trần)) |
 | C3.11 IO-DMA&Interrupts | ✅ 2026-10-08 (156 KB; Renode 1.17.0 STM32G0 + 3 lỗi mô hình tìm bằng đầu vào có đáp án và sửa (DMA HT gán lại mỗi lần chuyển: 5.911 vs 23 ngắt/s; ADC chia nguyên µV→mV: 19,4% mã mất; quantum 100 µs mất mẫu lúc khởi động); polling/ngắt/DMA/DMA+PendSV: 38 vs 19,4 lệnh/mẫu, CPU còn lại ở 384 kHz 66,7/61,6/68,9/70,9%; MMIO: thiếu volatile → `b .`, W1C `\|=` thấy 0/101 OVR; NVIC: Renode 4 bit vs G0 2 bit, ACc-BbDda, tranh chấp 2.276/6.831; picorv32 RTL độ trễ ngắt 12–15 → 51 → 147–213 ck; Linux WSL trung vị 95 µs/max 6,5 ms có tải, Windows Sleep(1) 7,8 ms (power throttling); soc.v AHB-Lite+APB+DMA scatter-gather (APB chờ chặn cả bus, ưu tiên sai tràn ×2,8); GPU: copy engine pinned CPU còn 94–101% vs pageable 0,3–1,8%, L1 không thấy cờ 0/20 triệu (sau khi bắt ptxas kéo lệnh nạp ra khỏi vòng), x86 mạch lạc 0/131 triệu nhưng đọc lại ×8,5; mô hình M7 6 kịch bản (gồm dòng bẩn .bss); UART +3,90/−5,26%, SPI 0↔3, I²C ngspice = 0,8473RC, ESP32 45 kΩ; PCIe đọc 834 ns; USB polled bus; checkpoint CWRU 64/64 khối trùng bit, tải 100 → 0,63% (÷159), bản M7 2 lần invalidate; bẫy kẹp tín hiệu K=2000 làm hệ số đỉnh hỏng < lành) |
-| C3.12 → C3.14 | ☐ |
+| C3.12 NumberRepresentation | ✅ 2026-10-08 (211 KB; bù hai/UB trên 4 ISA + N2/EPYC thật; số dưới chuẩn lõi P ~120 ck, lõi E ~300 (cả cộng), Zen 3/N2/GPU không phạt, mô hình 2.499 ô 0 lệch; IIR kẹt 0x1F4; libm 4 bản + mpmath; fp16/bf16/FP8 trên dữ liệu thật + GEMM cuBLASLt 6 kiểu; engine int8 tự viết 0 khác TFLite ref /3,68 triệu; theo tensor vs kênh: MobileNetV2 5% vs 65% (depthwise đầu −53 điểm); AVR simavr: Q15 4,2× float; Σ 3 triệu số hạng; Patriot khớp GAO; OpenMP tĩnh 2 kết quả/20 lần; CIC/IIR/vùng chết; MobileNetV2 tối −2 EV mất ×5; checkpoint MobileNetV3-Large 63,13 → 12,80%: 248 model nhân quả → 3 nút đầu, can thiệp một tensor: conv_bn theo tensor −27,8 điểm, theo kênh/int16 cứu; 16x8 "dự phòng float" → 0,10% do `numeric_limits<float>::min()` trong calibration_logger.h (thang 3,587e-43 dưới chuẩn)) |
+| C3.13 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -225,6 +223,15 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Last verification
 
+- 2026-10-08: C3.12 — mọi output chạy thật ([i7] WSL + Windows mingw, RTX 4060, runner N2/EPYC run7, QEMU, simavr, TF 2.21). blockcheck 69 khối ✅ /
+  618 dòng 0 lệch (bắt: 2 dòng nhãn tự thêm trong khối ✅; fx_avr.txt bị lần chạy lỗi ghi đè → link AVR hỏng vì .bss > 2 KB RAM, sửa bằng cửa sổ
+  vòng 16 float, chạy lại: số chu kỳ đổi vài chục, FIR "công bằng" 4,2× thay vì 4,7×); doccheck 0 lỗi, 11 bảng, 296 tham chiếu §, 51 chéo (sửa
+  C3.11 §10.9 → §10.7, C3.10 §4 → §4.1/§5.4, chuỗi "§9" bị gán nhầm cho C3.5). Lỗi/giả thuyết sai khi làm: ck7 lần 1 lỗi script (thư mục) và
+  "16x8 bị từ chối kể cả có dự phòng" — chạy lại: dự phòng chuyển được nhưng ra 0,10% → truy tới thang FLT_MIN/32767 và dòng mã calibration_logger.h;
+  ck10 vs ck1: XNNPACK −0,42 (p 0,072) vs builtin −0,72 (p 0,0015) — giữ cả hai làm bài học; "kênh 8" → kênh 7 (đọc sai cột). Nguồn đã kiểm:
+  Skeel SIAM News 7/1992 (23 chữ số, khớp GAO 6 điểm), bản sao GAO IMTEC-92-26, OpenMP 5.1 §2.21.5.2, cuBLAS §2.1.4, CMSIS-DSP arm_fir_q15(_fast),
+  DFQ (Nagel 2019, bảng 1), hướng dẫn QuantizationDebugger + mục 16x8 của LiteRT, mã nguồn TF v2.21.0 (calibration_logger.h, quantization_utils),
+  docstring Keras MobileNetV3 (75,6%, 217 M MAC).
 - 2026-10-08: C3.11 — mọi output chạy thật: phần cứng thật ([i7] WSL2 + Windows gốc qua mingw, RTX 4060), RTL (iverilog: picorv32 ef203c2,
   soc.v), Renode 1.17.0 (STM32G0, firmware thật), mô hình (m7cache, uart/spi sim, ngspice) — tầng bằng chứng ghi ở từng khối. blockcheck 32 khối
   ✅ / 301 dòng 0 lệch (bắt 5 dòng lệch sau khi firmware đổi: căn 32 B làm số lệnh renode_bugs đổi vài chục; bảng USB bị cắt); doccheck 0 lỗi,
