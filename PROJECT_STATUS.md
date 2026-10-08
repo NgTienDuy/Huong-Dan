@@ -24,10 +24,19 @@ Phát hiện đã đo (giữ cho tài liệu):
   KHÔNG BAO GIỜ thấy cờ do copy engine hoặc CPU ghi (20 triệu lần, 509 ms), .cg/.cv/volatile/acquire.sys thấy sau ~1 ms
   (acquire.sys = CCTL.IVALL). Đuổi con trỏ: L2 GPU 267 ck, DRAM GPU 626 ck (sửa lỗi điểm xuất phát ×16), RAM host qua PCIe 804 ns;
   zero-copy đọc 9,7 / ghi 7,2 GB/s; x86: DMA D2H 0/131 triệu từ cũ, đọc lại sau DMA 29,8 ns vs nóng 3,35, clflush 34,5, "L3" 27,5.
-Còn làm: §1 MMIO/volatile/inb SIGSEGV/W1C |= bug; §3 NVIC (bit ưu tiên: Renode 0xF0 vs G0 2 bit), lồng ngắt, race main/ISR; §4 picorv32
-RTL độ trễ ngắt chính xác chu kỳ + jitter Linux/Windows; §5 Verilog DMA chuỗi mô tả + APB; GPU bw/lat (CPU time pageable vs pinned,
-blocking sync); §6 mô hình cache M7; §7 UART baud, SPI mode, I²C ngspice; §8 PCIe tính toán; §9 USB; §10 checkpoint CWRU + đặc trưng
-so máy chủ. Rồi viết tài liệu (doc/ p1..), blockcheck/doccheck, commit.
+Đã xong thêm (2026-10-08, out/ của .draft-C3.11): mmio.txt (thiếu volatile → `b .`, Renode ngừng đếm lệnh; W1C `|=` thấy 0/101 OVR;
+inb → SIGSEGV si_code 128, ioperm/iopl ENOSYS trong WSL), nvic.txt (0xF0 vs G0 2 bit; ACc-BbDda; CcBbDdACc-BbDda; tranh chấp mất 2.276/6.831,
+cpsid 0; khối dịch 1/2/4 như nhau), irqlat.txt (picorv32 RTL: ALU 12–15 ck, mul/div/dịch tới 51, vùng găng 147, chờ bộ nhớ 213),
+tlat.txt (WSL trung vị ~99 µs, p99,9 0,6 ms; 10 luồng tải p99,9 9,6 ms; Windows Sleep(1) 7,8 ms dù timeBeginPeriod — power throttling;
+tắt throttling: 0,97 ms / waitable 362 µs p99 0,96 ms) — CHẠY LẠI exp_tlat.sh khi máy rảnh (bản cũ lỗi quote PowerShell + msedge 622%),
+soc.txt (Verilog AHB-Lite + APB + DMA scatter-gather: trace; tràn 506/1421 ở chu kỳ 10, WS 3; chờ APB chặn cả bus), m7cache.txt
+(mô hình M7: 512/512, 256/256, lệch dòng 7 vs 8 / 14 hỏng, nạp lạc chỉ invalidate SAU mới đúng, bộ đệm đôi 158/160 → 0), phy.txt (UART
++3,90/−5,26%, nghỉ 1 bit +5,11%; SPI 0↔3/1↔2 luôn đúng, cặp khác tùy t_skew vs t_co; I²C ngspice = 0,8473RC), phy_sources.txt (UM10204
+Rev 7.0 tr 1000/300/120 ns, Cb 400/400/550 pF; ESP32 datasheet v5.3 RPU 45 kΩ), usb_sources.txt (USB 2.0: polled bus §4.4, bảng 5-9/5-10),
+usb_devices.txt, m7_trm_excerpt.txt (DDI 0489D: 4 đường, dòng 32 B), gpu_*.txt (offload: pinned CPU còn 98–104%, pageable 0,3–1,6%),
+renode_bugs.txt, checkpoint_v1_K2000_kep.txt (bản ghi 130 bị kẹp 12% với 2000 mã/g → K = 500), checkpoint.txt (đang chạy lại K = 500).
+Còn làm: chạy lại exp_tlat.sh; viết tài liệu (doc/ p1..), blockcheck/doccheck, rà soát số, commit. Nguồn ST (RM0444, AN4839) KHÔNG tải
+được (st.com chặn tải tự động) → dùng CMSIS/HAL của ST trên GitHub + diễn đàn ST ghi rõ là thứ cấp.
 Draft ở `.draft-C3.11/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`. Ghi ESP32 là bước phần cứng thật tiếp theo.
 Môi trường C3.10 dựng lại bằng `.draft-C3.10/src/setup_env.sh S` (scratchpad mất sau mỗi phiên).
 Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
