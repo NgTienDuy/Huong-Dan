@@ -1,43 +1,19 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.10 xong; tiếp C3.11 (2026-10-08)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.11 xong; tiếp C3.12 (2026-10-08)
 **Updated:** 2026-10-08
-**Last session:** claude-code (Opus 5.5), 2026-10-08: viết xong C3.10 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
+**Last session:** claude-code (Opus 5.5), 2026-10-08: viết xong C3.11 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
 
 ## NEXT ACTION
 
-Viết C3.11 IO-DMA&Interrupts (roadmap §C3.11). ĐANG LÀM THÍ NGHIỆM (phiên 2026-10-08 sáng, claude-code Opus 5.5). Môi trường:
-`.draft-C3.11/src/setup_env.sh S` (Renode 1.17.0, arm-none-eabi-gcc 13.2.1, iverilog, ngspice 42 + lib X, venv construct/numpy, CWRU 97/130);
-CUDA: dùng `.draft-C3.9/src/cuda_setup.sh` (hoặc scratchpad cũ). Firmware: `src/fw/` (g0.h, startup.c, adcstream.c MODE 0 POLL / 1 IRQ /
-2 DMA vòng HT+TC / 3 DMA+PendSV, PROC, CHECK răng cưa, WORK việc nền, NOADC); chạy: `src/fw/run_fw.sh ELF giây nguồn.u16 fix` (FS=, Q=, EXTRA=,
-POST=). Đã có (out/): load_sweep.txt, work_sweep*.txt (đang chạy lại có MODE 3); GPU `src/gpu/gpu_io.cu` (bw/lat/zc/stale/dmacoh).
-Phát hiện đã đo (giữ cho tài liệu):
-- Renode DMA.STM32G0DMA SAI: HT gán lại mỗi lần chuyển → 5.911 ngắt HT/s thay vì 23; cờ tự xóa; CTCIF xóa cả HT → bản sửa
-  `fw/renode/STM32G0DMA_C311.cs` (REPL=fix): 23 HT + 23 TC/s, tải 0,95% (12 kHz, khối 256).
-- Renode ADC: `Sample.Voltage / 1000` chia NGUYÊN (µV→mV) → Vref 3,3 V chỉ 3.300/4.096 mã (19,4% bị bỏ; 233/1199 lặp/nhảy). Né: Vref 4,095 V,
-  mã c = c mV. (Giả thuyết sai trước đó: RESD lệch thời gian — viết SeqVoltageSource vẫn lỗi → mới tìm ra phép chia.)
-- Quantum mặc định Renode 100 µs (TimeSourceBase.DefaultQuantum) → 384 kHz mất 10 mẫu lúc khởi động; Q ≤ 10 µs hết; run_fw.sh mặc định 1 µs.
-- gcc giữ st.work trong thanh ghi trong vòng lặp vô hạn → RAM luôn 0 (bài học volatile). Vòng DMA kiểm cờ bằng cpsid/cpsie mỗi đơn vị
-  việc tốn ~8% CPU (work_sweep_v1) → sửa: chỉ đọc cờ; MODE 3 PendSV.
-- Tải (lệnh/mẫu, 64 MIPS): IRQ 38 (PROC 0) / 66 (PROC 1); DMA 19,4 / 48,5 → vận chuyển bằng ngắt ≈ 18–19 lệnh/mẫu; POLL 100%.
-- GPU: ptxas KÉO ld.global.ca/.cv (nạp yếu) ra khỏi vòng hỏi cờ → phải dùng địa chỉ flag+(i&msk), msk tham số = 0; khi đó ld.ca (L1)
-  KHÔNG BAO GIỜ thấy cờ do copy engine hoặc CPU ghi (20 triệu lần, 509 ms), .cg/.cv/volatile/acquire.sys thấy sau ~1 ms
-  (acquire.sys = CCTL.IVALL). Đuổi con trỏ: L2 GPU 267 ck, DRAM GPU 626 ck (sửa lỗi điểm xuất phát ×16), RAM host qua PCIe 804 ns;
-  zero-copy đọc 9,7 / ghi 7,2 GB/s; x86: DMA D2H 0/131 triệu từ cũ, đọc lại sau DMA 29,8 ns vs nóng 3,35, clflush 34,5, "L3" 27,5.
-Đã xong thêm (2026-10-08, out/ của .draft-C3.11): mmio.txt (thiếu volatile → `b .`, Renode ngừng đếm lệnh; W1C `|=` thấy 0/101 OVR;
-inb → SIGSEGV si_code 128, ioperm/iopl ENOSYS trong WSL), nvic.txt (0xF0 vs G0 2 bit; ACc-BbDda; CcBbDdACc-BbDda; tranh chấp mất 2.276/6.831,
-cpsid 0; khối dịch 1/2/4 như nhau), irqlat.txt (picorv32 RTL: ALU 12–15 ck, mul/div/dịch tới 51, vùng găng 147, chờ bộ nhớ 213),
-tlat.txt (WSL trung vị ~99 µs, p99,9 0,6 ms; 10 luồng tải p99,9 9,6 ms; Windows Sleep(1) 7,8 ms dù timeBeginPeriod — power throttling;
-tắt throttling: 0,97 ms / waitable 362 µs p99 0,96 ms) — CHẠY LẠI exp_tlat.sh khi máy rảnh (bản cũ lỗi quote PowerShell + msedge 622%),
-soc.txt (Verilog AHB-Lite + APB + DMA scatter-gather: trace; tràn 506/1421 ở chu kỳ 10, WS 3; chờ APB chặn cả bus), m7cache.txt
-(mô hình M7: 512/512, 256/256, lệch dòng 7 vs 8 / 14 hỏng, nạp lạc chỉ invalidate SAU mới đúng, bộ đệm đôi 158/160 → 0), phy.txt (UART
-+3,90/−5,26%, nghỉ 1 bit +5,11%; SPI 0↔3/1↔2 luôn đúng, cặp khác tùy t_skew vs t_co; I²C ngspice = 0,8473RC), phy_sources.txt (UM10204
-Rev 7.0 tr 1000/300/120 ns, Cb 400/400/550 pF; ESP32 datasheet v5.3 RPU 45 kΩ), usb_sources.txt (USB 2.0: polled bus §4.4, bảng 5-9/5-10),
-usb_devices.txt, m7_trm_excerpt.txt (DDI 0489D: 4 đường, dòng 32 B), gpu_*.txt (offload: pinned CPU còn 98–104%, pageable 0,3–1,6%),
-renode_bugs.txt, checkpoint_v1_K2000_kep.txt (bản ghi 130 bị kẹp 12% với 2000 mã/g → K = 500), checkpoint.txt (đang chạy lại K = 500).
-Còn làm: chạy lại exp_tlat.sh; viết tài liệu (doc/ p1..), blockcheck/doccheck, rà soát số, commit. Nguồn ST (RM0444, AN4839) KHÔNG tải
-được (st.com chặn tải tự động) → dùng CMSIS/HAL của ST trên GitHub + diễn đàn ST ghi rõ là thứ cấp.
-Draft ở `.draft-C3.11/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`. Ghi ESP32 là bước phần cứng thật tiếp theo.
+Viết C3.12 NumberRepresentation (roadmap §C3.12; checkpoint: lượng tử hóa một model sang int8, đo mất mát độ chính xác, ĐỊNH VỊ lớp gây
+mất mát nhiều nhất bằng phân tích theo lớp — không đoán; cạm bẫy: phân khúc dữ liệu không test). Nợ phải trả ở C3.12: C3.10 (định vị lớp
+gây mất chính xác, khi nào cần per-channel — §5.1, §5.2; "phân khúc dữ liệu không test" §5.3), C3.9 (FP16/BF16/FP8, chỗ chúng hỏng — §6.2,
+§8.3), C3.5 (đổi thứ tự cộng số thực — §6.6, C.1). Gợi ý: dùng lại CNN CWRU của C3.10 (`.draft-C3.10/src/train.py`, quant.py; dựng lại
+bằng `.draft-C3.10/src/setup_env.sh S`) + fixed-point cho MCU không FPU (nối với `adcstream.c` của C3.11: đặc trưng RMS/kurtosis bằng số
+nguyên trên M0+). Draft ở `.draft-C3.12/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`.
+Môi trường C3.11 dựng lại bằng `.draft-C3.11/src/setup_env.sh S` (+ CUDA của C3.9, mingw-w64 cho Windows: xem A.4 của C3.11).
+Ghi ESP32 là bước phần cứng thật tiếp theo (C3.11 §10.7: ADC liên tục + DMA, độ trễ ngắt bằng GPIO + máy phân tích logic, cầu USB–UART).
 Môi trường C3.10 dựng lại bằng `.draft-C3.10/src/setup_env.sh S` (scratchpad mất sau mỗi phiên).
 Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
 ⚠️ GPU tự tăng xung 2100 → ~2650 MHz: mọi phép đo warmup() + in MHz. ncu bị chặn (ERR_NVGPUCTRPERM) — người dùng chọn làm tiếp không
@@ -64,7 +40,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.8 SIMD&Vectorization | ✅ 2026-10-07 (94 KB; [i7] AVX2/FMA/AVX-VNNI + runner N2 NEON/SVE(VL 128) + runner x86 Xeon 8573C; RVV qua QEMU 3 VLEN; 12 vòng tự vector hóa + lý do gcc (vect-details); bẫy: "vectorized" = fold-left vaddss, _mm256_load_ps không chắc lỗi, SSE cũ addps lỗi căn lề, AVX2 pack trong nửa 128 bit (10006 sai), vpmaddubsw bão hòa (22/32 khối sai; reduce_range 7 bit — tài liệu ORT), OoO chồng lần gọi làm phép đo độ trễ 1,6 < 2,0; trả nợ C3.4 sat16 packssdw 2,8× compiler, C3.5 sum_ge AVX2 vpmovsxdq 1,4× vs intrinsics 32-bit theo khối 4,2×; checkpoint FIR 128 nhịp CWRU: intrinsics 17,1× [i7] (71% trần), 8,7× N2, SVE chậm hơn NEON trừ -mcpu=neoverse-n2) |
 | C3.9 GPUArchitecture | ✅ 2026-10-07 (101 KB; RTX 4060 Laptop qua WSL, CUDA 13.3 redist; ncu bị chặn quyền → trần đo riêng + đếm lệnh SASS + biến thể có kiểm soát; xung 2100→2650 phải đo (bẫy §2.3), bẫy CSE 94 TFLOP/s; phân kỳ ×P trong warp; độ trễ shared 24/L1 40/L2 262/DRAM ~620 ck; DRAM 231, L2 1260, shared 7,78 TB/s; LSU ~1 lệnh nạp/2 ck; gộp kernel ×3,05 = 6:2; GEMM 0,86→31,2 TFLOP/s, sai số FP16/TF32 = làm tròn đầu vào (mô phỏng khớp); PCIe 12,4–13,0 GB/s; checkpoint FIR 0,30→10,7 TFLOP/s cùng bit: nhóm LSU, nhóm ULDC (cpath: không mở rộng theo occupancy), bản nhanh nhất bị chặn phía tính toán dù AI 60 < 66 (bound.cu)) |
 | C3.10 NPU&Accelerators | ✅ 2026-10-08 (154 KB; pJ/phép & pJ/lệnh đo bằng RAPL (đơn vị pWh hiệu chuẩn) + NVML: CPU 1,4–2,2 nJ/lệnh dù 2 hay 64 phép, GPU INT8 tensor 0,54 pJ/phép (÷43 so với VNNI); mảng tâm thu Verilog 3 cỡ + 2 lỗi thật (x lan, ?: không dấu) + diện tích PE yosys; CNN CWRU 1-D 100% test → Vela U55/U65/U85 + Edge TPU 14.1: bước 4 tách 250 phép 0,4% đỉnh, viết lại tương đương từng bit ×11–17; Edge TPU không tất định (EXPAND_DIMS 2/10 vs 10/10, Fisher p 3,6e-4), GELU mã 150 → "builtin_code 127", cắt-một-lần; quant 9 kiểu: hiệu chuẩn chỉ lớp bình thường → 75% mà 4 trình biên dịch vẫn nhận; arena tham lam = cận dưới = Vela 1.470 KiB; checkpoint: CPU 8,56 µs/194 µJ vs GPU 96 µs/2.982 µJ batch 1 (chép 19,7 + khởi chạy 39,7 + tính 32,8 µs @1,26 GHz, 79% năng lượng ở CPU điều khiển), batch lớn GPU ×3,8–4,4 thông lượng, ×3,1–3,9 năng lượng (kernel 9% trần)) |
-| C3.11 → C3.14 | ☐ |
+| C3.11 IO-DMA&Interrupts | ✅ 2026-10-08 (156 KB; Renode 1.17.0 STM32G0 + 3 lỗi mô hình tìm bằng đầu vào có đáp án và sửa (DMA HT gán lại mỗi lần chuyển: 5.911 vs 23 ngắt/s; ADC chia nguyên µV→mV: 19,4% mã mất; quantum 100 µs mất mẫu lúc khởi động); polling/ngắt/DMA/DMA+PendSV: 38 vs 19,4 lệnh/mẫu, CPU còn lại ở 384 kHz 66,7/61,6/68,9/70,9%; MMIO: thiếu volatile → `b .`, W1C `\|=` thấy 0/101 OVR; NVIC: Renode 4 bit vs G0 2 bit, ACc-BbDda, tranh chấp 2.276/6.831; picorv32 RTL độ trễ ngắt 12–15 → 51 → 147–213 ck; Linux WSL trung vị 95 µs/max 6,5 ms có tải, Windows Sleep(1) 7,8 ms (power throttling); soc.v AHB-Lite+APB+DMA scatter-gather (APB chờ chặn cả bus, ưu tiên sai tràn ×2,8); GPU: copy engine pinned CPU còn 94–101% vs pageable 0,3–1,8%, L1 không thấy cờ 0/20 triệu (sau khi bắt ptxas kéo lệnh nạp ra khỏi vòng), x86 mạch lạc 0/131 triệu nhưng đọc lại ×8,5; mô hình M7 6 kịch bản (gồm dòng bẩn .bss); UART +3,90/−5,26%, SPI 0↔3, I²C ngspice = 0,8473RC, ESP32 45 kΩ; PCIe đọc 834 ns; USB polled bus; checkpoint CWRU 64/64 khối trùng bit, tải 100 → 0,63% (÷159), bản M7 2 lần invalidate; bẫy kẹp tín hiệu K=2000 làm hệ số đỉnh hỏng < lành) |
+| C3.12 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -179,9 +156,13 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 - C3.9 để lại: C3.12 — FP16/BF16/FP8, chỗ chúng hỏng (§6.2, §8.3); C3.10 — mảng tâm thu / NPU (D.3). → C3.10 ĐÃ TRẢ (§2, §3).
 - C3.10 để lại (kiểm ở rà soát cuối C3): C3.12 — định vị lớp gây mất chính xác, khi nào cần per-channel (§5.1, §5.2), cạm bẫy
   "phân khúc dữ liệu không test" (§5.3); C3.13 — giới hạn công suất/nhiệt của chip (§1.2), shunt + INA219 cho NPU thật (§10.7, §10.9);
-  C3.11 — DMA đưa dữ liệu cảm biến tới NPU (D.3 bước 6). C3.9 đã trả: C3.1 §6.3 và
+  C3.11 — DMA đưa dữ liệu cảm biến tới NPU (D.3 bước 6) → ĐÃ TRẢ ở C3.11 §5.5. C3.9 đã trả: C3.1 §6.3 và
   C3.8 §3.2 (quét tiền tố Kogge-Stone trên GPU, §2.5), C3.8 §1.1 (SIMT, §2).
 
+
+- C3.11 (2026-10-08): ĐÃ TRẢ C3.3 §6.5/§2.5 (giao dịch AHB/APB = C3.11 §5.1, §7.4; I²C cực máng hở §7.3), C3.6 §4.1 "C3.11 trở lại với
+  DMA" (§1.6, §6), C3.10 D.3 (§5.5). ⚠️ C3.4 §3.4 hứa "C3.11 đo độ trễ ngắt bằng chân GPIO và máy hiện sóng" — C3.11 đo bằng RTL picorv32
+  (§4.2) và để GPIO + máy phân tích logic ở §10.7 (chờ ESP32) → rà soát cuối: sửa câu đó ở C3.4. C3.11 dùng số "15 chu kỳ M0+" của C3.4 §3.4.
 
 ## Nhánh C2 (C2.1 → C2.13) — HOÀN TẤT 2026-09-26
 
@@ -218,6 +199,12 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Known problems
 
+- Renode 1.17.0 (C3.11): (1) DMA.STM32G0DMA sai cờ HT/TC → dùng `.draft-C3.11/src/fw/renode/STM32G0DMA_C311.cs` (REPL=fix); (2) ADC chia nguyên
+  µV→mV → Vref 4,095 V; (3) quantum mặc định 100 µs → run_fw.sh đặt 1 µs; (4) NVIC priorityMask 0xF0 (G0 thật 2 bit); (5) vòng `b .` không
+  được đếm lệnh; (6) lệnh monitor lỗi làm Renode treo tới timeout (run_fw.sh có canh pty.log). ĐỪNG sửa fw/run_fw.sh khi một quét đang chạy
+  (bash đọc script từng đoạn → lỗi cú pháp giữa chừng, mất dòng output). Tiến trình Renode mồ côi: tìm theo PID (`ps`), không `pkill -f`.
+  `until ! pgrep -f mẫu` tự khớp chính nó → vòng chờ vô hạn; dùng PID. st.com chặn tải tự động (RM0444, AN4839) → CMSIS/HAL ST trên GitHub.
+
 - Edge TPU Compiler 14.1 KHÔNG tất định (cùng file: lúc OK lúc "Internal compiler error"/std::length_error, lỗi có thể treo 2–5 phút) → luôn
   biên dịch lặp (etpu_repeat.sh) hoặc thử tới khi được (etpu_retry.sh), timeout 300 s. TF 2.21 converter SIGSEGV với LSTM batch tĩnh → chạy
   chuyển đổi trong tiến trình con.
@@ -241,6 +228,17 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
+
+- 2026-10-08: C3.11 — mọi output chạy thật: phần cứng thật ([i7] WSL2 + Windows gốc qua mingw, RTX 4060), RTL (iverilog: picorv32 ef203c2,
+  soc.v), Renode 1.17.0 (STM32G0, firmware thật), mô hình (m7cache, uart/spi sim, ngspice) — tầng bằng chứng ghi ở từng khối. blockcheck 32 khối
+  ✅ / 301 dòng 0 lệch (bắt 5 dòng lệch sau khi firmware đổi: căn 32 B làm số lệnh renode_bugs đổi vài chục; bảng USB bị cắt); doccheck 0 lỗi,
+  13 bảng, 234 tham chiếu §, 43 chéo (kiểm đúng chủ đề). Rà soát đọc toàn văn sửa ~18 chỗ (11 → 10,5 điểm; 12,3–12,4 → 11,6–12,4 GB/s; giải
+  thích UART +4% sai mốc 10,06 → 9,56 bit; câu ESP32 "của người viết"; trích dẫn dịch → nguyên văn tiếng Anh; số mục RM0444 chưa kiểm bị gỡ…).
+  Lỗi/giả thuyết sai khi làm: "RESD lệch thời gian" (thật ra ADC chia nguyên); ptxas kéo ld.ca/.cv ra khỏi vòng (2 lần); điểm xuất phát đuổi
+  con trỏ thiếu ×16 (DRAM 103 → 236 ns); DMA kiểm cờ cpsid mỗi đơn vị việc (94,6%); st.work++ giữ trong thanh ghi; K=2000 kẹp 12% mẫu lỗi
+  vòng ngoài; m7cache ngoài mảng (segfault) và kịch bản .bss đầu tiên không lộ lỗi (thứ tự đẩy dòng); `replace('')` làm phình adcstream.c 4,6 MB
+  (khôi phục bằng tách chuỗi). Nguồn đã kiểm: Arm DDI 0489D (cache M7), UM10204 rev 7.0, ESP32 datasheet v5.3, USB 2.0, Linux 2ffe2da3, mã
+  Renode @066a7f1, CMSIS/HAL ST (GitHub), tài liệu Microsoft timeBeginPeriod; ST RM0444/AN4839 không tải được (ghi rõ trong tài liệu).
 
 - 2026-10-08: C3.10 — mọi output chạy thật (CPU [i7] + RTX 4060; Vela/Edge TPU là output trình biên dịch thật, chu kỳ NPU ghi rõ là ước lượng).
   blockcheck: 41 khối ✅, 286 dòng, 0 lệch (bắt được 1 dòng chép nhầm 96,62% → 87,48%); doccheck 0 lỗi, 15 bảng, 231 tham chiếu §, 31 chéo (kiểm đúng
