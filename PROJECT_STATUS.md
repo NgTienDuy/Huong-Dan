@@ -7,10 +7,27 @@
 ## NEXT ACTION
 
 Viết C3.11 IO-DMA&Interrupts (roadmap §C3.11; checkpoint: DMA cho luồng ADC liên tục, đo mức giảm tải CPU so với polling, xử lý
-đúng mạch lạc cache). Phần cứng thật chưa nối (ESP32 DevKit, Arduino Uno) → kế hoạch đề xuất: Renode (bản portable, không cần root) mô
-phỏng STM32F4 có ADC + DMA + NVIC chạy firmware C thật (gcc-arm-none-eabi đã có công thức apt download) — đo chu kỳ CPU bận theo
-polling / ngắt mỗi mẫu / DMA vòng + nửa-đầy; mạch lạc cache: Cortex-M7 (D-cache) trong Renode hoặc QEMU, chứng minh lỗi đọc dữ liệu
-cũ khi thiếu SCB_InvalidateDCache_by_Addr; phía Linux: đo ngắt/độ trễ ngắt khả dĩ trong WSL (timerfd, jitter) — kiểm khả thi trước.
+đúng mạch lạc cache). Chưa có file nào trong `.draft-C3.11/` (phiên 2026-10-08 dừng ở đây: chế độ auto chặn lệnh tạo khung firmware vì
+một kiểm tra an toàn — cần người dùng chạy tiếp ngoài chế độ auto hoặc mở phiên mới). Đã khảo sát xong (2026-10-08):
+- Renode 1.17.0 portable (github.com/renode/renode/releases v1.17.0, `renode-1.17.0.linux-portable.tar.gz`, chạy `./renode --console`,
+  .NET 8 kèm sẵn) — nền tảng `platforms/cpus/stm32g0.repl` (cpuType cortex-m0, flash 128K @0x08000000, RAM 48K @0x20000000, USART2
+  @0x40004400 mô hình STM32F7_USART, DMA1 @0x40020000 = DMA.STM32G0DMA 7 kênh (kênh 1 → nvic 9), ADC @0x40012400 = Analog.STM32G0_ADC
+  → nvic 12, `externalEventFrequency: 1000`). ADC (STM32_ADC_Common.cs): EXTEN≠0 → lấy mẫu theo nhịp externalEventFrequency (thời gian ảo),
+  có cờ OVR thật (EOC chưa đọc khi mẫu mới tới), đọc DR xóa EOC, yêu cầu DMA mỗi mẫu nếu DMAEN — NHƯNG repl gốc không truyền
+  `dmaChannel/dmaPeripheral` → phải tự khai báo lại adc (dmaChannel: 1, dmaPeripheral: dma1, externalEventFrequency: 12000). Nguồn mẫu:
+  `Analog.ADCChannelSource @ adc 0` + `FeedSamplesFromRESD @file` (RESD tạo bằng `tools/csv2resd/csv2resd.py`, cần `pip install construct`)
+  → dùng dữ liệu rung CWRU làm tín hiệu ADC.
+- ⚠️ Lỗi mô hình DMA.STM32G0DMA (đọc mã, chưa đo): `HalfTransfer = dataCount <= originalDataCount/2` gán ở MỖI lần chuyển → sau khi ISR
+  xóa HTIF, mỗi mẫu của nửa sau lại bật HT (ngắt mỗi mẫu); TC tự xóa ở lần chuyển kế. Kế hoạch: đo số ngắt/bộ đệm để xác nhận, rồi nạp
+  bản vá lúc chạy (`include @STM32G0DMA_fix.cs`, chỉ đặt HT khi count == N/2). DMA.STM32DMA (F4/F7) KHÔNG có CIRC/HTIE/DBM (tagged).
+- Renode không mô hình cache → mạch lạc cache làm bằng: (a) GPU thật: L1 của GPU không mạch lạc với ghi của CPU vào bộ nhớ host-mapped
+  (thử `ld.global.ca` vs `ld.global.cv` bằng PTX inline); (b) x86 mạch lạc DMA PCIe (cudaMemcpy D2H vào buffer CPU đã cache); (c) mô hình
+  cache write-back + DMA cho Cortex-M7 (stale read, lỗi căn 32 B), kiểm ST AN4839 trước khi trích.
+- Toolchain: `apt download gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi libnewlib-dev` + dpkg -x → arm-none-eabi-gcc
+  13.2.1 chạy được. Khung firmware dự kiến: g0.ld, g0.h (thanh ghi RM0444), startup.c, uart.h; MODE POLL/IRQ/DMA; đo tải CPU =
+  `cpu ExecutedInstructions` / (PerformanceInMips × thời gian ảo) với WFI khi rảnh; mất mẫu = mẫu sinh ra theo thời gian − mẫu nhận.
+- Mục khác: §1 x86 `inb` từ user → SIGSEGV; §4 jitter timer Linux/Windows thật; §7 I²C cực máng hở (ngspice hoặc RC), UART dung sai
+  baud (mô phỏng bit), APB/AHB bằng Verilog (nợ của C3.3 §2.5/§6.5); §8 PCIe từ số đo C3.9/C3.10; §9 USB khái niệm (nguồn chuẩn).
 Draft ở `.draft-C3.11/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`. Ghi ESP32 là bước phần cứng thật tiếp theo.
 Môi trường C3.10 dựng lại bằng `.draft-C3.10/src/setup_env.sh S` (scratchpad mất sau mỗi phiên).
 Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
