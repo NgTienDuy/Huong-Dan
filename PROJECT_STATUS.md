@@ -1,16 +1,18 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.9 xong; tiếp C3.10 (2026-10-07)
-**Updated:** 2026-10-07
-**Last session:** claude-code (Opus 5.5), 2026-10-07, bắt đầu phiên dài: C3.7 → C3.14 rồi rà soát toàn bộ C3 (yêu cầu người dùng)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.10 xong; tiếp C3.11 (2026-10-08)
+**Updated:** 2026-10-08
+**Last session:** claude-code (Opus 5.5), 2026-10-08: viết xong C3.10 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
 
 ## NEXT ACTION
 
-Viết C3.10 NPU&Accelerators (roadmap §C3.10; checkpoint: cùng một model trên hai phần cứng, đo latency **và năng lượng**, giải thích
-chênh lệch bằng đặc điểm kiến trúc). Kế hoạch: model nhỏ (ví dụ MLP/CNN 1-D cho phân loại lỗi vòng bi CWRU — nối C3.6/C3.9) chạy trên
-CPU [i7] và RTX 4060 (tensor core = accelerator có trên máy; NPU thật: không có — nói rõ, mô phỏng mảng tâm thu bằng Python/Verilog);
-năng lượng: CPU qua `powershell.exe Get-Counter '\Energy Meter(*)\Power'` (RAPL), GPU qua `nvidia-smi --query-gpu=power.draw`
-(lấy mẫu dày) — trừ nền lúc rảnh. Draft ở `.draft-C3.10/`, cùng công thức (blockcheck/doccheck ở `.draft-C3.7/src/`).
+Viết C3.11 IO-DMA&Interrupts (roadmap §C3.11; checkpoint: DMA cho luồng ADC liên tục, đo mức giảm tải CPU so với polling, xử lý
+đúng mạch lạc cache). Phần cứng thật chưa nối (ESP32 DevKit, Arduino Uno) → kế hoạch đề xuất: Renode (bản portable, không cần root) mô
+phỏng STM32F4 có ADC + DMA + NVIC chạy firmware C thật (gcc-arm-none-eabi đã có công thức apt download) — đo chu kỳ CPU bận theo
+polling / ngắt mỗi mẫu / DMA vòng + nửa-đầy; mạch lạc cache: Cortex-M7 (D-cache) trong Renode hoặc QEMU, chứng minh lỗi đọc dữ liệu
+cũ khi thiếu SCB_InvalidateDCache_by_Addr; phía Linux: đo ngắt/độ trễ ngắt khả dĩ trong WSL (timerfd, jitter) — kiểm khả thi trước.
+Draft ở `.draft-C3.11/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`. Ghi ESP32 là bước phần cứng thật tiếp theo.
+Môi trường C3.10 dựng lại bằng `.draft-C3.10/src/setup_env.sh S` (scratchpad mất sau mỗi phiên).
 Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
 ⚠️ GPU tự tăng xung 2100 → ~2650 MHz: mọi phép đo warmup() + in MHz. ncu bị chặn (ERR_NVGPUCTRPERM) — người dùng chọn làm tiếp không
 bộ đếm; nếu họ bật quyền: chạy C3.9 §11.7 trong lần rà soát cuối và sửa §11.4 theo số đo.
@@ -35,7 +37,8 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
 | C3.7 MemoryConsistency&Coherence | ✅ 2026-10-07 (153 KB; ARM thật = runner GitHub Neoverse-N2, x86 = i7 + runner EPYC 7763; litmus.c 29 phép thử khớp herd7 7.58 (SC/TSO/ARMv8/RC11), đối chiếu litmus7; QEMU 8.2.2 sai cả hai chiều (MP 0; stlr/ldar SB 127/triệu — lỗi mã nguồn TCG); mesi.py 4 giao thức + bất biến + 3 đột biến; coh.c: E đắt như M, S rẻ 2,5×; smc.c: DIC=IDC=1 vẫn 999.998/10^6 mã cũ nếu thiếu dsb+isb; checkpoint ring.c: x86 0/10^9 ×2 máy, N2 0,12–47,5 lỗi/triệu, sửa bằng ishst+2×ishld+ctrl (herd7 cần & đủ), C11 ldapr nhanh 8,3× ldar; volatile-only hỏng ngay trên x86 vì gcc) |
 | C3.8 SIMD&Vectorization | ✅ 2026-10-07 (94 KB; [i7] AVX2/FMA/AVX-VNNI + runner N2 NEON/SVE(VL 128) + runner x86 Xeon 8573C; RVV qua QEMU 3 VLEN; 12 vòng tự vector hóa + lý do gcc (vect-details); bẫy: "vectorized" = fold-left vaddss, _mm256_load_ps không chắc lỗi, SSE cũ addps lỗi căn lề, AVX2 pack trong nửa 128 bit (10006 sai), vpmaddubsw bão hòa (22/32 khối sai; reduce_range 7 bit — tài liệu ORT), OoO chồng lần gọi làm phép đo độ trễ 1,6 < 2,0; trả nợ C3.4 sat16 packssdw 2,8× compiler, C3.5 sum_ge AVX2 vpmovsxdq 1,4× vs intrinsics 32-bit theo khối 4,2×; checkpoint FIR 128 nhịp CWRU: intrinsics 17,1× [i7] (71% trần), 8,7× N2, SVE chậm hơn NEON trừ -mcpu=neoverse-n2) |
 | C3.9 GPUArchitecture | ✅ 2026-10-07 (101 KB; RTX 4060 Laptop qua WSL, CUDA 13.3 redist; ncu bị chặn quyền → trần đo riêng + đếm lệnh SASS + biến thể có kiểm soát; xung 2100→2650 phải đo (bẫy §2.3), bẫy CSE 94 TFLOP/s; phân kỳ ×P trong warp; độ trễ shared 24/L1 40/L2 262/DRAM ~620 ck; DRAM 231, L2 1260, shared 7,78 TB/s; LSU ~1 lệnh nạp/2 ck; gộp kernel ×3,05 = 6:2; GEMM 0,86→31,2 TFLOP/s, sai số FP16/TF32 = làm tròn đầu vào (mô phỏng khớp); PCIe 12,4–13,0 GB/s; checkpoint FIR 0,30→10,7 TFLOP/s cùng bit: nhóm LSU, nhóm ULDC (cpath: không mở rộng theo occupancy), bản nhanh nhất bị chặn phía tính toán dù AI 60 < 66 (bound.cu)) |
-| C3.10 → C3.14 | ☐ |
+| C3.10 NPU&Accelerators | ✅ 2026-10-08 (154 KB; pJ/phép & pJ/lệnh đo bằng RAPL (đơn vị pWh hiệu chuẩn) + NVML: CPU 1,4–2,2 nJ/lệnh dù 2 hay 64 phép, GPU INT8 tensor 0,54 pJ/phép (÷43 so với VNNI); mảng tâm thu Verilog 3 cỡ + 2 lỗi thật (x lan, ?: không dấu) + diện tích PE yosys; CNN CWRU 1-D 100% test → Vela U55/U65/U85 + Edge TPU 14.1: bước 4 tách 250 phép 0,4% đỉnh, viết lại tương đương từng bit ×11–17; Edge TPU không tất định (EXPAND_DIMS 2/10 vs 10/10, Fisher p 3,6e-4), GELU mã 150 → "builtin_code 127", cắt-một-lần; quant 9 kiểu: hiệu chuẩn chỉ lớp bình thường → 75% mà 4 trình biên dịch vẫn nhận; arena tham lam = cận dưới = Vela 1.470 KiB; checkpoint: CPU 8,56 µs/194 µJ vs GPU 96 µs/2.982 µJ batch 1 (chép 19,7 + khởi chạy 39,7 + tính 32,8 µs @1,26 GHz, 79% năng lượng ở CPU điều khiển), batch lớn GPU ×3,8–4,4 thông lượng, ×3,1–3,9 năng lượng (kernel 9% trần)) |
+| C3.11 → C3.14 | ☐ |
 
 ### Môi trường C3 (không cần sudo)
 
@@ -89,6 +92,15 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   libgcc-13-dev-riscv64-cross libc6-dev-riscv64-cross. Công cụ kiểm: `.draft-C3.7/src/doccheck.py` (cấu trúc + § + Cx.y §z) và `blockcheck.py`
   (mọi dòng khối ✅ phải có trong out/ — bắt được 1 dòng chép nhầm ở C3.7). Bài học: ghi ra out/ MỌI output sẽ trích (kể cả kết quả pipeline grep).
 
+- C3.10 (2026-10-08): `setup_env.sh S` dựng venv (tensorflow-cpu 2.21.0, ethos-u-vela 5.2.0, numpy 2.5.3; thêm `pip install ai-edge-litert` cho đếm lệnh),
+  Edge TPU Compiler 14.1 (sparse clone google-coral/edgetpu `compiler/x86_64`; apt repo Coral 403), iverilog/yosys/yosys-abc, CUDA 13.3, CWRU 16 bản ghi
+  (engineering.case.edu/sites/default/files/N.mat). Valgrind: apt download valgrind, VALGRIND_LIB=$R/usr/libexec/valgrind; đếm lệnh CHỈ trong hàm
+  (callgrind --toggle-collect='tflite::interpreter_wrapper::InterpreterWrapper::Invoke(int)') — khởi động Python dao động ±10⁸ lệnh. iverilog cục bộ:
+  IVL=$R/usr/lib/x86_64-linux-gnu/ivl (run_systolic.sh). pdftotext cần thêm libopenjp2-7 liblcms2-2 libnss3 libnspr4. Năng lượng CPU: cpuwatt.py
+  (Get-Counter '\Energy Meter(rapl_package0_pkg)\Energy', pWh, mẫu ~1,2 s; lệch đồng hồ WSL–Windows −1,5 ms); GPU: NVML dlopen.
+  ⚠️ Máy chủ có lúc bận (java ~400% trên Windows ~1,5 h ngày 2026-10-08) → gói CPU "rảnh" 51 W; chờ máy rảnh (hostload ≤ 8%) mới đo năng lượng.
+  ⚠️ Công suất nền GPU phụ thuộc lịch sử (7,9 W ở P8, 12,3 W ngay sau tải). WSL có tiến trình mô phỏng hmi-scada của người dùng (iedsim, hmikit) — không đụng.
+
 ### C3.6 — số đo đáng dùng lại cho leaf sau (2026-10-05/06; chi tiết trong chính tài liệu C3.6)
 - Lõi P: L1 5 / L2 15–16 / L3 65–70 / DRAM 400–660 chu kỳ; băng thông 1 luồng L1 ~54, L2 ~38, L3 13–17, DRAM ~5,5 B/chu kỳ (21–24 GB/s);
   cả chip đọc ~61 GB/s (80% của 76,8). Trần FMA 4/16/32 FLOP/chu kỳ (vô hướng/AVX2 double/float), đợt AVX < ~10 µs chỉ ~75% (C3.8 dùng).
@@ -138,7 +150,10 @@ bám sát theo C1 và C2 đã làm vào roadmap.md đã ghi." → cùng quy ư�
   L2 dùng chung giữa hai luồng SMT (§7.3, D.3); C3.8 — AVX2 cho hàm checkpoint (§8.3, §8.9); C3.12 — đổi thứ tự cộng số thực (§6.6,
   C.1); C3.14 — top-down phân rã IPC (§6.5), luồng anh em SMT khi đo (§7.5).
 - C3.1 §6.5 hứa "phép nhân chia 3 tầng pipeline (C3.5)" → đã trả ở C3.5 §2.6 (imul độ trễ 3, thông lượng 1).
-- C3.9 để lại: C3.12 — FP16/BF16/FP8, chỗ chúng hỏng (§6.2, §8.3); C3.10 — mảng tâm thu / NPU (D.3). C3.9 đã trả: C3.1 §6.3 và
+- C3.9 để lại: C3.12 — FP16/BF16/FP8, chỗ chúng hỏng (§6.2, §8.3); C3.10 — mảng tâm thu / NPU (D.3). → C3.10 ĐÃ TRẢ (§2, §3).
+- C3.10 để lại (kiểm ở rà soát cuối C3): C3.12 — định vị lớp gây mất chính xác, khi nào cần per-channel (§5.1, §5.2), cạm bẫy
+  "phân khúc dữ liệu không test" (§5.3); C3.13 — giới hạn công suất/nhiệt của chip (§1.2), shunt + INA219 cho NPU thật (§10.7, §10.9);
+  C3.11 — DMA đưa dữ liệu cảm biến tới NPU (D.3 bước 6). C3.9 đã trả: C3.1 §6.3 và
   C3.8 §3.2 (quét tiền tố Kogge-Stone trên GPU, §2.5), C3.8 §1.1 (SIMT, §2).
 
 
@@ -177,6 +192,10 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
 
 ## Known problems
 
+- Edge TPU Compiler 14.1 KHÔNG tất định (cùng file: lúc OK lúc "Internal compiler error"/std::length_error, lỗi có thể treo 2–5 phút) → luôn
+  biên dịch lặp (etpu_repeat.sh) hoặc thử tới khi được (etpu_retry.sh), timeout 300 s. TF 2.21 converter SIGSEGV với LSTM batch tĩnh → chạy
+  chuyển đổi trong tiến trình con.
+
 - Icarus: `@(d)` trên cổng nối vào một bit của vector kích hoạt khi BẤT KỲ bit nào của vector đổi → so với giá trị trước;
   biểu thức tổ hợp `cnt ^ (cnt >> 1)` sinh glitch độ rộng 0 (C3.2 §4 dùng làm bài học). `pkill -f "<mẫu>"` có thể giết chính
   shell đang chạy lệnh (mẫu nằm trong dòng lệnh) → dùng `pkill -x qemu-system-arm`.
@@ -196,6 +215,17 @@ Quy ước rút từ C1 (giữ đúng khi viết tiếp):
   từ http://www.diag.uniroma1.it/challenge9/data/ (USA-road-d/t.NY.gr.gz, USA-road-d.NY.co.gz).
 
 ## Last verification
+
+- 2026-10-08: C3.10 — mọi output chạy thật (CPU [i7] + RTX 4060; Vela/Edge TPU là output trình biên dịch thật, chu kỳ NPU ghi rõ là ước lượng).
+  blockcheck: 41 khối ✅, 286 dòng, 0 lệch (bắt được 1 dòng chép nhầm 96,62% → 87,48%); doccheck 0 lỗi, 15 bảng, 231 tham chiếu §, 31 chéo (kiểm đúng
+  chủ đề, sửa C3.1 §6.1 → §6). Lỗi/giả thuyết sai tìm được khi làm: "EXPAND_DIMS là nguyên nhân" từ 1 lần chạy → lặp 10 lần mới thấy compiler không
+  tất định (kết luận sửa thành: EXPAND_DIMS → 80% gãy); "GELU gộp miễn phí vào conv" sai — là một lượt LUT riêng 4.568 ck (vela_lut.txt), cũng chính
+  là "phép thứ 250" của bản gốc; kernel `tuned` không nhanh hơn → đo trong kernel lộ xung 1,26 GHz + khởi chạy đơn lẻ 39,7 µs; K = N² (không phải 4N)
+  ở mảng tâm thu; hiệu hai lần chạy cachegrind cho số âm → đếm theo hàm; blocking sync tốn năng lượng hơn quay vòng (lặp 3×2 xác nhận). Khẳng định
+  ngoài đã kiểm: Horowitz ISSCC 2014 Fig 1.1.9 (giải mã PDF), whitepaper Ada (4090: 660,6/165,2), tài liệu Coral (8 MB, cắt một lần, ExpandDims ≥13),
+  Vela SUPPORTED_OPS (stride>3), calc_blockdep trong mã Vela, trang hãng ST/Renesas/Infineon/TI/Arm (nguồn thứ cấp ghi rõ: Alif, Nordic, NXP qua tìm kiếm).
+  Trả tham chiếu tới trước: C3.9 D.3 (mảng tâm thu/NPU). Để lại: C3.12 (định vị lớp gây mất chính xác, per-channel khi nào cần), C3.13 (shunt/INA219,
+  giới hạn công suất), C3.11 (DMA đưa dữ liệu tới NPU).
 
 - 2026-10-07: C3.9 — mọi output chạy thật trên RTX 4060 Laptop (run_gpu.sh + các lần chạy riêng cpath/bound/occ/inerr, kèm hostload và
   nvidia-smi trước/sau; 4 file "chép lại từ terminal" ghi rõ). blockcheck 30 khối ✅ / 191 dòng 0 lệch; doccheck 0 lỗi, 15 bảng, 159 tham
