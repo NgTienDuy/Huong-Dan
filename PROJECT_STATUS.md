@@ -6,28 +6,28 @@
 
 ## NEXT ACTION
 
-Viết C3.11 IO-DMA&Interrupts (roadmap §C3.11; checkpoint: DMA cho luồng ADC liên tục, đo mức giảm tải CPU so với polling, xử lý
-đúng mạch lạc cache). Chưa có file nào trong `.draft-C3.11/` (phiên 2026-10-08 dừng ở đây: chế độ auto chặn lệnh tạo khung firmware vì
-một kiểm tra an toàn — cần người dùng chạy tiếp ngoài chế độ auto hoặc mở phiên mới). Đã khảo sát xong (2026-10-08):
-- Renode 1.17.0 portable (github.com/renode/renode/releases v1.17.0, `renode-1.17.0.linux-portable.tar.gz`, chạy `./renode --console`,
-  .NET 8 kèm sẵn) — nền tảng `platforms/cpus/stm32g0.repl` (cpuType cortex-m0, flash 128K @0x08000000, RAM 48K @0x20000000, USART2
-  @0x40004400 mô hình STM32F7_USART, DMA1 @0x40020000 = DMA.STM32G0DMA 7 kênh (kênh 1 → nvic 9), ADC @0x40012400 = Analog.STM32G0_ADC
-  → nvic 12, `externalEventFrequency: 1000`). ADC (STM32_ADC_Common.cs): EXTEN≠0 → lấy mẫu theo nhịp externalEventFrequency (thời gian ảo),
-  có cờ OVR thật (EOC chưa đọc khi mẫu mới tới), đọc DR xóa EOC, yêu cầu DMA mỗi mẫu nếu DMAEN — NHƯNG repl gốc không truyền
-  `dmaChannel/dmaPeripheral` → phải tự khai báo lại adc (dmaChannel: 1, dmaPeripheral: dma1, externalEventFrequency: 12000). Nguồn mẫu:
-  `Analog.ADCChannelSource @ adc 0` + `FeedSamplesFromRESD @file` (RESD tạo bằng `tools/csv2resd/csv2resd.py`, cần `pip install construct`)
-  → dùng dữ liệu rung CWRU làm tín hiệu ADC.
-- ⚠️ Lỗi mô hình DMA.STM32G0DMA (đọc mã, chưa đo): `HalfTransfer = dataCount <= originalDataCount/2` gán ở MỖI lần chuyển → sau khi ISR
-  xóa HTIF, mỗi mẫu của nửa sau lại bật HT (ngắt mỗi mẫu); TC tự xóa ở lần chuyển kế. Kế hoạch: đo số ngắt/bộ đệm để xác nhận, rồi nạp
-  bản vá lúc chạy (`include @STM32G0DMA_fix.cs`, chỉ đặt HT khi count == N/2). DMA.STM32DMA (F4/F7) KHÔNG có CIRC/HTIE/DBM (tagged).
-- Renode không mô hình cache → mạch lạc cache làm bằng: (a) GPU thật: L1 của GPU không mạch lạc với ghi của CPU vào bộ nhớ host-mapped
-  (thử `ld.global.ca` vs `ld.global.cv` bằng PTX inline); (b) x86 mạch lạc DMA PCIe (cudaMemcpy D2H vào buffer CPU đã cache); (c) mô hình
-  cache write-back + DMA cho Cortex-M7 (stale read, lỗi căn 32 B), kiểm ST AN4839 trước khi trích.
-- Toolchain: `apt download gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi libnewlib-dev` + dpkg -x → arm-none-eabi-gcc
-  13.2.1 chạy được. Khung firmware dự kiến: g0.ld, g0.h (thanh ghi RM0444), startup.c, uart.h; MODE POLL/IRQ/DMA; đo tải CPU =
-  `cpu ExecutedInstructions` / (PerformanceInMips × thời gian ảo) với WFI khi rảnh; mất mẫu = mẫu sinh ra theo thời gian − mẫu nhận.
-- Mục khác: §1 x86 `inb` từ user → SIGSEGV; §4 jitter timer Linux/Windows thật; §7 I²C cực máng hở (ngspice hoặc RC), UART dung sai
-  baud (mô phỏng bit), APB/AHB bằng Verilog (nợ của C3.3 §2.5/§6.5); §8 PCIe từ số đo C3.9/C3.10; §9 USB khái niệm (nguồn chuẩn).
+Viết C3.11 IO-DMA&Interrupts (roadmap §C3.11). ĐANG LÀM THÍ NGHIỆM (phiên 2026-10-08 sáng, claude-code Opus 5.5). Môi trường:
+`.draft-C3.11/src/setup_env.sh S` (Renode 1.17.0, arm-none-eabi-gcc 13.2.1, iverilog, ngspice 42 + lib X, venv construct/numpy, CWRU 97/130);
+CUDA: dùng `.draft-C3.9/src/cuda_setup.sh` (hoặc scratchpad cũ). Firmware: `src/fw/` (g0.h, startup.c, adcstream.c MODE 0 POLL / 1 IRQ /
+2 DMA vòng HT+TC / 3 DMA+PendSV, PROC, CHECK răng cưa, WORK việc nền, NOADC); chạy: `src/fw/run_fw.sh ELF giây nguồn.u16 fix` (FS=, Q=, EXTRA=,
+POST=). Đã có (out/): load_sweep.txt, work_sweep*.txt (đang chạy lại có MODE 3); GPU `src/gpu/gpu_io.cu` (bw/lat/zc/stale/dmacoh).
+Phát hiện đã đo (giữ cho tài liệu):
+- Renode DMA.STM32G0DMA SAI: HT gán lại mỗi lần chuyển → 5.911 ngắt HT/s thay vì 23; cờ tự xóa; CTCIF xóa cả HT → bản sửa
+  `fw/renode/STM32G0DMA_C311.cs` (REPL=fix): 23 HT + 23 TC/s, tải 0,95% (12 kHz, khối 256).
+- Renode ADC: `Sample.Voltage / 1000` chia NGUYÊN (µV→mV) → Vref 3,3 V chỉ 3.300/4.096 mã (19,4% bị bỏ; 233/1199 lặp/nhảy). Né: Vref 4,095 V,
+  mã c = c mV. (Giả thuyết sai trước đó: RESD lệch thời gian — viết SeqVoltageSource vẫn lỗi → mới tìm ra phép chia.)
+- Quantum mặc định Renode 100 µs (TimeSourceBase.DefaultQuantum) → 384 kHz mất 10 mẫu lúc khởi động; Q ≤ 10 µs hết; run_fw.sh mặc định 1 µs.
+- gcc giữ st.work trong thanh ghi trong vòng lặp vô hạn → RAM luôn 0 (bài học volatile). Vòng DMA kiểm cờ bằng cpsid/cpsie mỗi đơn vị
+  việc tốn ~8% CPU (work_sweep_v1) → sửa: chỉ đọc cờ; MODE 3 PendSV.
+- Tải (lệnh/mẫu, 64 MIPS): IRQ 38 (PROC 0) / 66 (PROC 1); DMA 19,4 / 48,5 → vận chuyển bằng ngắt ≈ 18–19 lệnh/mẫu; POLL 100%.
+- GPU: ptxas KÉO ld.global.ca/.cv (nạp yếu) ra khỏi vòng hỏi cờ → phải dùng địa chỉ flag+(i&msk), msk tham số = 0; khi đó ld.ca (L1)
+  KHÔNG BAO GIỜ thấy cờ do copy engine hoặc CPU ghi (20 triệu lần, 509 ms), .cg/.cv/volatile/acquire.sys thấy sau ~1 ms
+  (acquire.sys = CCTL.IVALL). Đuổi con trỏ: L2 GPU 267 ck, DRAM GPU 626 ck (sửa lỗi điểm xuất phát ×16), RAM host qua PCIe 804 ns;
+  zero-copy đọc 9,7 / ghi 7,2 GB/s; x86: DMA D2H 0/131 triệu từ cũ, đọc lại sau DMA 29,8 ns vs nóng 3,35, clflush 34,5, "L3" 27,5.
+Còn làm: §1 MMIO/volatile/inb SIGSEGV/W1C |= bug; §3 NVIC (bit ưu tiên: Renode 0xF0 vs G0 2 bit), lồng ngắt, race main/ISR; §4 picorv32
+RTL độ trễ ngắt chính xác chu kỳ + jitter Linux/Windows; §5 Verilog DMA chuỗi mô tả + APB; GPU bw/lat (CPU time pageable vs pinned,
+blocking sync); §6 mô hình cache M7; §7 UART baud, SPI mode, I²C ngspice; §8 PCIe tính toán; §9 USB; §10 checkpoint CWRU + đặc trưng
+so máy chủ. Rồi viết tài liệu (doc/ p1..), blockcheck/doccheck, commit.
 Draft ở `.draft-C3.11/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`. Ghi ESP32 là bước phần cứng thật tiếp theo.
 Môi trường C3.10 dựng lại bằng `.draft-C3.10/src/setup_env.sh S` (scratchpad mất sau mỗi phiên).
 Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
