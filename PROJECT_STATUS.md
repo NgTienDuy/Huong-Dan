@@ -1,27 +1,23 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.11 xong; tiếp C3.12 (2026-10-08)
+**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.11 xong; C3.12 đang làm thí nghiệm (2026-10-08)
 **Updated:** 2026-10-08
-**Last session:** claude-code (Opus 5.5), 2026-10-08: viết xong C3.11 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
+**Last session:** claude-code (Opus 5.5), 2026-10-08 (phiên 2): bắt đầu C3.12 — dựng môi trường, tải ImageNetV2 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
 
 ## NEXT ACTION
 
-Viết C3.12 NumberRepresentation (roadmap §C3.12; checkpoint: lượng tử hóa một model sang int8, đo mất mát độ chính xác, ĐỊNH VỊ lớp gây
-mất mát nhiều nhất bằng phân tích theo lớp — không đoán; cạm bẫy: phân khúc dữ liệu không test). Nợ phải trả ở C3.12: C3.10 (định vị lớp
-gây mất chính xác, khi nào cần per-channel — §5.1, §5.2; "phân khúc dữ liệu không test" §5.3), C3.9 (FP16/BF16/FP8, chỗ chúng hỏng — §6.2,
-§8.3), C3.5 (đổi thứ tự cộng số thực — §6.6, C.1). Gợi ý: dùng lại CNN CWRU của C3.10 (`.draft-C3.10/src/train.py`, quant.py; dựng lại
-bằng `.draft-C3.10/src/setup_env.sh S`) + fixed-point cho MCU không FPU (nối với `adcstream.c` của C3.11: đặc trưng RMS/kurtosis bằng số
-nguyên trên M0+). Draft ở `.draft-C3.12/`; công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`.
-Môi trường C3.11 dựng lại bằng `.draft-C3.11/src/setup_env.sh S` (+ CUDA của C3.9, mingw-w64 cho Windows: xem A.4 của C3.11).
-Ghi ESP32 là bước phần cứng thật tiếp theo (C3.11 §10.7: ADC liên tục + DMA, độ trễ ngắt bằng GPIO + máy phân tích logic, cầu USB–UART).
-Môi trường C3.10 dựng lại bằng `.draft-C3.10/src/setup_env.sh S` (scratchpad mất sau mỗi phiên).
-Môi trường GPU: `. scratchpad/tools/cuda.sh` (CUDA 13.3 redist ở scratchpad/cuda/root; tái tạo bằng `.draft-C3.9/src/cuda_setup.sh DIR`).
-⚠️ GPU tự tăng xung 2100 → ~2650 MHz: mọi phép đo warmup() + in MHz. ncu bị chặn (ERR_NVGPUCTRPERM) — người dùng chọn làm tiếp không
-bộ đếm; nếu họ bật quyền: chạy C3.9 §11.7 trong lần rà soát cuối và sửa §11.4 theo số đo.
-Repo scratch ARM: https://github.com/NgTienDuy/c3-arm-lab (public; workflow chạy run.sh trên ubuntu-24.04-arm + ubuntu-24.04).
-⚠️ Runner x86 KHÔNG cố định CPU → luôn in `lscpu | grep "Model name"` cùng output. GitHub từng trả 500 ~7 phút (2026-10-07) rồi tự hết.
-Phần cứng người dùng có (2026-10-07): ESP32 DevKit + Arduino Uno (chưa nối vào máy này); sẽ mua STM32, Raspberry Pi sau → C3.11/C3.13 dùng
-mô phỏng + chính laptop, ghi ESP32 là bước phần cứng thật tiếp theo.
+C3.12 đang làm thí nghiệm (2026-10-08, phiên 2). Xong: §1 số nguyên (out/int), §2 IEEE 754 (out/fp: denorm + bản đồ 2499 ô + mô hình 0 lệch,
+lõi E ~270–310 ck và CỘNG cũng chậm, GPU không phạt, IIR kẹt 0x1F4, -Ofast/-mdaz-ftz, NaN, FMA co, libm 4 bản + mpmath), §3/§4 (out/lp_*:
+fp16/bf16 hỏng trên dữ liệu thật, FP8 256 mã, GEMM cuBLASLt 6 kiểu × 2 phân bố), §5 engine số nguyên khớp TFLite ref 0 lệch (out/q_engine.txt:
+conv kép gemmlowp, FC ref lượng tử lại bằng double, XNNPACK = làm tròn đơn), §7 AVR simavr (out/fx_*), §8 Patriot/velo, §9 OpenMP/GPU, §10 CIC/satwrap.
+Checkpoint: MobileNetV3Large int8 PTQ trên ImageNetV2 (1.000 ảnh hiệu chuẩn / 9.000 ảnh kiểm): 63,13% → 12,80% (out/ck1_*); kernel ref cũng ~11% (ck2) →
+do lượng tử hóa, không do kernel. Đang chạy: `src/ck/ck3_ablate.py MobileNetV3Large float 1000` (giữ từng nút float; tới nút 76/124 chưa nút nào cứu được)
+→ tiếp `... only 1000` (chỉ lượng tử hóa 1 nút), rồi phân tích lớp; §6 `src/q/granularity.py` (MobileNetV2 per-tensor 3% vs per-channel 78%; int4 thử ResNet50
+và chế độ `pw`); runner run7 (NgTienDuy/c3-arm-lab) đang chạy. Sau đó: viết C3.12 vào `.draft-C3.12/doc/`, blockcheck/doccheck, ghi file, commit.
+Môi trường: `.draft-C3.12/src/setup_env.sh S` (gồm C3.10 + chéo aarch64/armhf/riscv64 + avr/simavr + mingw + ImageNetV2 + Keras weights;
+`. S/tools/env12.sh`, CUDA `. S/tools/cuda.sh`; ImageNetV2 tiền xử lý bằng `src/ck/prep_inv2.py S/inv2/... S/inv2p`). Công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`.
+⚠️ Bài học phiên này: tiến trình nền phải chạy bằng run_in_background (nohup & bị giết khi lệnh kết thúc); hàm đo không được ghi đè đầu vào
+(denorm5: "dải chéo" giả); Pool spawn cần `if __name__ == "__main__"` và lỗi ở initializer làm Pool treo.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
