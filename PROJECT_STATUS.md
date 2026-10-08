@@ -2,19 +2,20 @@
 
 **State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.12 xong; C3.13 bắt đầu (2026-10-08)
 **Updated:** 2026-10-08
-**Last session:** claude-code (Opus 5.5), 2026-10-08 (phiên 3): xong C3.12 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
+**Last session:** claude-code (Opus 5.5), 2026-10-08 (phiên 3): xong C3.12, đang C3.13 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
 
 ## NEXT ACTION
 
-C3.13 Power&Thermal (bắt đầu 2026-10-08, phiên 3): khảo sát công cụ đo (RAPL qua `powershell.exe Get-Counter '\Energy Meter(*)'`,
-xung `\Processor Information(_Total)\Actual Frequency`, nhiệt `\Thermal Zone Information(*)`, nvidia-smi/NVML), dựng `.draft-C3.13/`
-(src/setup_env.sh + out/), chạy thí nghiệm theo roadmap §C3.13, rồi viết. Checkpoint roadmap muốn SBC 30 phút — máy này không có SBC:
-dùng laptop (CPU + RTX 4060) làm "thiết bị", ghi rõ; ESP32 là bước phần cứng thật kế tiếp. Chỉ đo năng lượng khi hostload ≤ ~8%.
-Sau C3.13: C3.14, rồi rà soát toàn bộ C3 (yêu cầu người dùng 2026-10-08).
-Môi trường C3.12 (dùng lại): `.draft-C3.12/src/setup_env.sh S` (S = scratchpad/S; ImageNetV2 đã giải nén ở `.draft-C3.12/data/` → symlink
-`S/inv2/imagenetv2-matched-frequency-format-val`). Công cụ kiểm: `.draft-C3.7/src/{doccheck,blockcheck}.py`.
-⚠️ Bài học: tiến trình nền phải chạy bằng run_in_background; WSL có thể khởi động lại giữa phiên (mất /tmp → scratchpad) — mọi output ghi
-thẳng vào out/; một lần chạy lỗi có thể GHI ĐÈ output thật (fx_avr.txt bị thay bằng thông báo lỗi) → blockcheck trước khi ghi file.
+C3.13 Power&Thermal đang làm (2026-10-08, phiên 3). `.draft-C3.13/`: src (pmon.py sampler 1 Hz RAPL/xung/nhiệt + nvidia-smi 2 Hz; cpu/load.c →
+load.exe Windows: fma/fma0/alu/pause/mem/ramp, ghim LP, định mức việc "q", EcoQoS qua LOAD_ECO+WSLENV; gpu/gpuload.cu, nvpoll.c, nvcheck*.sh,
+gpupulse.sh; run_c313.sh phần idle/cores/ramp/mem/race/gpuidle/pl/ckgpu/ckcpu; ana.py; plot_ts.py; budget.py), doc/p0 p5 p7 (nháp).
+Xong: idle, ramp (lõi P thức 0,77–2,3 → 4,53 GHz trong 0,5–2 ms; E 3,47; EcoQoS giữ 1,35 GHz), nvcheck (bộ đếm năng lượng NVML trong WSL sai
+50–100× khi bị hỏi dày; đọc thưa không ai hỏi: +0,03% / +6% dưới tải → số GPU của C3.10 đúng cỡ vài %), budget.txt, lpmap (LP 0–11 = 6 lõi P
+có SMT, 12–19 = lõi E). Đang chạy: `run_c313.sh S cores mem race` (run2.log). Tiếp: `src/queue3.sh S` (gpupulse, gpuidle, pl, ckgpu 30',
+ckcpu 30'), rồi chọn biện pháp giảm thiểu, viết §1–§4, §6, §8, phụ lục; blockcheck/doccheck; commit. Sau đó C3.14 (PMU: runner ARM N2 CÓ
+armv8_pmuv3 7 bộ đếm, perf stat chạy; runner x86 EPYC + WSL KHÔNG — out/run8 trong .draft-C3.14), rồi rà soát toàn bộ C3.
+⚠️ Lỗi đã gặp: vòng `while read … <<EOF` + pmon/load.exe đọc mất stdin (chỉ chạy cấu hình đầu) → `< /dev/null`; đối số thừa '-' làm cỡ vùng
+mem = 0 (đo nhầm L1) → kết quả cũ chuyển vào out/raw_old; Sleep() Windows làm tròn 15,6 ms → định mức theo thời gian thực.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
