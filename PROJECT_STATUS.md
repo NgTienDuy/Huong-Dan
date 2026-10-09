@@ -1,21 +1,20 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** ĐANG VIẾT C3 (C3.1 → C3.14) — C3.1–C3.12 xong; C3.13 bắt đầu (2026-10-08)
-**Updated:** 2026-10-08
+**State:** ĐANG VIẾT C3 — C3.1–C3.12 xong; C3.13/C3.14 nháp gần xong (2026-10-09)
+**Updated:** 2026-10-09
 **Last session:** claude-code (Opus 5.5), 2026-10-08 (phiên 3): xong C3.12, đang C3.13 (yêu cầu người dùng: tiếp C3 tới C3.14, rồi rà soát toàn bộ C3)
 
 ## NEXT ACTION
 
-C3.13 Power&Thermal đang làm (2026-10-08, phiên 3). `.draft-C3.13/`: src (pmon.py sampler 1 Hz RAPL/xung/nhiệt + nvidia-smi 2 Hz; cpu/load.c →
-load.exe Windows: fma/fma0/alu/pause/mem/ramp, ghim LP, định mức việc "q", EcoQoS qua LOAD_ECO+WSLENV; gpu/gpuload.cu, nvpoll.c, nvcheck*.sh,
-gpupulse.sh; run_c313.sh phần idle/cores/ramp/mem/race/gpuidle/pl/ckgpu/ckcpu; ana.py; plot_ts.py; budget.py), doc/p0 p5 p7 (nháp).
-Xong: idle, ramp (lõi P thức 0,77–2,3 → 4,53 GHz trong 0,5–2 ms; E 3,47; EcoQoS giữ 1,35 GHz), nvcheck (bộ đếm năng lượng NVML trong WSL sai
-50–100× khi bị hỏi dày; đọc thưa không ai hỏi: +0,03% / +6% dưới tải → số GPU của C3.10 đúng cỡ vài %), budget.txt, lpmap (LP 0–11 = 6 lõi P
-có SMT, 12–19 = lõi E). Đang chạy: `run_c313.sh S cores mem race` (run2.log). Tiếp: `src/queue3.sh S` (gpupulse, gpuidle, pl, ckgpu 30',
-ckcpu 30'), rồi chọn biện pháp giảm thiểu, viết §1–§4, §6, §8, phụ lục; blockcheck/doccheck; commit. Sau đó C3.14 (PMU: runner ARM N2 CÓ
-armv8_pmuv3 7 bộ đếm, perf stat chạy; runner x86 EPYC + WSL KHÔNG — out/run8 trong .draft-C3.14), rồi rà soát toàn bộ C3.
-⚠️ Lỗi đã gặp: vòng `while read … <<EOF` + pmon/load.exe đọc mất stdin (chỉ chạy cấu hình đầu) → `< /dev/null`; đối số thừa '-' làm cỡ vùng
-mem = 0 (đo nhầm L1) → kết quả cũ chuyển vào out/raw_old; Sleep() Windows làm tròn 15,6 ms → định mức theo thời gian thực.
+Phiên 4 (2026-10-09, claude-code Opus 5.5) — yêu cầu người dùng: xong C3.13 + C3.14 → rà soát toàn bộ C3 → xóa mọi .draft → gọn
+PROJECT_STATUS → commit. Trạng thái: bản nháp C3.13 (`.draft-C3.13/doc/p*.md`, assemble.py) và C3.14 (`.draft-C3.14/doc/p*.md`,
+assemble14.py) gần xong. Còn: C3.13 §8.6 (@@DAY2@@: hạ QoS — dữ liệu out/qos.txt, raw2/mit2 [bị cắt ở all_hq0b do WSL khởi động lại]),
+§8.7 Tự chấm, A.1 + tổng kết 10 (@@A1QOS@@, @@MIT_PHYS@@, @@MIT_HQ@@) → cần chạy `src/mit3_c313.sh` (HighQoS: all/phys ABBAAB + p6 +
+đối chứng hq0, ~85 phút) KHI MÁY RẢNH (12:30 UTC máy chủ đang chạy game arknights ~45% + msmpeng). C3.14 §7.3 (@@ALIAS3@@): alias3 (run15)
+hóa ra vòng VÔ HƯỚNG (objdump) → alias4.c (restrict, -O3, AVX2/NEON, thêm off lệch 32 B xa vùng 4K) chạy run16 (N2 phẳng; EPYC 9V45 Zen 5:
+4K aliasing thật +9–17% chỉ khi lệch và b ngay sau a; i7 P (busy): mọi off lệch ×1,28 = ghi vắt dòng, gần 4K dương thêm ~×1,10) →
+chạy lại `src/post_i7c.sh idle` khi máy rảnh, alias4_ana.py. ⚠️ C3.6 §3.4 (+56% "4K aliasing" ở d≡16) phần lớn là GHI VẮT DÒNG → sửa C3.6
+§3.4/§3.5 + C3.14 §7.3 nói rõ. Sau đó: rà soát C3.1–C3.14 (doccheck/blockcheck + đọc), xóa .draft-C3.7…C3.14, gọn file này, commit.
 
 ## Việc đang làm — viết nhánh C3 (C3.1 → C3.14)
 
