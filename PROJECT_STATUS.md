@@ -7,18 +7,17 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1 ĐANG VIẾT. Xong: `.draft-C4.1/doc/00-head.md` (tiêu đề, mục tiêu, §0) — đã ghép thử và doccheck: chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc".
-CHƯA viết: §2–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/02-fork.md` (§2) theo DÀN Ý ĐÃ CHỐT ở dưới (sau dấu `/NEXT`).
-Cách viết (đã dựng và thử): mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}`
-(thêm `:cut=N` để cắt dòng dài) — KHÔNG gõ lại output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục từ tiêu đề thật, ghi CRLF);
-kiểm: `doccheck.py <đích.md>` (đã thử: bắt được tham chiếu chéo sai) rồi `blockcheck.py <đích.md> .draft-C4.1/out .draft-C4.1/src`.
-Tham chiếu sang C1.3 viết "C1.3 §3 (bản Go)" — viết "C1.3 (Go) §3" làm doccheck hiểu nhầm thành mục của chính file này.
-Khi xong: ghép vào `C4-…/C4.1-Processes&Threads.md` (ghi đè file khung), doccheck + blockcheck sạch, commit leaf + file này, push (hiện 2 commit chưa push + commit này).
-Đã viết thêm `doc/01-pcb.md` (§1; ghép 2 file ≈ 30 KB; doccheck chỉ còn lỗi "chưa viết"; blockcheck 7 khối, 118 dòng, 0 lệch — cả hai công cụ đã thử là bắt được lỗi
-cố ý và trả mã thoát 1; KHÔNG nối ống khi dùng chúng làm cổng). Kế: `doc/02-fork.md`. SAU KHI văn bản trích số từ một file output thì KHÔNG chạy lại `run.sh` cả khối
-(giá trị như utime 12/13 tick đổi theo lần chạy; blockcheck không kiểm số trong văn xuôi) — nếu buộc phải sinh lại file thì rà lại đoạn văn trích nó.
-`first/fork_cost_4k_v2.txt` (không scope) là bản dựng CHƯA có dòng "mapping state"; `first/fork_cost_thp_v2.txt` thì có → hai file không cùng bản dựng.
-File mới từ lần ghi trước: `src/pcb_proc.py` → `out/pcb_proc.txt` (§1.2; tên thành viên đã đối chiếu với BTF), đã thêm vào `run.sh light`.
+C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (tiêu đề, mục tiêu, §0), `01-pcb.md` (§1), `02-fork.md` (§2). Ghép 3 file ≈ 58 KB, 590 dòng;
+doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 22 khối, 235 dòng, 0 lệch. CHƯA viết: §3–§9, Phụ lục A–D, Tổng kết, chân trang.
+Viết tiếp `doc/03-threads.md` (§3) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+Cách viết: mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}` (thêm `:cut=N`) — KHÔNG gõ lại
+output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục, ghi CRLF); kiểm: `doccheck.py <đích.md>` rồi
+`blockcheck.py <đích.md> .draft-C4.1/out .draft-C4.1/src`. Cả hai công cụ đã thử: bắt được lỗi cố ý, trả mã thoát 1 — KHÔNG nối ống khi dùng làm cổng.
+Sau mỗi mục: RÀ TỪNG CON SỐ trong văn xuôi với file (blockcheck không kiểm văn xuôi). §2 lần đầu có 8 chỗ sai kiểu này (đếm nhầm 14 lần fork thay vì 12; "0,6 s"; …).
+Số liệu `fork_cost` trong văn xuôi lấy từ `out/fork_cost_summary.txt` (script `src/fork_cost_summary.py`; bản đầu của script gộp nhầm "unscoped" vào "scoped" — đã sửa).
+SAU KHI văn bản trích số từ một file output thì KHÔNG chạy lại `run.sh` cả khối; nếu buộc phải sinh lại file thì rà lại đoạn văn trích nó.
+Tham chiếu sang C1.3 viết "C1.3 §3 (bản Go)". Trong §6.1 PHẢI kể vụ gcc xóa `malloc` của tiến trình con zombie (§2.5 đã hứa); §4.7 vzeroupper; §8.4 malloc trong handler.
+Khi xong: ghép vào `C4-…/C4.1-Processes&Threads.md` (ghi đè file khung), doccheck + blockcheck sạch, commit leaf + file này, push (hiện 4 commit chưa push + commit này).
 
 <!-- /NEXT : khi viết lại mục "việc kế tiếp" ở trên, chỉ thay đoạn từ tiêu đề của nó tới dấu này. Ngày 2026-10-12 một lần thay "tới tiêu đề kế" đã xóa mất
      DÀN Ý và mục run18 (chúng chưa từng được commit; thông điệp của commit 1a397d4 nói có là SAI). Hai mục dưới đây được KHÔI PHỤC CÓ BỔ SUNG (không phải nguyên văn):
