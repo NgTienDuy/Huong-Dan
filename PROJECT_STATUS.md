@@ -15,6 +15,14 @@ KẾ TIẾP: C4.2 (Lập lịch). Đọc file khung `C4.2-Scheduling.md` và m�
 kế thừa ưu tiên). Cần SCHED_FIFO → runner (sudo). Dùng lại: `.draft-tools/` (assemble.py, doccheck.py, blockcheck.py, setup_env.sh), cách viết theo file mục + chỉ thị `{{out:…}}`,
 các file `src/common.h`, `ctxsw.c`, `hog.c` của C4.1 (giữ `.draft-C4.1/` cho tới khi rà soát xong cả nhánh). Món nợ C4.1 để lại cho C4.2: lượt chạy ≈ 1 tick 4 ms (§4.8),
 43% lần chuyển trên đường pipe là không tự nguyện (§4.3), khoản phạt CPU nghỉ (§4.6), `sched_yield` được đếm là không tự nguyện.
+C4.2 — khảo sát [i7] đã làm (`C4-…/.draft-C4.2/out/survey_i7.txt`, chỉ đọc; CHƯA có thí nghiệm nào):
+- KHÔNG đặt được SCHED_FIFO / RR / DEADLINE (EPERM; RLIMIT_RTPRIO = 0) → checkpoint (đảo ngược ưu tiên + mutex PI) và mọi thứ thời gian thực làm trên runner, gộp trong MỘT lần chạy
+  cùng `lscpu`, mitigations, `sched/features`, chế độ preempt. Được phép cục bộ: SCHED_BATCH, SCHED_IDLE, `nice` dương; controller `cpu` đã ủy quyền cho user manager
+  (cpu.weight / cpu.max trong scope riêng — CHƯA thử chạy thật); `/proc/PID/sched` đọc được.
+- ⚠️ `nice -n -5 CMD` in "Permission denied" nhưng vẫn chạy CMD và trả mã thoát 0 → phải đọc lại nice thật, không tin mã thoát.
+- CHƯA biết: lớp fair là EEVDF hay CFS (file features cần root); chế độ preempt đang dùng (kernel dựng PREEMPT_DYNAMIC).
+- Khách này KHÔNG có cpufreq, và cpuidle `current_driver` = none → sub-leaf "lập lịch và điện năng" không quan sát được từ trong máy ảo (chỉ còn RAPL phía Windows như C3.13).
+  Cũng là dữ kiện mới cho câu còn mở ở C4.1 §4.6 (khoản phạt CPU nghỉ): khách không tự chọn trạng thái ngủ sâu → ghi nhận cho lượt rà soát nhánh, CHƯA đưa vào leaf.
 Quy tắc làm việc rút từ C4.1 (áp dụng cho mọi leaf sau): (1) số trong văn xuôi phải rà với file — blockcheck không kiểm văn xuôi; mỗi mục của C4.1 có 2–8 chỗ sai kiểu này ở bản đầu;
 (2) bảng tổng hợp do script sinh cũng phải đối chiếu với giá trị đã biết (hai script đã sai: gộp "unscoped" vào "scoped"; hoán đổi hai cột); (3) con số đếm ("ba lần", "bảy lệnh")
 phải đếm bằng script; (4) nối build với chạy bằng `&&`, không nối ống ở lệnh làm cổng; (5) sửa file này bằng thay chuỗi chính xác trong khoảng tiêu đề … dấu `/NEXT`;
