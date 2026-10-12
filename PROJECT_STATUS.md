@@ -8,13 +8,57 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 ## NEXT ACTION
 
 C4.1 ĐANG VIẾT. Xong: `.draft-C4.1/doc/00-head.md` (tiêu đề, mục tiêu, §0) — đã ghép thử và doccheck: chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc".
-CHƯA viết: §1–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/01-pcb.md` (§1) theo DÀN Ý ĐÃ CHỐT ở dưới.
+CHƯA viết: §2–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/02-fork.md` (§2) theo DÀN Ý ĐÃ CHỐT ở dưới (sau dấu `/NEXT`).
 Cách viết (đã dựng và thử): mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}`
 (thêm `:cut=N` để cắt dòng dài) — KHÔNG gõ lại output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục từ tiêu đề thật, ghi CRLF);
 kiểm: `doccheck.py <đích.md>` (đã thử: bắt được tham chiếu chéo sai) rồi `blockcheck.py <đích.md> .draft-C4.1/out .draft-C4.1/src`.
 Tham chiếu sang C1.3 viết "C1.3 §3 (bản Go)" — viết "C1.3 (Go) §3" làm doccheck hiểu nhầm thành mục của chính file này.
 Khi xong: ghép vào `C4-…/C4.1-Processes&Threads.md` (ghi đè file khung), doccheck + blockcheck sạch, commit leaf + file này, push (hiện 2 commit chưa push + commit này).
+Đã viết thêm `doc/01-pcb.md` (§1; ghép 2 file ≈ 30 KB; doccheck chỉ còn lỗi "chưa viết"; blockcheck 7 khối, 118 dòng, 0 lệch — cả hai công cụ đã thử là bắt được lỗi
+cố ý và trả mã thoát 1; KHÔNG nối ống khi dùng chúng làm cổng). Kế: `doc/02-fork.md`. SAU KHI văn bản trích số từ một file output thì KHÔNG chạy lại `run.sh` cả khối
+(giá trị như utime 12/13 tick đổi theo lần chạy; blockcheck không kiểm số trong văn xuôi) — nếu buộc phải sinh lại file thì rà lại đoạn văn trích nó.
+`first/fork_cost_4k_v2.txt` (không scope) là bản dựng CHƯA có dòng "mapping state"; `first/fork_cost_thp_v2.txt` thì có → hai file không cùng bản dựng.
 File mới từ lần ghi trước: `src/pcb_proc.py` → `out/pcb_proc.txt` (§1.2; tên thành viên đã đối chiếu với BTF), đã thêm vào `run.sh light`.
+
+<!-- /NEXT : khi viết lại mục "việc kế tiếp" ở trên, chỉ thay đoạn từ tiêu đề của nó tới dấu này. Ngày 2026-10-12 một lần thay "tới tiêu đề kế" đã xóa mất
+     DÀN Ý và mục run18 (chúng chưa từng được commit; thông điệp của commit 1a397d4 nói có là SAI). Hai mục dưới đây được KHÔI PHỤC CÓ BỔ SUNG (không phải nguyên văn):
+     thêm file nào đã viết, cột objsize của slabinfo, và việc không runner nào đặt mitigations=. Trước khi viết thông điệp commit: grep nội dung đã stage. -->
+
+DÀN Ý C4.1 ĐÃ CHỐT (viết từng file ở `.draft-C4.1/doc/NN-*.md`, ghép + sinh Mục lục + CRLF ở cuối; đã viết: `00-head.md`, `01-pcb.md`):
+- §0 Cách dùng tài liệu: 0.1 nguyên tắc · 0.2 bộ công cụ · 0.3 môi trường ([i7], [N2], [EPYC]=7763 run17, [9V74]=run18)
+- §1 Khối điều khiển tiến trình: 1.1 một tác vụ là gì (task_struct, BTF) · 1.2 đọc nó qua /proc (`pcb_proc`) · 1.3 cỡ thật trong slab (run18; x86 dư 2.576 B, ARM dư 0) ·
+  1.4 mỗi cờ CLONE_* chia sẻ một thứ (`clone_share`, strace `thr_one`)
+- §2 fork/exec/wait: 2.1 fork trả về hai lần (`fork_basic`) · 2.2 ⚠️ bộ đệm stdio bị nhân đôi (`fork_stdio`, bản lỗi `wait_status_run1_buggy`) · 2.3 exec giữ gì (`exec_inherit`) ·
+  2.4 wait và mã trạng thái (`wait_status`, core_pattern) · 2.5 ⚠️ `1/z` không sinh SIGFPE (objdump) · 2.6 giá của fork theo cỡ bộ nhớ (`fork_cost` 4k/THP; cột "warm" sai nhãn;
+  chỉ báo THP lấy mẫu sai lúc) · 2.7 fork trong tiến trình nhiều luồng (`fork_mt`)
+- §3 Luồng: 3.1 luồng là tác vụ chung mm (`ids`) · 3.2 một luồng tốn gì (`thread_cost`) · 3.3 ⚠️ giới hạn thật là cgroup (9.391, pids.max; scope riêng) ·
+  3.4 mô hình lai: Go nhìn từ /proc (`go_threads`) · 3.5 preempt bằng tín hiệu (`go_preempt2`; bản hỏng `go_preempt`)
+- §4 Chi phí chuyển ngữ cảnh: 4.1 phải lưu gì (pt_regs, inactive_task_frame, FPU) · 4.2 ⚠️ thước đo: 19 GHz, và vì sao dùng ns · 4.3 cùng CPU trên ba máy + perf đếm lại ·
+  4.4 tiến trình so với luồng · 4.5 tập làm việc: "chi phí gián tiếp" (`ctxsw_wset`) · 4.6 khác CPU, CPU nghỉ/bận · 4.7 ⚠️ trạng thái AVX (hai lượt vô hiệu, lượt thứ ba + đối chứng) ·
+  4.8 chuyển không tự nguyện (`hog`)
+- §5 Coroutine và luồng xanh: 5.1 bảy lệnh asm (`switch.S`, `uctx`, strace swapcontext) · 5.2 thư viện N:1 (`green order`) · 5.3 100.000 luồng xanh · 5.4 ⚠️ một syscall chặn làm
+  chết tất cả (`green block/nonblock`) · 5.5 coroutine không stack (`proto`)
+- §6 Cây tiến trình: 6.1 zombie (`zombie`) · 6.2 mồ côi và subreaper (`orphan`, chuỗi cha ở WSL, runner) · 6.3 SIGCHLD không đếm (`reap`) · 6.4 PID 1 không thu dọn (`init_noreap`) ·
+  6.5 PID bị dùng lại và pidfd (`pid_reuse`)
+- §7 Nhóm tiến trình, phiên, điều khiển tác vụ: 7.1 nhóm và phiên (`job_groups`, `ids`) · 7.2 ^C (`job_ctrl_c`) · 7.3 đọc terminal từ nền (`job_ttin`) · 7.4 ^Z, bg (`job_ctrl_z`) ·
+  7.5 mất terminal (`job_hangup`) · 7.6 bốn nghĩa vụ của shell (`fgjob`)
+- §8 Tín hiệu: 8.1 bitmap và hàng đợi (`sig_queue`) · 8.2 khung trên stack và giá một lần giao (`sig_frame`, `sig_frame_align`, 3 máy) · 8.3 EINTR, SA_RESTART (`sig_eintr`) ·
+  8.4 ⚠️ handler không an toàn: 4 chế độ + gdb (và lần đầu gcc xóa malloc) · 8.5 errno (`sig_errno`) · 8.6 mất lần đánh thức (`sig_race`) · 8.7 luồng nào nhận (`sig_threads`) ·
+  8.8 mask và ignore qua exec (`sig_mask`) · 8.9 stack riêng cho handler (`sig_altstack`)
+- §9 Checkpoint: 9.1 yêu cầu · 9.2 benchmark · 9.3 con số · 9.4 phân rã · 9.5 Tự chấm · 9.6 Mở rộng (máy không ảo hóa; run19; Windows gốc)
+- Phụ lục A bảng tra · B triệu chứng → nguyên nhân (gồm bảng "thí nghiệm bị tầng dưới làm lệch": hiệu chuẩn add $1; vzeroupper; 1/z; malloc bị xóa ×2 (handler, zombie);
+  cột warm; chỉ báo THP; vòng Go có lời gọi; stdio nhân đôi — ĐẾM LẠI khi viết, đừng ghi con số trước) · C checklist · D đọc tiếp · Tổng kết mười điều · chân trang
+
+Runner run18 (commit 4818af5 của `c3-arm-lab`, artifact `out/runner18/`) — CHÚ Ý máy x86 lần này là EPYC 9V74, KHÁC máy 7763 của run17:
+- cùng một máy, cùng lần khởi động: x86 (9V74, AVX-512) `sizeof(task_struct)` 9.664 B (BTF) nhưng `object_size` slab 12.240 B → dư 2.576 B mỗi tác vụ; `thread_struct` 184 B,
+  `struct fpu` 4.224 B không nằm trong đó. ARM (N2) `sizeof` 8.960 = `object_size` 8.960 → dư 0; `thread_struct` 1.680 B. "2.576 B là trạng thái FPU" RẤT CÓ KHẢ NĂNG
+  nhưng CHƯA khép: dòng dmesg "context size" bị `head -8` của tôi cắt mất.
+  Cột `objsize` của `/proc/slabinfo` = `slab_size` (12.288 ở 9V74), KHÔNG phải `object_size` (12.240) → số 10.688 của 7763 ở run17 là cỡ ô slab; đừng lấy nó trừ `sizeof`.
+- N2 có `sve`, `sve2` trong Features (run17 chưa biết); cả hai runner là khách Hyper-V (dmesg).
+- mitigation của 9V74 (KHÔNG phải của 7763): spectre_v2 và retbleed "Not affected"; SRSO "Safe RET, no microcode"; tsa, SSB "Vulnerable"; không runner nào có `mitigations=`
+  trên dòng lệnh kernel. Vì vậy câu hỏi "7763 chậm 3–5× có phải do mitigation" VẪN CHƯA được thử: có trạng thái của máy không có số đo, và số đo của máy không có trạng thái.
+  `cpu MHz` (3.654 ở 9V74; 2.803 ở laptop trong khi chuỗi hiệu chuẩn đọc 4,4–4,8 GHz) là số danh nghĩa — KHÔNG dùng để kiểm hiệu chuẩn.
+- run19 (tùy chọn, CHƯA làm): trong MỘT script trên MỘT máy: `ctxsw sys|pipe1|pipe-thr` + vulnerabilities + `dmesg | grep -i "x86/fpu"` đầy đủ (không `head`) + BTF sizeof + slab.
 
 Độ chắc của số liệu C4.1 (sau lượt lặp lại 2026-10-12) — SỬA các con số ghi ở dưới nếu mâu thuẫn:
 - Chính xác/tất định: cờ clone; ma trận `clone_share`; thừa kế qua exec; mã trạng thái wait; SỐ lỗi trang (1/trang, 0, 1/trang); AnonHugePages 1024→0 qua lượt cow
@@ -166,6 +210,13 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 - `pkill -f <mẫu>` có thể giết chính shell; tìm theo PID. WSL có tiến trình hmi-scada của người dùng (iedsim, hmikit) — không đụng.
 - TSan trên kernel WSL này cần `setarch $(uname -m) -R`. Renode 1.17.0 STM32G0 có 4 chỗ sai mô hình (DMA HT/TC, ADC chia nguyên, quantum, NVIC 4 bit)
   — C3.11 §2.2 ghi cách vá. Edge TPU Compiler 14.1 không tất định — biên dịch lặp.
+
+## Việc cần báo người dùng (chưa làm, cần họ quyết)
+
+- Thư mục crash dump của WSL phía Windows (`%LOCALAPPDATA%\Temp\wsl-crashes`, đọc từ WSL là `/mnt/c/Users/<tài khoản>/AppData/Local/Temp/wsl-crashes`) đang giữ
+  ~5,7 GiB file `.dmp` do chương trình thử của các phiên trước sinh ra (hai file edgetpu 4,6 GiB + 1,0 GiB ngày 2026-10-08, v.v.) và 2 file 450 kB của phiên 2026-10-12
+  (`wait_status`, trước khi tôi cho tiến trình con tự khai không dump). `core_pattern` của WSL là một pipe nên `ulimit -c 0` KHÔNG chặn được. Nằm NGOÀI dự án →
+  không tự xóa; hỏi người dùng. Từ nay chương trình cố ý sập phải gọi `prctl(PR_SET_DUMPABLE, 0)` trước.
 
 ## Blockers
 
