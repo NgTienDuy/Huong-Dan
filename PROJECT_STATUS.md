@@ -1,6 +1,6 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2 xong; C4.3 đã khảo sát và có ba công cụ đầu; C4.4–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2 xong; C4.3 thí nghiệm gần xong, chưa viết; C4.4–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-12
 **Last session:** claude-code (Opus 5.5), 2026-10-12 (phiên thứ hai trong ngày): viết xong C4.2 (ba lượt runner run19–run21), chuẩn bị C4.3. Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
@@ -9,7 +9,27 @@ viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nh
 
 C4.1 và C4.2 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.3 (Bộ nhớ ảo & phân trang)** — 11 sub-leaf của `roadmap.md`; checkpoint: tự dựng một sự cố thrashing, chẩn đoán nó từ số liệu
 (lỗi trang, hoạt động hoán đổi, độ trễ), xác định nguyên nhân và sửa.
-BƯỚC ĐẦU TIÊN CỤ THỂ CỦA C4.3: đã có sẵn ở `C4-…/.draft-C4.3/`: `out/survey_i7.txt` (khảo sát chỉ đọc), `src/vmutil.h`, `src/pagesim.py` (FIFO/LRU/CLOCK/OPT, selftest 206 phép kiểm,
+TRẠNG THÁI C4.3 (cập nhật 2026-10-12, giữa phiên): THÍ NGHIỆM GẦN XONG, CHƯA VIẾT CHỮ NÀO CỦA LEAF. Mọi thứ ở `C4-…/.draft-C4.3/`:
+- `src/`: `vmutil.h`, `pagesim.py` (FIFO/LRU/CLOCK/OPT + selftest), `ptcost.c` (chỉ số bảng trang; chi phí bảng trang theo độ thưa; `pagemap` + kpageflags khi root), `faults.c` (3 loại lỗi trang;
+  file ghi bằng write 1 MiB so với 4 KiB), `cow.c` (smaps + PFN/kpagecount khi root), `mmapio.c` (`sem`, `speed`), `reclaim.c` (`anon` nóng/lạnh + mincore; `cache [-p 1]`), `thp.c` (+ `hugetlb`),
+  `madv.c` (`show`, `pressure`), `overcommit.c` (`reserve`, `promise`, `eat`, `victim ADJ`), `thrash.c` (checkpoint; `-d us` nghỉ giữa các yêu cầu), `tlbshoot.c`, `run.sh [basic|io|limit|thrash|all]`.
+- `out/predictions.txt`: dự đoán + kết quả từng đợt (Q, F, W, M, S, R, O, T, D, B, H, N, P-a…P-f). Kết quả chính đã có:
+  bảng trang: 16 MiB dữ liệu tốn 32 kB / 16,4 MiB / 32,8 MiB bảng trang khi rải 4 KiB / 2 MiB / 1 GiB (tỉ lệ 0 / 1 / 2 / 3) · lỗi trang: 1/trang cho anon; file trong cache: 79 lỗi cho 16.384 trang trên
+  [i7] 6.18 nhưng 1.024 trên runner 6.17 (6.18 ánh xạ cả folio lớn; file ghi bằng write 4 KiB → 1.024 cả ở [i7]) · COW: Pss 65536 → 32768 → 49152 → 65536; PFN trên runner đúng dự đoán; ghi lại sau khi con
+  thoát: 8.192 lỗi không sao chép · mmap so với read (bản công bằng, đọc mọi byte): 13,7 so với 9,3 GiB/s tuần tự trong cache · reclaim: vùng nóng 100 % còn, vùng lạnh 0,5/1,3/99/97 % theo phần tư;
+  page cache BẨN đẩy 43 % anon ra swap, page cache sạch thì không · THP: 131.072 → 256 lỗi; p99,9 một lần ghi 161–534 µs; thưa: 4 kB so với 2.048 kB mỗi byte · MADV_FREE: RSS không giảm, bị lấy 9.377
+  trang khi có áp lực, không swap · overcommit mode 0: 12 GiB nhận, 16 GiB từ chối, nhưng 64 × 4 GiB và 4.096 × malloc(1 GiB) đều nhận; mode 2 (runner): NULL ở lần 17 · OOM: systemd DỪNG CẢ SCOPE sau một
+  lần OOM kill (OOMPolicy=stop mặc định) → phải `-p OOMPolicy=continue`; PID trong dmesg ≠ PID tiến trình thấy (WSL: PID namespace) · THRASHING (checkpoint): 128–240 MiB: 3,0–3,5 triệu yêu cầu/s; 272 → 8.630;
+  320 → 2.664; 512 → 1.071 (vách ở memory.max 256M) · ⚠️ PHÁT HIỆN LỚN: tập làm việc ĐÚNG BẰNG memory.max, chạy hết tốc lực → bị OOM kill 10/10 lần dù swap còn 2 GiB; thêm 100 µs nghỉ mỗi yêu cầu → 0/5;
+  dùng memory.high → 0/5; trên runner (MGLRU bật) không bị giết → run23 thử bật/tắt lru_gen trên cùng kernel (dự đoán P-e).
+- Runner: run22 (`c3-arm-lab` be47c9e, artifact đã tải về `out/runner22/`; EPYC 7763 + N2, 16 GiB RAM, swapfile 3 GiB, MGLRU 0x0007, THP always (x86)/madvise (arm), fault_around_bytes 65536).
+  run23 (8255e9d: lru_gen bật/tắt × thrash 256/264 MiB; victim với oom_score_adj đặt tường minh) ĐANG CHẠY → tải về `out/runner23/`.
+  ⚠️ Trên runner mọi tiến trình thừa kế oom_score_adj = 500 từ agent của CI (dmesg ghi `oom_score_adj:500`) → phép thử `victim` của run22 vô hiệu; `overcommit.c` nay tự đặt và đọc lại.
+- Cục bộ đang chạy lại (nền): `run.sh limit` rồi `run.sh thrash` (bản sweep mới ghi rõ lượt nào bị giết; bản cũ giữ ở `out/thrash_sweep_run1_silent.txt`). Bằng chứng thí nghiệm hỏng đã lưu:
+  `thrash_run1_latarray.txt`, `mmapio_speed_run1_unfair.txt` (so "chép mọi byte" với "nhìn 1/4096"), `victim_run1_terminated.txt`.
+- KẾ TIẾP: chờ run23 + lượt cục bộ → viết leaf theo dàn ý 11 mục (danh sách ở dòng "Việc kế" bên dưới đã thành dàn ý chính thức; thêm §2 TLB shootdown: trên [i7]/EPYC luồng và tiến trình KHÔNG khác nhau,
+  trên N2 luồng đắt hơn 0,1–0,5 µs; dòng TLB của /proc/interrupts = 0 trên khách Hyper-V) → ghép → doccheck/blockcheck → commit → C4.4.
+(Ghi chú cũ, giữ để tham khảo) BƯỚC ĐẦU TIÊN CỤ THỂ CỦA C4.3: đã có sẵn ở `C4-…/.draft-C4.3/`: `out/survey_i7.txt` (khảo sát chỉ đọc), `src/vmutil.h`, `src/pagesim.py` (FIFO/LRU/CLOCK/OPT, selftest 206 phép kiểm,
 chuỗi Belady 9 → 10 lỗi), `src/thrash.c` (vòng yêu cầu trên một tập làm việc + bộ đếm cgroup; đã thử: 32 MiB dưới MemoryMax=64M → 7,9 triệu yêu cầu/s, 0 swap; 80 MiB → 2.650 yêu cầu/s,
 ~8.700 lỗi trang lớn/s) và `out/thrash_run1_latarray.txt` (bản đầu giữ mọi mẫu độ trễ trong mảng 32 MiB → chính mảng đó đẩy tiến trình vào swap; đã thay bằng histogram).
 Việc kế: ghi dự đoán vào `.draft-C4.3/out/predictions.txt` rồi viết các chương trình còn lại theo dàn ý: §1 không gian địa chỉ & bảng trang (VmPTE theo độ thưa; pagemap) · §2 MMU/TLB
