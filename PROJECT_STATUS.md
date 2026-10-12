@@ -1,63 +1,49 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1 xong; C4.2 đang làm thí nghiệm; C4.3–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2 xong; C4.3 đã khảo sát và có ba công cụ đầu; C4.4–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-12
-**Last session:** claude-code (Opus 5.5), 2026-10-12: bắt đầu C4 theo yêu cầu người dùng (viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`,
-rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước). Dựng lại công cụ ở `C4-…/.draft-tools/`.
+**Last session:** claude-code (Opus 5.5), 2026-10-12 (phiên thứ hai trong ngày): viết xong C4.2 (ba lượt runner run19–run21), chuẩn bị C4.3. Yêu cầu của người dùng không đổi:
+viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1 ĐÃ VIẾT XONG (2026-10-12): `E2E-SYSTEM/C4-…/C4.1-Processes&Threads.md`, 229,7 KB, 2.476 dòng, ghép từ 13 file `.draft-C4.1/doc/NN-*.md`.
-Kiểm trên file thật, không nối ống: `doccheck.py` 0 lỗi 0 cảnh báo (mã thoát 0); `blockcheck.py` 87 khối ✅, 831 dòng, 0 lệch (mã thoát 0); mọi dòng CRLF; không đường dẫn cục bộ.
-CHƯA làm cho C4.1: đọc lại TOÀN BỘ văn bản đã ghép từ đầu tới cuối như một người đọc (mới rà từng mục với file output + quét nhất quán 12 họ con số) — để dành cho lượt rà soát
-toàn nhánh sau C4.13, hoặc làm ngay nếu người dùng muốn. Leaf dài hơn leaf lớn nhất trước đó (C3.4, 215,8 KB) khoảng 14 KB.
-ĐÃ SỬA sau khi đẩy lần đầu (f3aedde): §1.2 viết "không đọc được `prio` thô từ không gian người dùng, 120 chỉ là quy ước" — SAI; `/proc/PID/sched` in `prio` (120; 130 ở nice 10)
-và `stat` in `prio` − 100. Đã thay bằng số đo + khối `out/proc_sched_prio.txt`. Phát hiện khi khảo sát C4.2.
-KẾ TIẾP: C4.2 (Lập lịch). Đọc file khung `C4.2-Scheduling.md` và mục C4.2 của `roadmap.md` (9 sub-leaf; checkpoint: tái tạo đảo ngược ưu tiên với 3 luồng, đo độ trễ, sửa bằng
-kế thừa ưu tiên). Cần SCHED_FIFO → runner (sudo). Dùng lại: `.draft-tools/` (assemble.py, doccheck.py, blockcheck.py, setup_env.sh), cách viết theo file mục + chỉ thị `{{out:…}}`,
-các file `src/common.h`, `ctxsw.c`, `hog.c` của C4.1 (giữ `.draft-C4.1/` cho tới khi rà soát xong cả nhánh). Món nợ C4.1 để lại cho C4.2: lượt chạy ≈ 1 tick 4 ms (§4.8),
-43% lần chuyển trên đường pipe là không tự nguyện (§4.3), khoản phạt CPU nghỉ (§4.6), `sched_yield` được đếm là không tự nguyện.
-C4.2 ĐANG LÀM (claude-code, Opus 5.5, phiên 2026-10-12 thứ hai) — thí nghiệm, CHƯA viết chữ nào của leaf. Mọi thứ ở `C4-…/.draft-C4.2/`:
-- `src/`: `schedutil.h`, `pi_inversion.c` (checkpoint; lớp fifo|nice|idle × mutex none|inherit|protect), `hogs.c` (chia CPU theo policy/nice/slice; `-n` = không syscall trong vòng lặp;
-  `-y` = lượng tử tự nhường; `-W` = tập làm việc), `wakelat.c` (độ trễ đánh thức; `-s` timer slack), `rtperiodic.c` (rm|inv|edf|other + `admit`), `schedsim.py` (FIFO/SJF/STCF/RR/MLFQ/FAIR,
-  có selftest 10 ca tính tay), `rtsim.py` (LL, hyperbolic, RTA, mô phỏng RM/EDF, assert RTA = mô phỏng), `run.sh [sim|share|slice|wake|quantum|multi|cgroup|tick|pi|all]` (ghi `out/`).
-- `out/predictions.txt`: dự đoán ghi TRƯỚC khi chạy (P1–P18). P1–P4 (cục bộ) đã khớp.
-- Runner: `c3-arm-lab` commit 626afd7 = run19 (script `run.sh` ở gốc repo, mã ở `c42/`); run19 dùng `hogs.c` CÒN LỖI (mỗi luồng tự tính thời điểm kết thúc → luồng ưu tiên thấp chạy bù một mình
-  sau khi các luồng khác xong; `out/nice_shares_run1_lateend.txt` là bằng chứng) → các mục e, f, j của run19 KHÔNG dùng; phải đẩy run20 với `hogs.c` đã sửa (chép lại `src/*.c,*.h` vào `c42/`).
-- Phát hiện đã có (cục bộ, [i7]): (1) mutex PI nâng trường `prio` của luồng giữ khóa (39 → 20 → 39) nhưng luồng `nice`/`SCHED_IDLE` KHÔNG được thêm CPU (trọng số lấy từ `static_prio`,
-  đã đọc `set_load_weight`/`rt_mutex_setprio` ở v6.18); (2) đọc `CLOCK_THREAD_CPUTIME_ID` trong vòng lặp tạo điểm preempt (`task_sched_runtime` → `update_curr` → `resched_curr_lazy`):
-  có đọc thì lượt chạy = slice 2,8 ms / 0,104 ms, không đọc thì = 1 tick 4 ms bất kể slice (trả món nợ C4.1 §4.8); (3) timer slack mặc định 50 µs: p50 độ trễ 99 → 53 µs khi đặt 1 ns;
-  (4) ngắt timer trên khách Hyper-V là dòng `HVS` (LOC = 0): 74/s khi nghỉ, 250/s khi có hog; (5) chia theo trọng số khớp bảng (68,8/22,6/7,4/1,05/0,19 %), nice 0:1 = 1,247.
-- Mã nguồn kernel v6.18 (bản gốc, KHÔNG phải bản Microsoft) tải ở `.draft-tools/ksrc-6.18/` (thiếu `sched.h`: GitHub trả 429) — dùng để kiểm cơ chế, ghi rõ là "v6.18 gốc" khi trích.
-- TIẾN ĐỘ VIẾT (07:07 UTC 2026-10-12): đã có ở `.draft-C4.2/doc/`: `00-head` (còn placeholder {{ENV}}, {{HZ_RUNNER}}, {{RUNNAME}}), `01-goals`, `02-policies-a/-b` (§2.1–§2.6; còn {{RUNNER_P19}}),
-  `03-quantum` (còn {{RUNNER_BASESLICE*}}, {{RUNNER_RR_TEXT}}, {{RUNNER_WAKE_TEXT}}), `04-rt-a` (§4.1–4.2; CHƯA viết §4.3–4.5 = `04-rt-b`), `05-analysis` (§5.1–5.3; CHƯA viết §5.3 phần máy thật, §5.4, §5.5),
-  `06-inversion` (xong, số runner lấy tạm từ run19 → phải rà lại với run21), `07-policies-a` (§7.1–7.3), `07-policies-c` (§7.6; CHƯA viết §7.4–7.5 = `07-policies-b`), `08-multicore` (còn {{MULTICORE_RUNNER}}),
-  `09-power` (còn {{RUNNER_WAKELAT_SLACK*}}, {{RUNNER_IDLE_*}}), `10-checkpoint` (còn {{CHECKPOINT_TABLE}}), `12-appendix-cd`, `13-summary` (còn {{FOOTER}}). CHƯA viết: `11-appendix-ab` (A bảng tra, B.1–B.4).
-  Mọi đường dẫn `runner20/…` trong doc phải đổi thành `runner21/…` (run21 = run chuẩn). Placeholder dạng {{TÊN}} KHÔNG phải chỉ thị của assemble.py — phải thay bằng văn bản trước khi ghép.
-- Runner: run19 (626afd7) đã tải về `out/runner19/` — phần d (PI), g, h, i dùng được để THAM KHẢO; e, f, j hỏng vì lỗi hogs. run20 (1f970de, hogs đã sửa) và run21 (b27ffa3 = run20 + `pi_inversion mixed`
-  + tập chu kỳ cạnh một hog OTHER) ĐANG CHẠY; tải về `out/runner20/`, `out/runner21/` bằng `gh run download <id> -R NgTienDuy/c3-arm-lab -n out-ubuntu-24.04[-arm] -D …` (id: 38214891820, 38215669939).
-  Script tổng hợp đã viết và thử trên run19: `src/pi_table.py RUNDIR`, `src/rt_table.py FILE…` (đo so với RTA), `src/rr_summary.py FILE…` (có assert tự bác dữ liệu run19), `src/wakelat_summary.py FILE ROUNDS`,
-  `src/quantum_summary.py`. Kết quả run19 đáng nhớ: PI 540,1 / 45,0 / 40,0 ms trên cả N2 lẫn EPYC 7763 (HZ=1000, 6.17.0-1022-azure, PREEMPT_VOLUNTARY, autogroup bật); RM S2: t2 lỡ 60/300, xấu nhất 72,15 ms (RTA 72);
-  S4: đo 85,16 so với RTA 80 (nghiệm RTA trùng thời điểm phát của t1 → +C1); P14 SAI (đảo ưu tiên trên S1 không lỡ: R1 = 48 ≤ 50); DEADLINE: 12 rồi EBUSY ở miền gốc, 3 rồi EBUSY trong phân vùng 1 CPU;
-  ba tập EDF bị EBUSY (nghi băng thông tác vụ vừa thoát chưa trả — run20/21 thử bằng `sleep 1` và `admit` hai lần liền); ba hog trên hai CPU của N2: 50/25/25 %, 0 di trú (trên [i7]: 33/33/33, 41–54 di trú).
-- Cục bộ đã thêm: `out/preempt_batch.txt` (P19 khớp: 43,8–44,1 % không tự nguyện dưới OTHER, ≤ 0,29 % dưới BATCH), `out/cgroup_quota.txt` (thời gian đáp ứng: p99 2,9 → 31,0 → 55,3 ms ở hạn mức 30 %, 20 %),
-  `out/util_avg.txt`, `out/quantum_yield_summary.txt` (0,52 µs/lần chuyển không tập làm việc; 6,5–6,9 µs với 1 MiB), `out/wakelat_i7_summary.txt`.
-- KẾ TIẾP: tải run20 + run21 → sinh `out/pi_table.txt`, `out/runner21_rr_summary.txt`, bảng wakelat của runner → viết §4.3–4.5, §5.3–5.5, §7.4–7.5, phụ lục A/B, điền placeholder → rà số trong văn xuôi
-  từng file với output → `assemble.py` → `doccheck.py` + `blockcheck.py` → ghi đè `C4.2-Scheduling.md` → commit (`git -c core.autocrlf=true add`), đẩy → sang C4.3.
-C4.2 — khảo sát [i7] đã làm (`C4-…/.draft-C4.2/out/survey_i7.txt`, chỉ đọc; CHƯA có thí nghiệm nào):
-- KHÔNG đặt được SCHED_FIFO / RR / DEADLINE (EPERM; RLIMIT_RTPRIO = 0) → checkpoint (đảo ngược ưu tiên + mutex PI) và mọi thứ thời gian thực làm trên runner, gộp trong MỘT lần chạy
-  cùng `lscpu`, mitigations, `sched/features`, chế độ preempt. Được phép cục bộ: SCHED_BATCH, SCHED_IDLE, `nice` dương; controller `cpu` đã ủy quyền cho user manager
-  (cpu.weight / cpu.max trong scope riêng — CHƯA thử chạy thật); `/proc/PID/sched` đọc được.
-- ⚠️ `nice -n -5 CMD` in "Permission denied" nhưng vẫn chạy CMD và trả mã thoát 0 → phải đọc lại nice thật, không tin mã thoát.
-- Lớp fair: BTF của `struct sched_entity` trên [i7] có `deadline`, `vlag`, `slice`, `min_slice`, `rel_deadline`… (`.draft-C4.2/out/btf_sched_entity.txt`) → trạng thái của EEVDF, không phải
-  CFS của sách; hành vi chọn tác vụ CHƯA kiểm (cần `sched/features` trên runner). `/proc/PID/sched` (`out/proc_self_sched.txt`, `proc_sched_prio.txt`): `se.slice` = 2.800.000 ns;
-  `se.load.weight` 1.048.576 (nice 0), 112.640 (nice 10), 3.072 (SCHED_IDLE). CHƯA biết: chế độ preempt đang dùng (kernel dựng PREEMPT_DYNAMIC).
-- Khách này KHÔNG có cpufreq, và cpuidle `current_driver` = none → sub-leaf "lập lịch và điện năng" không quan sát được từ trong máy ảo (chỉ còn RAPL phía Windows như C3.13).
-  Cũng là dữ kiện mới cho câu còn mở ở C4.1 §4.6 (khoản phạt CPU nghỉ): khách không tự chọn trạng thái ngủ sâu → ghi nhận cho lượt rà soát nhánh, CHƯA đưa vào leaf.
-Quy tắc làm việc rút từ C4.1 (áp dụng cho mọi leaf sau): (1) số trong văn xuôi phải rà với file — blockcheck không kiểm văn xuôi; mỗi mục của C4.1 có 2–8 chỗ sai kiểu này ở bản đầu;
-(2) bảng tổng hợp do script sinh cũng phải đối chiếu với giá trị đã biết (hai script đã sai: gộp "unscoped" vào "scoped"; hoán đổi hai cột); (3) con số đếm ("ba lần", "bảy lệnh")
-phải đếm bằng script; (4) nối build với chạy bằng `&&`, không nối ống ở lệnh làm cổng; (5) sửa file này bằng thay chuỗi chính xác trong khoảng tiêu đề … dấu `/NEXT`;
-(6) trước khi viết thông điệp commit, grep nội dung đã stage; (7) thí nghiệm nặng chạy trong `systemd-run --user --scope`.
+C4.1 và C4.2 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.3 (Bộ nhớ ảo & phân trang)** — 11 sub-leaf của `roadmap.md`; checkpoint: tự dựng một sự cố thrashing, chẩn đoán nó từ số liệu
+(lỗi trang, hoạt động hoán đổi, độ trễ), xác định nguyên nhân và sửa.
+BƯỚC ĐẦU TIÊN CỤ THỂ CỦA C4.3: đã có sẵn ở `C4-…/.draft-C4.3/`: `out/survey_i7.txt` (khảo sát chỉ đọc), `src/vmutil.h`, `src/pagesim.py` (FIFO/LRU/CLOCK/OPT, selftest 206 phép kiểm,
+chuỗi Belady 9 → 10 lỗi), `src/thrash.c` (vòng yêu cầu trên một tập làm việc + bộ đếm cgroup; đã thử: 32 MiB dưới MemoryMax=64M → 7,9 triệu yêu cầu/s, 0 swap; 80 MiB → 2.650 yêu cầu/s,
+~8.700 lỗi trang lớn/s) và `out/thrash_run1_latarray.txt` (bản đầu giữ mọi mẫu độ trễ trong mảng 32 MiB → chính mảng đó đẩy tiến trình vào swap; đã thay bằng histogram).
+Việc kế: ghi dự đoán vào `.draft-C4.3/out/predictions.txt` rồi viết các chương trình còn lại theo dàn ý: §1 không gian địa chỉ & bảng trang (VmPTE theo độ thưa; pagemap) · §2 MMU/TLB
+(dẫn C3.6 §5; thêm TLB shootdown: dòng `TLB` của /proc/interrupts khi `mprotect`/`munmap` trong tiến trình nhiều luồng) · §3 ba loại lỗi trang (minflt/majflt; `posix_fadvise(DONTNEED)` để
+ép lỗi lớn không cần root; fault-around; SEGV_MAPERR/ACCERR) · §4 COW (smaps Shared/Private/Pss; trang zero; dẫn C4.1 §2.6) · §5 mmap/file/chia sẻ (MAP_SHARED vs PRIVATE, msync, SIGBUS khi
+truncate, mmap so với read) · §6 hoán đổi & thay thế trang (pagesim + active/inactive của memory.stat) · §7 huge page (dẫn C3.6 §5.3–5.4; thêm phình RSS, độ trễ lỗi 2 MiB) · §8 cấp phát
+kernel vs người dùng (buddyinfo; slabinfo cần root → runner; dẫn C1.4 §3) · §9 overcommit & OOM (trong scope riêng: `memory.events oom_kill`, dmesg đọc được cục bộ; chế độ 2 trên runner)
+· §10 thrashing (checkpoint: quét tập làm việc quanh `memory.max`; PSI; sửa) · §11 cách ly bộ nhớ cho container (memory.max/high/low, page cache tính vào cgroup, `free` trong container).
+Cục bộ làm được gần hết (cgroup memory đã ủy quyền; swap 8 GiB ở /dev/sdc — GIỮ lưu lượng swap vừa phải; THP = madvise; PSI có; dmesg không bị hạn chế; không có MGLRU).
+Cần runner (root): PFN thật qua pagemap + kpageflags, /proc/slabinfo, hugetlbfs, `vm.overcommit_memory=2`, drop_caches.
+
+C4.2 (2026-10-12, claude-code Opus 5.5): `C4-…/C4.2-Scheduling.md`, 220,4 KB, 2.084 dòng, ghép từ 19 file `.draft-C4.2/doc/NN-*.md`. Kiểm trên file thật: `doccheck.py` 0 lỗi 0 cảnh báo;
+`blockcheck.py` 62 khối ✅, 534 dòng, 0 lệch; mọi dòng CRLF; không đường dẫn cục bộ. Số runner lấy từ run21 (`c3-arm-lab` b27ffa3; artifact ở `.draft-C4.2/out/runner21/`); run19 và run20
+giữ lại ở `out/runner19`, `out/runner20` vì leaf trích hai chỗ từ chúng (EBUSY của SCHED_DEADLINE; lần khựng 4,82 ms trên N2).
+CHƯA làm cho C4.2 (để lượt rà soát nhánh): đọc lại TOÀN BỘ văn bản đã ghép từ đầu tới cuối (mới rà từng mục khi viết + rà các đoạn điền số runner với bảng).
+Kết quả chính của C4.2 (để leaf sau dẫn đúng): chia theo trọng số khớp bảng tới 2 chữ số (§2.3) · EEVDF: slice riêng xóa đuôi 3,95 ms → 0,19 ms trên [i7], nhưng runner KHÔNG có đuôi đó (§2.4, §3.4)
+· đọc CLOCK_THREAD_CPUTIME_ID là điểm preempt; lượt chạy thật = 1 tick (§2.5) · 43–44 % "không tự nguyện" trên pipe = chen ngang lúc thức dậy (§2.6) · giá đổi lượt 0,52 µs / 6,5–6,9 µs với 1 MiB (§3.3)
+· RM S2: 60/300 lỡ, 72,05 ms = RTA; EDF 0 lỡ; nghiệm RTA trên mép bậc thang → +C1 (§5.5) · ngưỡng tiếp nhận DEADLINE 90 % (máy chủ công bằng chiếm 5 %) (§5.4) · PI: 540,1 → 45,0 ms; trần 40,0;
+PI vô dụng giữa các luồng SCHED_OTHER (1.017 → 1.047 ms) nhưng có tác dụng khi bên đợi là FIFO (540,2 → 43,7 ms) (§6) · nice vô nghĩa giữa hai cgroup (§7.2) · máy chủ công bằng 50 ms/s (§7.5)
+· 3 luồng/2 CPU: 33/33/33 ([i7], EPYC) nhưng 50/25/25 trên N2 (§8.2) · CPUQuota 30 % trên tác vụ cần 40 %: p99 2,9 → 31 ms (§8.4) · timer slack 50 µs (§9.2).
+Dữ liệu trả nợ C4.1 (CHƯA đưa vào C4.1 — việc của lượt rà soát nhánh): trong `.draft-C4.2/out/runner2{0,1}/…/c41-m-paired-*.txt` và `c41-n-state-*.txt`, CÙNG một máy một lần chạy (EPYC 7763):
+bảng ctxsw (sys 211 ns, pipe-thr 3.284 ns…), trạng thái mitigation (spectre_v2 Retpolines; SRSO Safe RET; tsa, SSB Vulnerable), `x86/fpu … context size is 872 bytes`, sizeof(task_struct) 9.664 (BTF)
+và slab object_size 10.640 → dư 976 B trên 7763 (so với 2.576 B trên 9V74 có AVX-512) → khép câu hỏi §1.3 của C4.1: phần dư đi theo cỡ vùng XSAVE của từng CPU. Câu "[EPYC] chậm vì mitigation?" vẫn
+chỉ có trạng thái + số đo trên cùng máy, chưa có phép bật/tắt. Ngoài ra C4.1 §4.8 (lượt 3,9 ms = tick) và câu "43 % không tự nguyện" của §4.3 nay đã có cơ chế ở C4.2 §2.5, §2.6 → thêm dẫn chiếu.
+
+Quy tắc làm việc (C4.1 + C4.2; áp dụng cho mọi leaf sau): (1) số trong văn xuôi phải rà với file — blockcheck không kiểm văn xuôi; (2) bảng tổng hợp do script sinh cũng phải đối chiếu với
+giá trị đã biết, và script phải tự bác dữ liệu hỏng (assert số vòng, assert tổng CPU = thời gian chạy); cột "max" là max thật, không phải trung vị của các max; (3) con số đếm phải đếm bằng
+script; (4) nối build với chạy bằng `&&`, không nối ống ở lệnh làm cổng; (5) sửa file này bằng thay chuỗi chính xác trong khoảng tiêu đề … dấu `/NEXT`; (6) trước khi viết thông điệp commit,
+grep nội dung đã stage; (7) thí nghiệm nặng chạy trong `systemd-run --user --scope`; (8) GHI DỰ ĐOÁN vào `out/predictions.txt` TRƯỚC khi chạy (C4.2: 7/26 sai hoặc đúng một nửa — chính chúng là
+nội dung hay nhất); (9) dụng cụ đo không được tạo ra thứ nó đo: không gọi syscall trong vòng lặp đo lập lịch; không giữ mảng mẫu lớn khi đo bộ nhớ; mọi luồng chung một thời điểm bắt đầu/kết thúc;
+định giờ bằng CLOCK_MONOTONIC_RAW; (10) một phép thử phải phân biệt được hai giả thuyết trước khi đọc kết quả của nó (PI/nice với M quá ngắn; `admit` với tác vụ chưa từng chạy);
+(11) chờ runner bằng `scratchpad/waitrun.sh RUN_ID` chạy nền (lệnh `sleep` tiền cảnh bị chặn); runner mất ~15–20 phút mỗi lượt → gom mọi thứ cần root vào MỘT script, đẩy sớm, viết trong lúc chờ;
+(12) khi điền văn bản bằng Python, đừng dùng toán tử `%` trên chuỗi có ký tự `%` — dùng `.replace` với một token; (13) mã nguồn kernel v6.18 gốc ở `.draft-tools/ksrc-6.18/` (không phải bản
+Microsoft/Azure đang chạy): trích thì ghi rõ, và luôn đặt một phép đo bên cạnh.
 
 <!-- /NEXT : khi viết lại mục "việc kế tiếp" ở trên, chỉ thay đoạn từ tiêu đề của nó tới dấu này. Ngày 2026-10-12 một lần thay "tới tiêu đề kế" đã xóa mất
      DÀN Ý và mục run18 (chúng chưa từng được commit; thông điệp của commit 1a397d4 nói có là SAI). Hai mục dưới đây được KHÔI PHỤC CÓ BỔ SUNG (không phải nguyên văn):
@@ -265,6 +251,9 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
   đó để ở mục "Mở rộng" của C3.x. Mở khóa: người dùng nối thiết bị (USB → `usbipd` cho WSL).
 
 ## Last verification
+
+- 2026-10-12: `doccheck.py C4.2-Scheduling.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.2-Scheduling.md .draft-C4.2/out .draft-C4.2/src`: 62 khối ✅, 534 dòng, 0 lệch.
+  (C4.1, cùng ngày: doccheck 0/0; blockcheck 87 khối, 831 dòng, 0 lệch.)
 
 - 2026-10-09: `doccheck.py` trên C3.1–C3.14: 14 file, 0 lỗi, 0 cảnh báo. `blockcheck.py` C3.7–C3.14 với `out/` của từng nháp: 0 dòng lệch
   (C3.7 431, C3.8 209, C3.9 191, C3.10 286, C3.11 301, C3.12 618, C3.13 371, C3.14 427). Sau đó xóa `.draft-C3.7` … `.draft-C3.14`.
