@@ -1,6 +1,6 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1 xong; C4.2–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1 xong; C4.2 đang làm thí nghiệm; C4.3–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-12
 **Last session:** claude-code (Opus 5.5), 2026-10-12: bắt đầu C4 theo yêu cầu người dùng (viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`,
 rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước). Dựng lại công cụ ở `C4-…/.draft-tools/`.
@@ -17,10 +17,33 @@ KẾ TIẾP: C4.2 (Lập lịch). Đọc file khung `C4.2-Scheduling.md` và m�
 kế thừa ưu tiên). Cần SCHED_FIFO → runner (sudo). Dùng lại: `.draft-tools/` (assemble.py, doccheck.py, blockcheck.py, setup_env.sh), cách viết theo file mục + chỉ thị `{{out:…}}`,
 các file `src/common.h`, `ctxsw.c`, `hog.c` của C4.1 (giữ `.draft-C4.1/` cho tới khi rà soát xong cả nhánh). Món nợ C4.1 để lại cho C4.2: lượt chạy ≈ 1 tick 4 ms (§4.8),
 43% lần chuyển trên đường pipe là không tự nguyện (§4.3), khoản phạt CPU nghỉ (§4.6), `sched_yield` được đếm là không tự nguyện.
-BƯỚC ĐẦU TIÊN CỤ THỂ CỦA C4.2: viết `C4-…/.draft-C4.2/src/pi_inversion.c` (3 luồng ghim một CPU: thấp giữ mutex, cao chờ mutex, trung bình chạy không nghỉ; đo thời gian luồng cao
-bị chặn với mutex thường rồi với `PTHREAD_PRIO_INHERIT`; in số lần chuyển của từng luồng để KIỂM là luồng trung bình thật sự đã chạy trong lúc luồng cao chờ), rồi một lần chạy runner
-(run19 của `c3-arm-lab`) gộp: chương trình đó dưới `sudo chrt`, `cat /sys/kernel/debug/sched/features` và `…/sched/preempt`, `lscpu`, mitigations, `ctxsw sys|pipe1|pipe-thr`
-(trả luôn món nợ run19 của C4.1), `dmesg | grep -i x86/fpu` đầy đủ, BTF sizeof + slab. Dự đoán phải ghi TRƯỚC khi chạy. Chưa viết dòng mã nào cho C4.2.
+C4.2 ĐANG LÀM (claude-code, Opus 5.5, phiên 2026-10-12 thứ hai) — thí nghiệm, CHƯA viết chữ nào của leaf. Mọi thứ ở `C4-…/.draft-C4.2/`:
+- `src/`: `schedutil.h`, `pi_inversion.c` (checkpoint; lớp fifo|nice|idle × mutex none|inherit|protect), `hogs.c` (chia CPU theo policy/nice/slice; `-n` = không syscall trong vòng lặp;
+  `-y` = lượng tử tự nhường; `-W` = tập làm việc), `wakelat.c` (độ trễ đánh thức; `-s` timer slack), `rtperiodic.c` (rm|inv|edf|other + `admit`), `schedsim.py` (FIFO/SJF/STCF/RR/MLFQ/FAIR,
+  có selftest 10 ca tính tay), `rtsim.py` (LL, hyperbolic, RTA, mô phỏng RM/EDF, assert RTA = mô phỏng), `run.sh [sim|share|slice|wake|quantum|multi|cgroup|tick|pi|all]` (ghi `out/`).
+- `out/predictions.txt`: dự đoán ghi TRƯỚC khi chạy (P1–P18). P1–P4 (cục bộ) đã khớp.
+- Runner: `c3-arm-lab` commit 626afd7 = run19 (script `run.sh` ở gốc repo, mã ở `c42/`); run19 dùng `hogs.c` CÒN LỖI (mỗi luồng tự tính thời điểm kết thúc → luồng ưu tiên thấp chạy bù một mình
+  sau khi các luồng khác xong; `out/nice_shares_run1_lateend.txt` là bằng chứng) → các mục e, f, j của run19 KHÔNG dùng; phải đẩy run20 với `hogs.c` đã sửa (chép lại `src/*.c,*.h` vào `c42/`).
+- Phát hiện đã có (cục bộ, [i7]): (1) mutex PI nâng trường `prio` của luồng giữ khóa (39 → 20 → 39) nhưng luồng `nice`/`SCHED_IDLE` KHÔNG được thêm CPU (trọng số lấy từ `static_prio`,
+  đã đọc `set_load_weight`/`rt_mutex_setprio` ở v6.18); (2) đọc `CLOCK_THREAD_CPUTIME_ID` trong vòng lặp tạo điểm preempt (`task_sched_runtime` → `update_curr` → `resched_curr_lazy`):
+  có đọc thì lượt chạy = slice 2,8 ms / 0,104 ms, không đọc thì = 1 tick 4 ms bất kể slice (trả món nợ C4.1 §4.8); (3) timer slack mặc định 50 µs: p50 độ trễ 99 → 53 µs khi đặt 1 ns;
+  (4) ngắt timer trên khách Hyper-V là dòng `HVS` (LOC = 0): 74/s khi nghỉ, 250/s khi có hog; (5) chia theo trọng số khớp bảng (68,8/22,6/7,4/1,05/0,19 %), nice 0:1 = 1,247.
+- Mã nguồn kernel v6.18 (bản gốc, KHÔNG phải bản Microsoft) tải ở `.draft-tools/ksrc-6.18/` (thiếu `sched.h`: GitHub trả 429) — dùng để kiểm cơ chế, ghi rõ là "v6.18 gốc" khi trích.
+- TIẾN ĐỘ VIẾT (07:07 UTC 2026-10-12): đã có ở `.draft-C4.2/doc/`: `00-head` (còn placeholder {{ENV}}, {{HZ_RUNNER}}, {{RUNNAME}}), `01-goals`, `02-policies-a/-b` (§2.1–§2.6; còn {{RUNNER_P19}}),
+  `03-quantum` (còn {{RUNNER_BASESLICE*}}, {{RUNNER_RR_TEXT}}, {{RUNNER_WAKE_TEXT}}), `04-rt-a` (§4.1–4.2; CHƯA viết §4.3–4.5 = `04-rt-b`), `05-analysis` (§5.1–5.3; CHƯA viết §5.3 phần máy thật, §5.4, §5.5),
+  `06-inversion` (xong, số runner lấy tạm từ run19 → phải rà lại với run21), `07-policies-a` (§7.1–7.3), `07-policies-c` (§7.6; CHƯA viết §7.4–7.5 = `07-policies-b`), `08-multicore` (còn {{MULTICORE_RUNNER}}),
+  `09-power` (còn {{RUNNER_WAKELAT_SLACK*}}, {{RUNNER_IDLE_*}}), `10-checkpoint` (còn {{CHECKPOINT_TABLE}}), `12-appendix-cd`, `13-summary` (còn {{FOOTER}}). CHƯA viết: `11-appendix-ab` (A bảng tra, B.1–B.4).
+  Mọi đường dẫn `runner20/…` trong doc phải đổi thành `runner21/…` (run21 = run chuẩn). Placeholder dạng {{TÊN}} KHÔNG phải chỉ thị của assemble.py — phải thay bằng văn bản trước khi ghép.
+- Runner: run19 (626afd7) đã tải về `out/runner19/` — phần d (PI), g, h, i dùng được để THAM KHẢO; e, f, j hỏng vì lỗi hogs. run20 (1f970de, hogs đã sửa) và run21 (b27ffa3 = run20 + `pi_inversion mixed`
+  + tập chu kỳ cạnh một hog OTHER) ĐANG CHẠY; tải về `out/runner20/`, `out/runner21/` bằng `gh run download <id> -R NgTienDuy/c3-arm-lab -n out-ubuntu-24.04[-arm] -D …` (id: 38214891820, 38215669939).
+  Script tổng hợp đã viết và thử trên run19: `src/pi_table.py RUNDIR`, `src/rt_table.py FILE…` (đo so với RTA), `src/rr_summary.py FILE…` (có assert tự bác dữ liệu run19), `src/wakelat_summary.py FILE ROUNDS`,
+  `src/quantum_summary.py`. Kết quả run19 đáng nhớ: PI 540,1 / 45,0 / 40,0 ms trên cả N2 lẫn EPYC 7763 (HZ=1000, 6.17.0-1022-azure, PREEMPT_VOLUNTARY, autogroup bật); RM S2: t2 lỡ 60/300, xấu nhất 72,15 ms (RTA 72);
+  S4: đo 85,16 so với RTA 80 (nghiệm RTA trùng thời điểm phát của t1 → +C1); P14 SAI (đảo ưu tiên trên S1 không lỡ: R1 = 48 ≤ 50); DEADLINE: 12 rồi EBUSY ở miền gốc, 3 rồi EBUSY trong phân vùng 1 CPU;
+  ba tập EDF bị EBUSY (nghi băng thông tác vụ vừa thoát chưa trả — run20/21 thử bằng `sleep 1` và `admit` hai lần liền); ba hog trên hai CPU của N2: 50/25/25 %, 0 di trú (trên [i7]: 33/33/33, 41–54 di trú).
+- Cục bộ đã thêm: `out/preempt_batch.txt` (P19 khớp: 43,8–44,1 % không tự nguyện dưới OTHER, ≤ 0,29 % dưới BATCH), `out/cgroup_quota.txt` (thời gian đáp ứng: p99 2,9 → 31,0 → 55,3 ms ở hạn mức 30 %, 20 %),
+  `out/util_avg.txt`, `out/quantum_yield_summary.txt` (0,52 µs/lần chuyển không tập làm việc; 6,5–6,9 µs với 1 MiB), `out/wakelat_i7_summary.txt`.
+- KẾ TIẾP: tải run20 + run21 → sinh `out/pi_table.txt`, `out/runner21_rr_summary.txt`, bảng wakelat của runner → viết §4.3–4.5, §5.3–5.5, §7.4–7.5, phụ lục A/B, điền placeholder → rà số trong văn xuôi
+  từng file với output → `assemble.py` → `doccheck.py` + `blockcheck.py` → ghi đè `C4.2-Scheduling.md` → commit (`git -c core.autocrlf=true add`), đẩy → sang C4.3.
 C4.2 — khảo sát [i7] đã làm (`C4-…/.draft-C4.2/out/survey_i7.txt`, chỉ đọc; CHƯA có thí nghiệm nào):
 - KHÔNG đặt được SCHED_FIFO / RR / DEADLINE (EPERM; RLIMIT_RTPRIO = 0) → checkpoint (đảo ngược ưu tiên + mutex PI) và mọi thứ thời gian thực làm trên runner, gộp trong MỘT lần chạy
   cùng `lscpu`, mitigations, `sched/features`, chế độ preempt. Được phép cục bộ: SCHED_BATCH, SCHED_IDLE, `nice` dương; controller `cpu` đã ủy quyền cho user manager
