@@ -7,11 +7,14 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1: mọi thí nghiệm đã có kết quả và `src/run.sh light` (31 file) + `heavy` (9 file) đã chạy thử cả khối, đã đọc hết. Bản chạy tay đầu tiên của 8 file bị
-`heavy` ghi đè nằm ở `out/first/` (giữ: `fork_cost_*` trong `first/` là KHÔNG scope, bản mới là TRONG scope — khác nhau ở cột exec).
-Kế tiếp: (1) VIẾT LEAF `C4.1-Processes&Threads.md` chỉ từ file output; ns là đơn vị chính; dùng bảng "độ chắc" dưới đây để không viết phẳng;
-không trích hai dòng "Killed" của `sig_mask.txt` (có đường dẫn cục bộ). (2) doccheck + blockcheck. (3) commit leaf + file này, push (hiện 1 commit chưa push: 55a3540).
-Tùy chọn trước/sau khi viết: Windows gốc (mingw); run18 (mitigations, MHz, pahole + slabinfo cùng máy, Features của N2).
+C4.1 ĐANG VIẾT. Xong: `.draft-C4.1/doc/00-head.md` (tiêu đề, mục tiêu, §0) — đã ghép thử và doccheck: chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc".
+CHƯA viết: §1–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/01-pcb.md` (§1) theo DÀN Ý ĐÃ CHỐT ở dưới.
+Cách viết (đã dựng và thử): mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}`
+(thêm `:cut=N` để cắt dòng dài) — KHÔNG gõ lại output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục từ tiêu đề thật, ghi CRLF);
+kiểm: `doccheck.py <đích.md>` (đã thử: bắt được tham chiếu chéo sai) rồi `blockcheck.py <đích.md> .draft-C4.1/out .draft-C4.1/src`.
+Tham chiếu sang C1.3 viết "C1.3 §3 (bản Go)" — viết "C1.3 (Go) §3" làm doccheck hiểu nhầm thành mục của chính file này.
+Khi xong: ghép vào `C4-…/C4.1-Processes&Threads.md` (ghi đè file khung), doccheck + blockcheck sạch, commit leaf + file này, push (hiện 2 commit chưa push + commit này).
+File mới từ lần ghi trước: `src/pcb_proc.py` → `out/pcb_proc.txt` (§1.2; tên thành viên đã đối chiếu với BTF), đã thêm vào `run.sh light`.
 
 Độ chắc của số liệu C4.1 (sau lượt lặp lại 2026-10-12) — SỬA các con số ghi ở dưới nếu mâu thuẫn:
 - Chính xác/tất định: cờ clone; ma trận `clone_share`; thừa kế qua exec; mã trạng thái wait; SỐ lỗi trang (1/trang, 0, 1/trang); AnonHugePages 1024→0 qua lượt cow
@@ -104,8 +107,9 @@ Kết quả đã có, kèm giới hạn:
   "job nền bỏ qua INT/QUIT" khi chưa đọc manual bash. `sig_frame_align.txt` — fpregs luôn chia hết 64; sp−fpregs ∈ {976, 992, 1008, 1024} theo sp mod 64, chu kỳ 64;
   khung = 1440…1488 B (khớp mọi mẫu lẻ trước đó; 128 red zone + 836 = 964 nằm trong khoảng (960, 976] mà số liệu ép ra). `green_many.txt` (scope riêng, 3 lần) —
   19,4–19,5 ns/lần chuyển trên 100.000 ngữ cảnh (2 ngữ cảnh: 7,2 ns), 4,03 KiB RSS mỗi luồng xanh, spawn 0,9–1,5 µs (dao động; "do lỗi trang đầu" là suy luận).
-- Bài học đưa vào leaf: ba lần trình biên dịch gỡ mất chính thứ đang thử — gcc -O2 xóa cặp `malloc/free` không dùng (handler "không an toàn" hóa rỗng),
-  gấp `1/z` thành so sánh (không SIGFPE), thêm `vzeroupper` (trạng thái AVX "bẩn" hóa sạch);
+- Bài học đưa vào leaf: BỐN lần trình biên dịch gỡ mất/vô hiệu chính thứ đang thử (trước đây tôi ghi "ba", quên vụ zombie) — gcc -O2 xóa cặp `malloc/free`
+  không dùng trong handler (handler "không an toàn" hóa rỗng), xóa `malloc`+`memset` của tiến trình con trong `zombie.c` (con chỉ có 292 kB), gấp `1/z` thành so sánh
+  (không SIGFPE), thêm `vzeroupper` (trạng thái AVX "bẩn" hóa sạch);
   `printf(..., syscall(), strerror(errno))` sai vì thứ tự tính đối số; stdio chưa flush trước `fork` in lặp.
 
 ## Kế hoạch C4 (máy nào cho việc gì)
@@ -116,6 +120,8 @@ Kết quả đã có, kèm giới hạn:
   KHÔNG có: SCHED_FIFO (rtprio 0), eBPF/ftrace/tracepoint (cần root), dm-flakey, Docker (chưa bật WSL integration), /dev/kvm.
 - Việc cần root → runner GitHub (`NgTienDuy/c3-arm-lab`, sudo, systemd, Docker, KVM trên x86): C4.2 (FIFO/DEADLINE, đảo ưu tiên), C4.4 (dm-flakey,
   mkfs), C4.11 (cgroup/veth/seccomp thật), C4.12 (QEMU khởi động + DT overlay), C4.13 (ftrace, bpftrace, bcc).
+- C4.4 trên runner: rootfs của runner gắn `nobarrier,data=writeback,journal_async_commit,commit=30` (đọc từ /proc/cmdline, run18) → KHÔNG đo fsync/độ bền trên
+  rootfs của runner; tự tạo loop device + mkfs + tùy chọn mount riêng.
 - C4.10: không có MCU nối máy → FreeRTOS/Zephyr trên QEMU/Renode (thời gian mô phỏng) + đo jitter thật trên Linux; phần MCU thật để "Mở rộng".
 
 ## Completed
