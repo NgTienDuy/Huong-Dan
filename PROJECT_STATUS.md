@@ -1,36 +1,24 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1 đang làm)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1 xong; C4.2–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-12
 **Last session:** claude-code (Opus 5.5), 2026-10-12: bắt đầu C4 theo yêu cầu người dùng (viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`,
 rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước). Dựng lại công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1 ĐANG VIẾT. MỌI mục nội dung §0–§8 đã có bản nháp ở `.draft-C4.1/doc/`: `00-head` (§0), `01-pcb` (§1), `02-fork` (§2), `03-threads` (§3), `04-ctxsw-a/b` (§4),
-`05-coro` (§5), `06-tree` (§6), `07-jobs` (§7), `08-signals-a/b` (§8, 22,5 KB). Ghép 11 file ≈ 199 KB, 2.192 dòng; doccheck còn 13 lỗi = §9 chưa viết + phần bắt buộc
-còn thiếu; blockcheck 85 khối, 808 dòng, 0 lệch; không có đường dẫn cục bộ.
-CHƯA viết: `09-checkpoint.md` (§9: 9.1 yêu cầu · 9.2 benchmark · 9.3 con số · 9.4 phân rã · 9.5 Tự chấm · 9.6 Mở rộng), `10-appendix.md` (Phụ lục A–D, Tổng kết mười điều,
-chân trang `*Môi trường đo: …*`). §9.4: bảng phân rã tính bằng script (`src/ctxsw_decomp.py` → `out/ctxsw_decomp.txt`, CHƯA viết) từ `ctxsw_three_machines.txt`,
-`ctxsw_ymm3.txt`, `ctxsw_cross_three.txt`; nói rõ phần 215 ns "lõi" KHÔNG tách được giữa lưu thanh ghi và sổ sách của bộ lập lịch.
-`out/sig_frame.txt` lưu ngày 2026-10-12 (3 lần trên [i7]); `sig_unsafe_modes.txt` KHÔNG có dòng `safe` (dòng đó ở `out/sig_unsafe.txt`).
-Các bản ghi `job_*.txt` do `pty_job.py` GHÉP (có nhãn do script viết) — §7 đã nói rõ. Chỉ thị ghép không được chứa dấu ":" trong regex (dùng "." thay).
-Bằng chứng mới lưu cho §5–§8 (trước đó chỉ in màn hình): `out/userswitch_summary.txt`, `out/zombie_elided.txt` (`src/zombie_elided.c`: thân hàm bản đầu = một lệnh `jmp pause`,
-292 kB), `out/reap_runs.txt`, `out/sig_threads_runs.txt`, `out/orphan_ancestors.txt` (Relay(366) là tổ tiên; có ÍT NHẤT ba tổ tiên gần hơn bị bỏ qua, không phải "hai").
-NGÂN SÁCH ĐỘ DÀI cho phần còn lại (leaf lớn nhất hiện có 216 KB): §5 ≤ 12 KB, §6 ≤ 14, §7 ≤ 14, §8 ≤ 26, §9 ≤ 10, phụ lục + tổng kết ≤ 14 → tổng ~215 KB.
-Tên file: hai chữ số + tên; hai nửa của một mục dùng CÙNG số (`04-ctxsw-a/b`) — đặt nhầm `05-ctxsw-b` sẽ làm `05-coro` xếp trước nó.
-File số liệu tính bằng script cho §4 (trích, không gõ tay): `out/ctxsw_three_machines.txt` (`src/ctxsw_three.py`), `out/ctxsw_cross_three.txt` (`src/ctxsw_cross_three.py`),
-`out/ctxsw_ymm_void_summary.txt`, `out/cpu_flags.txt` (pcid có; pti, avx512f, pku KHÔNG có — lần kiểm đầu grep cả dòng lệnh nên báo "có đủ", sai).
-Phải XEM các khối ghép từ nhiều đoạn/có `cut=` sau khi ghép (blockcheck cho qua một dòng bị cắt giữa con số: "round trip 7 …").
-§3 lần đầu có 7 chỗ văn xuôi nói quá số đo (15% của systemd, EAGAIN cho giới hạn khác, cgo, …) — đã sửa thành "theo tài liệu".
-Cách viết: mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}` (thêm `:cut=N`) — KHÔNG gõ lại
-output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục, ghi CRLF); kiểm: `doccheck.py <đích.md>` rồi
-`blockcheck.py <đích.md> .draft-C4.1/out .draft-C4.1/src`. Cả hai công cụ đã thử: bắt được lỗi cố ý, trả mã thoát 1 — KHÔNG nối ống khi dùng làm cổng.
-Sau mỗi mục: RÀ TỪNG CON SỐ trong văn xuôi với file (blockcheck không kiểm văn xuôi). §2 lần đầu có 8 chỗ sai kiểu này (đếm nhầm 14 lần fork thay vì 12; "0,6 s"; …).
-Số liệu `fork_cost` trong văn xuôi lấy từ `out/fork_cost_summary.txt` (script `src/fork_cost_summary.py`; bản đầu của script gộp nhầm "unscoped" vào "scoped" — đã sửa).
-SAU KHI văn bản trích số từ một file output thì KHÔNG chạy lại `run.sh` cả khối; nếu buộc phải sinh lại file thì rà lại đoạn văn trích nó.
-Tham chiếu sang C1.3 viết "C1.3 §3 (bản Go)". Trong §6.1 PHẢI kể vụ gcc xóa `malloc` của tiến trình con zombie (§2.5 đã hứa); §4.7 vzeroupper; §8.4 malloc trong handler.
-Khi xong: ghép vào `C4-…/C4.1-Processes&Threads.md` (ghi đè file khung), doccheck + blockcheck sạch, commit leaf + file này, push (hiện 4 commit chưa push + commit này).
+C4.1 ĐÃ VIẾT XONG (2026-10-12): `E2E-SYSTEM/C4-…/C4.1-Processes&Threads.md`, 228,5 KB, 2.460 dòng, ghép từ 13 file `.draft-C4.1/doc/NN-*.md`.
+Kiểm trên file thật, không nối ống: `doccheck.py` 0 lỗi 0 cảnh báo (mã thoát 0); `blockcheck.py` 86 khối ✅, 825 dòng, 0 lệch (mã thoát 0); mọi dòng CRLF; không đường dẫn cục bộ.
+CHƯA làm cho C4.1: đọc lại TOÀN BỘ văn bản đã ghép từ đầu tới cuối như một người đọc (mới rà từng mục với file output + quét nhất quán 12 họ con số) — để dành cho lượt rà soát
+toàn nhánh sau C4.13, hoặc làm ngay nếu người dùng muốn. Leaf dài hơn leaf lớn nhất trước đó (C3.4, 215,8 KB) khoảng 13 KB.
+KẾ TIẾP: C4.2 (Lập lịch). Đọc file khung `C4.2-Scheduling.md` và mục C4.2 của `roadmap.md` (9 sub-leaf; checkpoint: tái tạo đảo ngược ưu tiên với 3 luồng, đo độ trễ, sửa bằng
+kế thừa ưu tiên). Cần SCHED_FIFO → runner (sudo). Dùng lại: `.draft-tools/` (assemble.py, doccheck.py, blockcheck.py, setup_env.sh), cách viết theo file mục + chỉ thị `{{out:…}}`,
+các file `src/common.h`, `ctxsw.c`, `hog.c` của C4.1 (giữ `.draft-C4.1/` cho tới khi rà soát xong cả nhánh). Món nợ C4.1 để lại cho C4.2: lượt chạy ≈ 1 tick 4 ms (§4.8),
+43% lần chuyển trên đường pipe là không tự nguyện (§4.3), khoản phạt CPU nghỉ (§4.6), `sched_yield` được đếm là không tự nguyện.
+Quy tắc làm việc rút từ C4.1 (áp dụng cho mọi leaf sau): (1) số trong văn xuôi phải rà với file — blockcheck không kiểm văn xuôi; mỗi mục của C4.1 có 2–8 chỗ sai kiểu này ở bản đầu;
+(2) bảng tổng hợp do script sinh cũng phải đối chiếu với giá trị đã biết (hai script đã sai: gộp "unscoped" vào "scoped"; hoán đổi hai cột); (3) con số đếm ("ba lần", "bảy lệnh")
+phải đếm bằng script; (4) nối build với chạy bằng `&&`, không nối ống ở lệnh làm cổng; (5) sửa file này bằng thay chuỗi chính xác trong khoảng tiêu đề … dấu `/NEXT`;
+(6) trước khi viết thông điệp commit, grep nội dung đã stage; (7) thí nghiệm nặng chạy trong `systemd-run --user --scope`.
 
 <!-- /NEXT : khi viết lại mục "việc kế tiếp" ở trên, chỉ thay đoạn từ tiêu đề của nó tới dấu này. Ngày 2026-10-12 một lần thay "tới tiêu đề kế" đã xóa mất
      DÀN Ý và mục run18 (chúng chưa từng được commit; thông điệp của commit 1a397d4 nói có là SAI). Hai mục dưới đây được KHÔI PHỤC CÓ BỔ SUNG (không phải nguyên văn):
