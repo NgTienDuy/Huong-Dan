@@ -7,10 +7,24 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1: MỌI thí nghiệm đã có kết quả trong `.draft-C4.1/out/` (cục bộ + Go + runner run17); `src/run.sh light|heavy` tái tạo phần lớn (phần `heavy` mới
-viết, CHƯA chạy thử cả khối — các lệnh trong đó đã chạy tay từng cái). Kế tiếp: (1) VIẾT LEAF `C4.1-Processes&Threads.md` từ các file output (chỉ trích
-từ file; ns là đơn vị chính); (2) doccheck + blockcheck; (3) commit leaf + file này, push. Tùy chọn trước khi viết: Windows gốc (mingw) cho chuyển luồng;
-run18 trên runner (mitigations, MHz, pahole + slabinfo cùng máy, Features của N2).
+C4.1: mọi thí nghiệm đã có kết quả và `src/run.sh light` (31 file) + `heavy` (9 file) đã chạy thử cả khối, đã đọc hết. Bản chạy tay đầu tiên của 8 file bị
+`heavy` ghi đè nằm ở `out/first/` (giữ: `fork_cost_*` trong `first/` là KHÔNG scope, bản mới là TRONG scope — khác nhau ở cột exec).
+Kế tiếp: (1) VIẾT LEAF `C4.1-Processes&Threads.md` chỉ từ file output; ns là đơn vị chính; dùng bảng "độ chắc" dưới đây để không viết phẳng;
+không trích hai dòng "Killed" của `sig_mask.txt` (có đường dẫn cục bộ). (2) doccheck + blockcheck. (3) commit leaf + file này, push (hiện 1 commit chưa push: 55a3540).
+Tùy chọn trước/sau khi viết: Windows gốc (mingw); run18 (mitigations, MHz, pahole + slabinfo cùng máy, Features của N2).
+
+Độ chắc của số liệu C4.1 (sau lượt lặp lại 2026-10-12) — SỬA các con số ghi ở dưới nếu mâu thuẫn:
+- Chính xác/tất định: cờ clone; ma trận `clone_share`; thừa kế qua exec; mã trạng thái wait; SỐ lỗi trang (1/trang, 0, 1/trang); AnonHugePages 1024→0 qua lượt cow
+  (3 lần); ánh xạ sp mod 64 → {976, 992, 1008, 1024} / khung 1440…1488 (2 lần, pha đổi theo ASLR, ánh xạ không đổi); che/bỏ qua qua exec; perf = getrusage ± 13;
+  giới hạn luồng = `pids.max`.
+- Lặp lại được, có dải: fork 1 GiB/4 KiB 5,0 / 5,5 / 5,6 ms; THP 0,17 / 0,27 / 0,20 ms; luồng: VmRSS 8,28–8,29 KiB, KernelStack 15,96–15,99 KiB (N = 2.000 và 9.391);
+  luồng xanh 19,1–20,5 ns (6 lần), 4,03 KiB; `gt_switch` 7,2–7,4 ns; `swapcontext` 134–140 ns; lượt chạy 3,92–3,99 ms; bảng cùng CPU trên 3 máy; chiều nghỉ > bận 4/4 × 3 máy.
+- Mềm / phụ thuộc điều kiện: mất đánh thức tự nhiên 5, 14, 16, 23 trên 200.000 (4 lần; KHÔNG phải "1/9.000–14.000"); nới 20 µs: 23% và 36% (2 lần);
+  `sigsuspend` 0/804.000; slab mỗi luồng 8,6–11,4 KiB (tổng thường trú ~33–36 KiB); ảnh hưởng cỡ stack lên thời gian tạo CHƯA xác lập (1,5× rồi 1,1×);
+  posix_spawn 226–387 µs ngoài scope nhưng 660–1.363 µs trong scope (chưa rõ vì sao; câu "phẳng, nhích ở 1 GiB" không gộp được); giá mỗi lỗi trang
+  ~0,5 µs / ~2–3 µs (±50% theo điều kiện); AVX +13 ns; độ lớn khác-CPU theo từng máy.
+- Còn mở: cụm chậm ~395 ns ở lượt hai tác vụ; chu kỳ preempt Go ~20 ms; số lỗi sau fork vùng THP (13.637 / 20.698 / 22.786 cho 512 trang lớn — không phải "8% ổn định");
+  SigQ 1002; SigIgn của subshell `trap "" TERM` (lặp lại được, chưa giải thích); EPYC chậm 3–5×; posix_spawn chậm trong scope.
 
 Điểm mà output nói ÍT HƠN lời giải thích — phải ghi rõ là suy luận/tài liệu khi viết, hoặc bổ sung thí nghiệm:
 - `zombie.txt`: dòng "ls fd: Permission denied" KHÔNG chứng minh fd đã đóng. `job_ttin.txt`: đuôi file không cho thấy job chết sau `kill -9`.
