@@ -7,13 +7,14 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (§0), `01-pcb.md` (§1), `02-fork.md` (§2), `03-threads.md` (§3),
-`04-ctxsw-a.md` (§4.1–4.4), `04-ctxsw-b.md` (§4.5–4.8), `05-coro.md` (§5), `06-tree.md` (§6), `07-jobs.md` (§7, 9,1 KB). Ghép 9 file ≈ 167 KB, 1.851 dòng;
-doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 73 khối, 678 dòng, 0 lệch; không có đường dẫn cục bộ.
-CHƯA viết: §8–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/08-signals-a.md` (§8.1–8.4) rồi `08-signals-b.md` (§8.5–8.9) theo DÀN Ý ĐÃ CHỐT.
-`out/sig_frame.txt` MỚI LƯU (3 lần trên [i7]: AT_MINSIGSTKSZ 1776, extended_size 836, giao tín hiệu 741–774 ns, bỏ qua 127–128, getppid 62–66; khung 1472 ×3 với
-sp mod 64 = 48 — đúng như bảng `sig_frame_align`); trước đó §1.3 và §4.1 đã trích "836 byte của [i7]" khi số đó mới chỉ in màn hình. Đã thêm `sig_frame` vào `run.sh light`.
-Các bản ghi `job_*.txt` do `pty_job.py` GHÉP (có nhãn do script viết) — §7 đã nói rõ.
+C4.1 ĐANG VIẾT. MỌI mục nội dung §0–§8 đã có bản nháp ở `.draft-C4.1/doc/`: `00-head` (§0), `01-pcb` (§1), `02-fork` (§2), `03-threads` (§3), `04-ctxsw-a/b` (§4),
+`05-coro` (§5), `06-tree` (§6), `07-jobs` (§7), `08-signals-a/b` (§8, 22,5 KB). Ghép 11 file ≈ 199 KB, 2.192 dòng; doccheck còn 13 lỗi = §9 chưa viết + phần bắt buộc
+còn thiếu; blockcheck 85 khối, 808 dòng, 0 lệch; không có đường dẫn cục bộ.
+CHƯA viết: `09-checkpoint.md` (§9: 9.1 yêu cầu · 9.2 benchmark · 9.3 con số · 9.4 phân rã · 9.5 Tự chấm · 9.6 Mở rộng), `10-appendix.md` (Phụ lục A–D, Tổng kết mười điều,
+chân trang `*Môi trường đo: …*`). §9.4: bảng phân rã tính bằng script (`src/ctxsw_decomp.py` → `out/ctxsw_decomp.txt`, CHƯA viết) từ `ctxsw_three_machines.txt`,
+`ctxsw_ymm3.txt`, `ctxsw_cross_three.txt`; nói rõ phần 215 ns "lõi" KHÔNG tách được giữa lưu thanh ghi và sổ sách của bộ lập lịch.
+`out/sig_frame.txt` lưu ngày 2026-10-12 (3 lần trên [i7]); `sig_unsafe_modes.txt` KHÔNG có dòng `safe` (dòng đó ở `out/sig_unsafe.txt`).
+Các bản ghi `job_*.txt` do `pty_job.py` GHÉP (có nhãn do script viết) — §7 đã nói rõ. Chỉ thị ghép không được chứa dấu ":" trong regex (dùng "." thay).
 Bằng chứng mới lưu cho §5–§8 (trước đó chỉ in màn hình): `out/userswitch_summary.txt`, `out/zombie_elided.txt` (`src/zombie_elided.c`: thân hàm bản đầu = một lệnh `jmp pause`,
 292 kB), `out/reap_runs.txt`, `out/sig_threads_runs.txt`, `out/orphan_ancestors.txt` (Relay(366) là tổ tiên; có ÍT NHẤT ba tổ tiên gần hơn bị bỏ qua, không phải "hai").
 NGÂN SÁCH ĐỘ DÀI cho phần còn lại (leaf lớn nhất hiện có 216 KB): §5 ≤ 12 KB, §6 ≤ 14, §7 ≤ 14, §8 ≤ 26, §9 ≤ 10, phụ lục + tổng kết ≤ 14 → tổng ~215 KB.
