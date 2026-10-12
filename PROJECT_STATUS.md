@@ -7,10 +7,12 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1 ĐÃ VIẾT XONG (2026-10-12): `E2E-SYSTEM/C4-…/C4.1-Processes&Threads.md`, 228,5 KB, 2.460 dòng, ghép từ 13 file `.draft-C4.1/doc/NN-*.md`.
-Kiểm trên file thật, không nối ống: `doccheck.py` 0 lỗi 0 cảnh báo (mã thoát 0); `blockcheck.py` 86 khối ✅, 825 dòng, 0 lệch (mã thoát 0); mọi dòng CRLF; không đường dẫn cục bộ.
+C4.1 ĐÃ VIẾT XONG (2026-10-12): `E2E-SYSTEM/C4-…/C4.1-Processes&Threads.md`, 229,7 KB, 2.476 dòng, ghép từ 13 file `.draft-C4.1/doc/NN-*.md`.
+Kiểm trên file thật, không nối ống: `doccheck.py` 0 lỗi 0 cảnh báo (mã thoát 0); `blockcheck.py` 87 khối ✅, 831 dòng, 0 lệch (mã thoát 0); mọi dòng CRLF; không đường dẫn cục bộ.
 CHƯA làm cho C4.1: đọc lại TOÀN BỘ văn bản đã ghép từ đầu tới cuối như một người đọc (mới rà từng mục với file output + quét nhất quán 12 họ con số) — để dành cho lượt rà soát
-toàn nhánh sau C4.13, hoặc làm ngay nếu người dùng muốn. Leaf dài hơn leaf lớn nhất trước đó (C3.4, 215,8 KB) khoảng 13 KB.
+toàn nhánh sau C4.13, hoặc làm ngay nếu người dùng muốn. Leaf dài hơn leaf lớn nhất trước đó (C3.4, 215,8 KB) khoảng 14 KB.
+ĐÃ SỬA sau khi đẩy lần đầu (f3aedde): §1.2 viết "không đọc được `prio` thô từ không gian người dùng, 120 chỉ là quy ước" — SAI; `/proc/PID/sched` in `prio` (120; 130 ở nice 10)
+và `stat` in `prio` − 100. Đã thay bằng số đo + khối `out/proc_sched_prio.txt`. Phát hiện khi khảo sát C4.2.
 KẾ TIẾP: C4.2 (Lập lịch). Đọc file khung `C4.2-Scheduling.md` và mục C4.2 của `roadmap.md` (9 sub-leaf; checkpoint: tái tạo đảo ngược ưu tiên với 3 luồng, đo độ trễ, sửa bằng
 kế thừa ưu tiên). Cần SCHED_FIFO → runner (sudo). Dùng lại: `.draft-tools/` (assemble.py, doccheck.py, blockcheck.py, setup_env.sh), cách viết theo file mục + chỉ thị `{{out:…}}`,
 các file `src/common.h`, `ctxsw.c`, `hog.c` của C4.1 (giữ `.draft-C4.1/` cho tới khi rà soát xong cả nhánh). Món nợ C4.1 để lại cho C4.2: lượt chạy ≈ 1 tick 4 ms (§4.8),
@@ -20,7 +22,9 @@ C4.2 — khảo sát [i7] đã làm (`C4-…/.draft-C4.2/out/survey_i7.txt`, ch�
   cùng `lscpu`, mitigations, `sched/features`, chế độ preempt. Được phép cục bộ: SCHED_BATCH, SCHED_IDLE, `nice` dương; controller `cpu` đã ủy quyền cho user manager
   (cpu.weight / cpu.max trong scope riêng — CHƯA thử chạy thật); `/proc/PID/sched` đọc được.
 - ⚠️ `nice -n -5 CMD` in "Permission denied" nhưng vẫn chạy CMD và trả mã thoát 0 → phải đọc lại nice thật, không tin mã thoát.
-- CHƯA biết: lớp fair là EEVDF hay CFS (file features cần root); chế độ preempt đang dùng (kernel dựng PREEMPT_DYNAMIC).
+- Lớp fair: BTF của `struct sched_entity` trên [i7] có `deadline`, `vlag`, `slice`, `min_slice`, `rel_deadline`… (`.draft-C4.2/out/btf_sched_entity.txt`) → trạng thái của EEVDF, không phải
+  CFS của sách; hành vi chọn tác vụ CHƯA kiểm (cần `sched/features` trên runner). `/proc/PID/sched` (`out/proc_self_sched.txt`, `proc_sched_prio.txt`): `se.slice` = 2.800.000 ns;
+  `se.load.weight` 1.048.576 (nice 0), 112.640 (nice 10), 3.072 (SCHED_IDLE). CHƯA biết: chế độ preempt đang dùng (kernel dựng PREEMPT_DYNAMIC).
 - Khách này KHÔNG có cpufreq, và cpuidle `current_driver` = none → sub-leaf "lập lịch và điện năng" không quan sát được từ trong máy ảo (chỉ còn RAPL phía Windows như C3.13).
   Cũng là dữ kiện mới cho câu còn mở ở C4.1 §4.6 (khoản phạt CPU nghỉ): khách không tự chọn trạng thái ngủ sâu → ghi nhận cho lượt rà soát nhánh, CHƯA đưa vào leaf.
 Quy tắc làm việc rút từ C4.1 (áp dụng cho mọi leaf sau): (1) số trong văn xuôi phải rà với file — blockcheck không kiểm văn xuôi; mỗi mục của C4.1 có 2–8 chỗ sai kiểu này ở bản đầu;
