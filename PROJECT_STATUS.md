@@ -8,9 +8,11 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 ## NEXT ACTION
 
 C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (§0), `01-pcb.md` (§1), `02-fork.md` (§2), `03-threads.md` (§3),
-`04-ctxsw-a.md` (§4.1–4.4), `04-ctxsw-b.md` (§4.5–4.8). Ghép 6 file ≈ 126 KB, 1.289 dòng; doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc";
-blockcheck 52 khối, 492 dòng, 0 lệch; không có đường dẫn cục bộ.
-CHƯA viết: §5–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/05-coro.md` (§5) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+`04-ctxsw-a.md` (§4.1–4.4), `04-ctxsw-b.md` (§4.5–4.8), `05-coro.md` (§5, 9,3 KB), `06-tree.md` (§6, 9,5 KB). Ghép 8 file ≈ 152 KB, 1.650 dòng;
+doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 67 khối, 610 dòng, 0 lệch; không có đường dẫn cục bộ.
+CHƯA viết: §7–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/07-jobs.md` (§7) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+Bằng chứng mới lưu cho §5–§8 (trước đó chỉ in màn hình): `out/userswitch_summary.txt`, `out/zombie_elided.txt` (`src/zombie_elided.c`: thân hàm bản đầu = một lệnh `jmp pause`,
+292 kB), `out/reap_runs.txt`, `out/sig_threads_runs.txt`, `out/orphan_ancestors.txt` (Relay(366) là tổ tiên; có ÍT NHẤT ba tổ tiên gần hơn bị bỏ qua, không phải "hai").
 NGÂN SÁCH ĐỘ DÀI cho phần còn lại (leaf lớn nhất hiện có 216 KB): §5 ≤ 12 KB, §6 ≤ 14, §7 ≤ 14, §8 ≤ 26, §9 ≤ 10, phụ lục + tổng kết ≤ 14 → tổng ~215 KB.
 Tên file: hai chữ số + tên; hai nửa của một mục dùng CÙNG số (`04-ctxsw-a/b`) — đặt nhầm `05-ctxsw-b` sẽ làm `05-coro` xếp trước nó.
 File số liệu tính bằng script cho §4 (trích, không gõ tay): `out/ctxsw_three_machines.txt` (`src/ctxsw_three.py`), `out/ctxsw_cross_three.txt` (`src/ctxsw_cross_three.py`),
@@ -85,7 +87,9 @@ Runner run18 (commit 4818af5 của `c3-arm-lab`, artifact `out/runner18/`) — C
 - `sig_queue`: thứ tự handler (USR1 chạy sau 1000 RT) là quan sát; cơ chế "khung lồng nhau" là đọc kernel. SigQ 1002 (gửi 1001) chưa giải thích.
 - `sig_threads`: mọi tín hiệu tới một luồng là quan sát; `curr_target` là theo trí nhớ. `core_pattern`: "RLIMIT_CORE=1 là giá trị đặc biệt" CHƯA kiểm.
 - `ids.txt` chạy từ script nên pgid = pid của script (không phải của chính nó) — đúng ý §7, đừng viết "pgid = pid".
-- Dao động giữa hai lần chạy: `reap` naive 79/95, handler vòng lặp 132/15 lần; `sig_unsafe` hỏng sau 37…163 vòng; `sig_threads` 1999 hoặc 2000.
+- Dao động giữa các lần chạy (đã LƯU thêm: `out/reap_runs.txt` 5 lần, `out/sig_threads_runs.txt` 3 lần, `out/orphan_ancestors.txt`): `reap` naive thu được 78–122 trên 200,
+  luôn còn zombie; handler vòng lặp chạy 15–122 lần cho 200 con, luôn thu đủ. `sig_unsafe` hỏng sau 1…487 vòng. `sig_threads`: mọi tín hiệu tới MỘT luồng ở cả 16 hàng
+  đã lưu, nhưng số đếm được là 1.989–2.000 trên 2.000 (thiếu 0–11) — câu "thiếu nhiều nhất 1" trước đây SAI (nó dựa trên 2 lần chạy, một lần chỉ in màn hình).
 
 Trạng thái C4.1 (2026-10-12): mã ở `.draft-C4.1/src/` (31 chương trình C, `pty_job.py`, `ctxsw_paired.py`, `pcb.sh`) đã biên dịch và chạy thử.
 Đã ghi `out/`: `pcb_*`, `wait_status_run1_buggy.txt`, `core_pattern.txt`, `sig_unsafe_elided.txt`, `calib_chains.txt`, `ctxsw_run1_badcalib.txt`,
