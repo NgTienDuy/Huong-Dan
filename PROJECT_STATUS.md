@@ -8,9 +8,12 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 ## NEXT ACTION
 
 C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (§0), `01-pcb.md` (§1), `02-fork.md` (§2), `03-threads.md` (§3),
-`04-ctxsw-a.md` (§4.1–4.4), `04-ctxsw-b.md` (§4.5–4.8), `05-coro.md` (§5, 9,3 KB), `06-tree.md` (§6, 9,5 KB). Ghép 8 file ≈ 152 KB, 1.650 dòng;
-doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 67 khối, 610 dòng, 0 lệch; không có đường dẫn cục bộ.
-CHƯA viết: §7–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/07-jobs.md` (§7) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+`04-ctxsw-a.md` (§4.1–4.4), `04-ctxsw-b.md` (§4.5–4.8), `05-coro.md` (§5), `06-tree.md` (§6), `07-jobs.md` (§7, 9,1 KB). Ghép 9 file ≈ 167 KB, 1.851 dòng;
+doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 73 khối, 678 dòng, 0 lệch; không có đường dẫn cục bộ.
+CHƯA viết: §8–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/08-signals-a.md` (§8.1–8.4) rồi `08-signals-b.md` (§8.5–8.9) theo DÀN Ý ĐÃ CHỐT.
+`out/sig_frame.txt` MỚI LƯU (3 lần trên [i7]: AT_MINSIGSTKSZ 1776, extended_size 836, giao tín hiệu 741–774 ns, bỏ qua 127–128, getppid 62–66; khung 1472 ×3 với
+sp mod 64 = 48 — đúng như bảng `sig_frame_align`); trước đó §1.3 và §4.1 đã trích "836 byte của [i7]" khi số đó mới chỉ in màn hình. Đã thêm `sig_frame` vào `run.sh light`.
+Các bản ghi `job_*.txt` do `pty_job.py` GHÉP (có nhãn do script viết) — §7 đã nói rõ.
 Bằng chứng mới lưu cho §5–§8 (trước đó chỉ in màn hình): `out/userswitch_summary.txt`, `out/zombie_elided.txt` (`src/zombie_elided.c`: thân hàm bản đầu = một lệnh `jmp pause`,
 292 kB), `out/reap_runs.txt`, `out/sig_threads_runs.txt`, `out/orphan_ancestors.txt` (Relay(366) là tổ tiên; có ÍT NHẤT ba tổ tiên gần hơn bị bỏ qua, không phải "hai").
 NGÂN SÁCH ĐỘ DÀI cho phần còn lại (leaf lớn nhất hiện có 216 KB): §5 ≤ 12 KB, §6 ≤ 14, §7 ≤ 14, §8 ≤ 26, §9 ≤ 10, phụ lục + tổng kết ≤ 14 → tổng ~215 KB.
