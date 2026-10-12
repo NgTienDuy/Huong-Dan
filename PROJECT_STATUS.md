@@ -7,9 +7,11 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (tiêu đề, mục tiêu, §0), `01-pcb.md` (§1), `02-fork.md` (§2). Ghép 3 file ≈ 58 KB, 590 dòng;
-doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 22 khối, 235 dòng, 0 lệch. CHƯA viết: §3–§9, Phụ lục A–D, Tổng kết, chân trang.
-Viết tiếp `doc/03-threads.md` (§3) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (tiêu đề, mục tiêu, §0), `01-pcb.md` (§1), `02-fork.md` (§2), `03-threads.md` (§3).
+Ghép 4 file ≈ 80 KB, 835 dòng; doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 31 khối, 317 dòng, 0 lệch; không có đường dẫn cục bộ.
+CHƯA viết: §4–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/04-ctxsw.md` (§4) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+§4: bảng ba máy KHÔNG gõ tay — viết script gộp `out/ctxsw_paired_ns.txt` + `out/runner17/paired_ns_{aarch64,x86_64}.txt` ra một file rồi trích.
+§3 lần đầu có 7 chỗ văn xuôi nói quá số đo (15% của systemd, EAGAIN cho giới hạn khác, cgo, …) — đã sửa thành "theo tài liệu".
 Cách viết: mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}` (thêm `:cut=N`) — KHÔNG gõ lại
 output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục, ghi CRLF); kiểm: `doccheck.py <đích.md>` rồi
 `blockcheck.py <đích.md> .draft-C4.1/out .draft-C4.1/src`. Cả hai công cụ đã thử: bắt được lỗi cố ý, trả mã thoát 1 — KHÔNG nối ống khi dùng làm cổng.
