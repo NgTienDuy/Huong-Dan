@@ -17,6 +17,10 @@ KẾ TIẾP: C4.2 (Lập lịch). Đọc file khung `C4.2-Scheduling.md` và m�
 kế thừa ưu tiên). Cần SCHED_FIFO → runner (sudo). Dùng lại: `.draft-tools/` (assemble.py, doccheck.py, blockcheck.py, setup_env.sh), cách viết theo file mục + chỉ thị `{{out:…}}`,
 các file `src/common.h`, `ctxsw.c`, `hog.c` của C4.1 (giữ `.draft-C4.1/` cho tới khi rà soát xong cả nhánh). Món nợ C4.1 để lại cho C4.2: lượt chạy ≈ 1 tick 4 ms (§4.8),
 43% lần chuyển trên đường pipe là không tự nguyện (§4.3), khoản phạt CPU nghỉ (§4.6), `sched_yield` được đếm là không tự nguyện.
+BƯỚC ĐẦU TIÊN CỤ THỂ CỦA C4.2: viết `C4-…/.draft-C4.2/src/pi_inversion.c` (3 luồng ghim một CPU: thấp giữ mutex, cao chờ mutex, trung bình chạy không nghỉ; đo thời gian luồng cao
+bị chặn với mutex thường rồi với `PTHREAD_PRIO_INHERIT`; in số lần chuyển của từng luồng để KIỂM là luồng trung bình thật sự đã chạy trong lúc luồng cao chờ), rồi một lần chạy runner
+(run19 của `c3-arm-lab`) gộp: chương trình đó dưới `sudo chrt`, `cat /sys/kernel/debug/sched/features` và `…/sched/preempt`, `lscpu`, mitigations, `ctxsw sys|pipe1|pipe-thr`
+(trả luôn món nợ run19 của C4.1), `dmesg | grep -i x86/fpu` đầy đủ, BTF sizeof + slab. Dự đoán phải ghi TRƯỚC khi chạy. Chưa viết dòng mã nào cho C4.2.
 C4.2 — khảo sát [i7] đã làm (`C4-…/.draft-C4.2/out/survey_i7.txt`, chỉ đọc; CHƯA có thí nghiệm nào):
 - KHÔNG đặt được SCHED_FIFO / RR / DEADLINE (EPERM; RLIMIT_RTPRIO = 0) → checkpoint (đảo ngược ưu tiên + mutex PI) và mọi thứ thời gian thực làm trên runner, gộp trong MỘT lần chạy
   cùng `lscpu`, mitigations, `sched/features`, chế độ preempt. Được phép cục bộ: SCHED_BATCH, SCHED_IDLE, `nice` dương; controller `cpu` đã ủy quyền cho user manager
