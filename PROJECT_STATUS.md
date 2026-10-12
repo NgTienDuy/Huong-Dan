@@ -7,10 +7,15 @@ rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc ph�
 
 ## NEXT ACTION
 
-C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (tiêu đề, mục tiêu, §0), `01-pcb.md` (§1), `02-fork.md` (§2), `03-threads.md` (§3).
-Ghép 4 file ≈ 80 KB, 835 dòng; doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc"; blockcheck 31 khối, 317 dòng, 0 lệch; không có đường dẫn cục bộ.
-CHƯA viết: §4–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/04-ctxsw.md` (§4) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
-§4: bảng ba máy KHÔNG gõ tay — viết script gộp `out/ctxsw_paired_ns.txt` + `out/runner17/paired_ns_{aarch64,x86_64}.txt` ra một file rồi trích.
+C4.1 ĐANG VIẾT. Đã viết (bản nháp ở `.draft-C4.1/doc/`): `00-head.md` (§0), `01-pcb.md` (§1), `02-fork.md` (§2), `03-threads.md` (§3),
+`04-ctxsw-a.md` (§4.1–4.4), `04-ctxsw-b.md` (§4.5–4.8). Ghép 6 file ≈ 126 KB, 1.289 dòng; doccheck chỉ còn lỗi "mục chưa viết" + "thiếu phần bắt buộc";
+blockcheck 52 khối, 492 dòng, 0 lệch; không có đường dẫn cục bộ.
+CHƯA viết: §5–§9, Phụ lục A–D, Tổng kết, chân trang. Viết tiếp `doc/05-coro.md` (§5) theo DÀN Ý ĐÃ CHỐT (ngay sau dấu `/NEXT`).
+NGÂN SÁCH ĐỘ DÀI cho phần còn lại (leaf lớn nhất hiện có 216 KB): §5 ≤ 12 KB, §6 ≤ 14, §7 ≤ 14, §8 ≤ 26, §9 ≤ 10, phụ lục + tổng kết ≤ 14 → tổng ~215 KB.
+Tên file: hai chữ số + tên; hai nửa của một mục dùng CÙNG số (`04-ctxsw-a/b`) — đặt nhầm `05-ctxsw-b` sẽ làm `05-coro` xếp trước nó.
+File số liệu tính bằng script cho §4 (trích, không gõ tay): `out/ctxsw_three_machines.txt` (`src/ctxsw_three.py`), `out/ctxsw_cross_three.txt` (`src/ctxsw_cross_three.py`),
+`out/ctxsw_ymm_void_summary.txt`, `out/cpu_flags.txt` (pcid có; pti, avx512f, pku KHÔNG có — lần kiểm đầu grep cả dòng lệnh nên báo "có đủ", sai).
+Phải XEM các khối ghép từ nhiều đoạn/có `cut=` sau khi ghép (blockcheck cho qua một dòng bị cắt giữa con số: "round trip 7 …").
 §3 lần đầu có 7 chỗ văn xuôi nói quá số đo (15% của systemd, EAGAIN cho giới hạn khác, cgo, …) — đã sửa thành "theo tài liệu".
 Cách viết: mỗi mục một file `doc/NN-*.md`; trích output bằng chỉ thị đứng riêng một dòng `{{out:FILE}}`, `{{out:FILE:A-B}}`, `{{out:FILE:/REGEX/}}` (thêm `:cut=N`) — KHÔNG gõ lại
 output bằng tay; ghép: `python3 .draft-tools/assemble.py .draft-C4.1 <đích.md>` (sinh Mục lục, ghi CRLF); kiểm: `doccheck.py <đích.md>` rồi
@@ -37,7 +42,7 @@ DÀN Ý C4.1 ĐÃ CHỐT (viết từng file ở `.draft-C4.1/doc/NN-*.md`, ghé
 - §4 Chi phí chuyển ngữ cảnh: 4.1 phải lưu gì (pt_regs, inactive_task_frame, FPU) · 4.2 ⚠️ thước đo: 19 GHz, và vì sao dùng ns · 4.3 cùng CPU trên ba máy + perf đếm lại ·
   4.4 tiến trình so với luồng · 4.5 tập làm việc: "chi phí gián tiếp" (`ctxsw_wset`) · 4.6 khác CPU, CPU nghỉ/bận · 4.7 ⚠️ trạng thái AVX (hai lượt vô hiệu, lượt thứ ba + đối chứng) ·
   4.8 chuyển không tự nguyện (`hog`)
-- §5 Coroutine và luồng xanh: 5.1 bảy lệnh asm (`switch.S`, `uctx`, strace swapcontext) · 5.2 thư viện N:1 (`green order`) · 5.3 100.000 luồng xanh · 5.4 ⚠️ một syscall chặn làm
+- §5 Coroutine và luồng xanh: 5.1 chuyển bằng 15 lệnh asm, khung 7 giá trị (`switch.S`, `uctx`, strace swapcontext) [trước ghi nhầm "bảy lệnh" — đếm từ file] · 5.2 thư viện N:1 (`green order`) · 5.3 100.000 luồng xanh · 5.4 ⚠️ một syscall chặn làm
   chết tất cả (`green block/nonblock`) · 5.5 coroutine không stack (`proto`)
 - §6 Cây tiến trình: 6.1 zombie (`zombie`) · 6.2 mồ côi và subreaper (`orphan`, chuỗi cha ở WSL, runner) · 6.3 SIGCHLD không đếm (`reap`) · 6.4 PID 1 không thu dọn (`init_noreap`) ·
   6.5 PID bị dùng lại và pidfd (`pid_reuse`)
@@ -118,7 +123,7 @@ Kết quả đã có, kèm giới hạn:
   tiến trình−luồng yield +99 / +100 / +106, pipe +53 / +109 / +38, futex +87 / +148 / +91 (runner: 15/15, dải hẹp). KHÔNG khẳng định "100 ns phổ quát".
   perf đếm lại: 1.200.020 / 1.200.018 so với getrusage 1.200.007 / 1.200.005 (chỉ kiểm cho pipe-thr cùng CPU); gắn perf làm chậm 7–12,5%.
   Khác CPU, đích nghỉ / bận (µs mỗi lần trao tay): i7 11,6–12,1 / 2,6; N2 7,55 / 6,2–6,4; EPYC 12,8–13,4 / 6,2–6,4 → chiều lặp lại 4/4 trên cả ba máy,
-  nhưng độ lớn riêng từng môi trường (phần "do nghỉ" 9,4 / 1,3 / 6,7 µs): câu "9,4 trên 12 µs" CHỈ đúng cho laptop. Cơ chế chưa tách trên máy nào.
+  nhưng độ lớn riêng từng môi trường (phần "do nghỉ" 9,4 / 1,3 / 6,6 µs — tính bằng `ctxsw_cross_three.py`): câu "9,4 trên 12 µs" CHỈ đúng cho laptop. Cơ chế chưa tách trên máy nào.
 - `fork_cost` (đã chạy lần đầu hôm nay; `out/fork_cost_4k.txt` có cột "warm" GHI NHÃN SAI — đã chú thích; dùng `_4k_v2`, `_thp_v2`):
   trang 4 KiB: `fork()` 40–67 µs ở 1 MiB → 5,0–5,5 ms ở 1 GiB (≈5 µs/MiB, hai lần chạy); fork+wait ≈ 2× ; vfork 17–44 µs không theo cỡ;
   posix_spawn 226–291 µs, riêng 1 GiB 361/387 µs (hai lần cùng chiều, chưa giải thích). Ghi một byte mỗi trang (kèm số lỗi trang, getrusage):
