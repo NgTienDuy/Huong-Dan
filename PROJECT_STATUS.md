@@ -1,27 +1,29 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2 xong; C4.3 đã viết §0–§11 ở nháp; C4.4–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2, C4.3 xong; C4.4–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-30
-**Last session:** claude-code (Opus 5.5), 2026-10-30: tiếp C4.3 (viết §9–§11, thí nghiệm checkpoint mới). Yêu cầu của người dùng không đổi:
+**Last session:** claude-code (Opus 5.5), 2026-10-30: viết xong C4.3 (§9–§12, phụ lục; thí nghiệm checkpoint mới), chuẩn bị C4.4. Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1 và C4.2 ĐÃ VIẾT XONG. ĐANG LÀM: **C4.3 (Bộ nhớ ảo & phân trang)** — cập nhật 2026-10-30 (claude-code Opus 5.5):
-- Nháp ở `C4-…/.draft-C4.3/doc/`: `00-head` … `11-cgroup` ĐÃ VIẾT (§0–§11). CÒN: `12-checkpoint.md`, `13-appendix.md` (Phụ lục A–D, Tổng kết, chân trang),
-  sửa `00-head.md` §0.3 (run23 x86 là EPYC 9V45, không phải 7763; lru_gen 0x0007 trên x86 nhưng 0x0003 trên N2; ngày đo thêm 30/10/2026),
-  rồi `assemble.py` → `C4.3-VirtualMemory&Paging.md`, doccheck + blockcheck, rà văn xuôi từng mục với file, commit, rồi C4.4.
-- Thí nghiệm mới 2026-10-30 (đều có dự đoán ghi trước trong `out/predictions.txt`): checkpoint `src/ckpt.sh` + `src/diag.sh` (theo dõi từ ngoài) +
-  `thrash -g S:MiB` → `out/ckpt_{app,diag,fix_at}_{run1,run2,pin}.txt`: 200→320 MiB ở giây 6 dưới 256M; 3,1 triệu → 2,5k yêu cầu/s; majflt ≈ pswpin ≈ 9k/s;
-  sửa bằng `systemctl --user set-property … MemoryMax=384M` ở t=13,1 → hồi trong ~2,5 s; memory.current 321 MiB = tập làm việc đo được.
-  PSI: mem% chỉ 1–2% khi `workingset_restore_anon` = 0 (mm/page_io.c chỉ tính trang từng active); io% 34–57% không ghim nhưng 89,6–91,4% khi ghim 1 CPU
-  (kernel/sched/psi.c gộp theo tNONIDLE của từng CPU). `src/kmem.py` (300.000 file: +1.328 B slab/file; giới hạn 64M vẫn tạo đủ, anon bị đẩy ra);
-  `src/iso.sh` (scope Delegate=yes, hai nhóm con: không memory.low → dịch vụ 3,3 triệu → ~1k yêu cầu/s; memory.low=160M → 0 lỗi lớn; hàng xóm 1.040/s).
-  `src/oomtable.py`, `thrashmodel.py` (16(1−R/W) khớp ≤9% trên 3 máy, R≈254 MiB), `slowruns.py` (3/37 lượt chậm 3–11×, chưa rõ vì sao).
-  Tái lập OOM ở đúng giới hạn: 5/5 (`out/oomfreq4.txt`); `out/oom_when.txt`: bị giết trong giây đầu sau khi điền (P-h sai).
-- Mã nguồn kernel v6.18 thêm vào `.draft-tools/ksrc-6.18/`: mm_{oom_kill,memcontrol,vmscan,util,page_counter,page_io,workingset,memory}.c, mm_internal.h,
-  fs_proc_base.c, kernel_sched_psi.c.
-- `src/run.sh` có thêm mục `repeat` (công thức oomfreq*), `c11`, `ckpt`, `tables`; mục `cgroup_view` đã sửa dòng `$` cho đúng lệnh thật (chạy lại 30/10).
+C4.1, C4.2, C4.3 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.4 (Hệ thống file & lưu trữ ở tầng OS)** — 10 sub-leaf của `roadmap.md`; checkpoint: chứng minh mất dữ liệu
+khi thiếu `fsync` bằng cắt điện thật hoặc mô phỏng (`dm-flakey`/VM), rồi sửa và chứng minh không mất. Cần runner (root: loop device, mkfs, dm-flakey, mount
+tùy chọn; rootfs của runner gắn nobarrier,data=writeback → KHÔNG đo độ bền trên rootfs) hoặc QEMU khởi động một kernel + đĩa ảo rồi "giết" QEMU (cắt điện
+thật hơn dm-flakey: mất cả cache ghi của "đĩa"). Bước đầu tiên cụ thể: khảo sát chỉ đọc trên [i7] (`mount`, `findmnt -o +OPTIONS`, `/sys/block/*/queue/*`,
+scheduler, `stat -f`, `debugfs` không cần root? không) → `.draft-C4.4/out/survey_i7.txt`; tải qemu-system-x86 + một kernel/initramfs nhỏ vào scratchpad
+(C3 đã làm được với `apt download`); ghi dự đoán; viết `fsync` checkpoint chạy trong QEMU (virtio-blk cache=writeback, kill -9 QEMU) — chạy được không root.
+
+C4.3 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.3-VirtualMemory&Paging.md`, 215,1 KB, 2.000 dòng, ghép từ 14 file `.draft-C4.3/doc/NN-*.md`. Kiểm trên file thật:
+`doccheck.py` 0 lỗi 0 cảnh báo; `blockcheck.py` 55 khối ✅, 599 dòng, 0 lệch; CRLF; không đường dẫn cục bộ. Đã rà văn xuôi §1–§12 với file (sửa: §8.3 đổi kB→MiB
+chia 1.000; §7.1 "max tệ hơn mười lần" chỉ đúng với p99,9; §3.4 tỉ lệ 65–80×; bảng B.3 hàng R2). CHƯA: đọc lại toàn văn đã ghép từ đầu tới cuối (để lượt rà soát nhánh).
+Kết quả chính (để leaf sau dẫn đúng): bảng trang 32 kB / 16,4 MiB / 32,8 MiB cho 16 MiB rải 4 KiB/2 MiB/1 GiB (§1.2) · lỗi nhỏ ~1 µs, lớn 68–84 µs; 79 so với
+1.024 lỗi file (6.18 so với 6.17, §3.3) · COW Pss 64→32→48→64; ghi lại sau khi con thoát: lỗi không chép (§4) · mmap 1,6× read trong cache, chậm hơn khi
+ngẫu nhiên lạnh (§5.3) · cache bẩn đẩy anon ra swap (§6.3) · THP 256 lỗi, p99,9 184 µs, 2.048 kB/byte (§7) · 1.328 B slab/file (§8.3, §11.3) · 4 TiB
+hứa / 18 MiB có mặt; điểm OOM = rss+swap+pgtables+adj·T/1000; runner thừa kế adj 500 (§9) · thrashing = 16(1−R/W), ×357 khi vượt 6%, ~115–130 µs mỗi lỗi
+(§10.1) · PSI: chỉ trang từng active; gộp theo CPU (§10.5) · OOM ở đúng giới hạn: 10/10 LRU hai danh sách, 0/10 MGLRU (§11.4) · memory.low: 3,3 triệu → ~1k
+yêu cầu/s không bảo vệ, 0 lỗi có bảo vệ (§11.6) · checkpoint §12: 200→320 MiB, chẩn đoán 7 bước từ diag.sh, sửa bằng set-property, hồi sau 2,5 s.
+Câu hỏi mở của C4.3 ở Phụ lục B.4 (3/37 lượt chậm; cơ chế MGLRU; 80 MiB "file" sau 300.000 file; read chậm trên EPYC…).
 
 C4.2 (2026-10-12, claude-code Opus 5.5): `C4-…/C4.2-Scheduling.md`, 220,4 KB, 2.084 dòng, ghép từ 19 file `.draft-C4.2/doc/NN-*.md`. Kiểm trên file thật: `doccheck.py` 0 lỗi 0 cảnh báo;
 `blockcheck.py` 62 khối ✅, 534 dòng, 0 lệch; mọi dòng CRLF; không đường dẫn cục bộ. Số runner lấy từ run21 (`c3-arm-lab` b27ffa3; artifact ở `.draft-C4.2/out/runner21/`); run19 và run20
@@ -253,6 +255,8 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
   đó để ở mục "Mở rộng" của C3.x. Mở khóa: người dùng nối thiết bị (USB → `usbipd` cho WSL).
 
 ## Last verification
+
+- 2026-10-30: `doccheck.py C4.3-VirtualMemory&Paging.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.3-VirtualMemory&Paging.md .draft-C4.3/out .draft-C4.3/src`: 55 khối ✅, 599 dòng, 0 lệch.
 
 - 2026-10-12: `doccheck.py C4.2-Scheduling.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.2-Scheduling.md .draft-C4.2/out .draft-C4.2/src`: 62 khối ✅, 534 dòng, 0 lệch.
   (C4.1, cùng ngày: doccheck 0/0; blockcheck 87 khối, 831 dòng, 0 lệch.)
