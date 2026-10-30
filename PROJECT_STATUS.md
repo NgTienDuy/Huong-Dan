@@ -13,6 +13,16 @@ mutex + condvar, không busy-wait, xử lý thức dậy giả, sạch dưới T
 Thứ tự bộ nhớ yếu (MP/LB) cần ARM thật: runner `c3-arm-lab` (đã được phép) — gom mọi thứ cần ARM vào MỘT `run.sh`, đẩy sớm. Bước đầu tiên cụ thể: tạo
 `.draft-C4.6/{doc,src,out}`, khảo sát (`getconf _NPROCESSORS_ONLN`, glibc version, `ldd --version`, có `libtsan` không: `gcc -fsanitize=thread` thử một
 chương trình 3 dòng), ghi `out/predictions.txt` cho thí nghiệm đầu (giá mutex không tranh chấp / có tranh chấp / spinlock, futex đếm bằng strace -c).
+TIẾN ĐỘ C4.6 (2026-10-30): MỌI THÍ NGHIỆM ĐÃ CHẠY (`.draft-C4.6/src/*.c`, `build.sh`, `locks_run.sh`, `bbuf_run.sh`; output ở `out/`: locks_uncont, locks,
+locks_ticket1cpu, cv, sem, rw, cas, mo, mo_plain_disasm, fx, bar, tls, once, bbuf, survey_i7; dự đoán + kết quả ở `out/predictions.txt`). CHƯA viết doc.
+Kết quả chính: mutex 2,8 ns khi một luồng (glibc SINGLE_THREAD_P, nguồn `.draft-tools/glibc-2.39/`) / 11,5 ns có luồng thứ hai; 4 luồng/1 CPU: mutex 78M,
+TAS 30M, ticket 13k–590k ops/s; spin dài 4 CPU vs mutex 1,27; `if` trong condvar: 1 lần thức trống → 549k item ma; 0 lần trả về giả với 1.000 tín hiệu;
+broadcast 8 lần/item; rwlock mặc định: writer đói 3 s, PREFER_WRITER 1,6 ms max; rdlock không tăng theo luồng; CAS tệ nhất 34.645 lần thử; split lock
+2,5 µs, memcpy luồng khác 18,4→4,7 GB/s; TSan bắt relaxed MP trên x86; cờ int thường -O2 → vòng lặp vô tận (objdump); futex EAGAIN 119 ns; mutex
+ngây thơ 1 syscall/op; strace làm méo contention; barrier: spin 1,29 µs vs futex 57 µs (T=8), 8 luồng/2 CPU spin 12 ms, pthread NHANH hơn (15 µs);
+TLS exe 1,12 / dlopen 2,69 ns; 1 MiB .tdata +39 µs/luồng; DCLP relaxed chỉ bị TSan bắt khi luồng đến muộn; pthread_once đệ quy treo; checkpoint:
+đúng ở cap 1/16/1024 ± noise, idle 0,0 ms CPU, `if` SAI cả khi không noise (TSan vẫn 0 cảnh báo), onecv cap 1 tắc, nolock TSan bắt.
+KẾ TIẾP: viết doc 00–14 (dàn ý như C4.5: §1 mutex/spinlock … §10 once, §11 checkpoint, phụ lục A–D, tổng kết), ghép, doccheck, blockcheck, commit.
 
 C4.5 (2026-10-30, claude-code Opus 5.5, phiên 2): `C4-…/C4.5-IOModels.md`, 177,8 KB, 1.687 dòng, ghép từ 14 file `.draft-C4.5/doc/NN-*.md`; doccheck 0/0;
 blockcheck 38 khối ✅, 466 dòng, 0 lệch. Nháp 00–09 của phiên 1 (viết vội, nông) được viết lại toàn bộ; ~15 thí nghiệm mới; server checkpoint viết lại.
