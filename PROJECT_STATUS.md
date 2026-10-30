@@ -1,28 +1,26 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.5 xong; C4.6–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.6 xong; C4.7–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-30
-**Last session:** claude-code (Opus 5.5), 2026-10-30 (phiên 2): viết xong C4.5 (viết lại nháp vội của phiên 1, ~15 thí nghiệm mới, server checkpoint mới). Yêu cầu của người dùng không đổi:
+**Last session:** claude-code (Opus 5.5), 2026-10-30 (phiên 2): viết xong C4.5 và C4.6. Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1–C4.5 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.6 (Nguyên thủy concurrency)** — 10 sub-leaf của `roadmap.md` (mutex/spinlock, condvar + thức dậy giả, semaphore,
-rwlock + bỏ đói, atomic + CAS, thứ tự bộ nhớ relaxed/acquire/release/seq_cst, futex, barrier/latch, TLS, khởi tạo một lần); checkpoint: bounded buffer
-mutex + condvar, không busy-wait, xử lý thức dậy giả, sạch dưới TSan với 8 producer + 8 consumer. TSan trên kernel WSL cần `setarch $(uname -m) -R`.
-Thứ tự bộ nhớ yếu (MP/LB) cần ARM thật: runner `c3-arm-lab` (đã được phép) — gom mọi thứ cần ARM vào MỘT `run.sh`, đẩy sớm. Bước đầu tiên cụ thể: tạo
-`.draft-C4.6/{doc,src,out}`, khảo sát (`getconf _NPROCESSORS_ONLN`, glibc version, `ldd --version`, có `libtsan` không: `gcc -fsanitize=thread` thử một
-chương trình 3 dòng), ghi `out/predictions.txt` cho thí nghiệm đầu (giá mutex không tranh chấp / có tranh chấp / spinlock, futex đếm bằng strace -c).
-TIẾN ĐỘ C4.6 (2026-10-30): MỌI THÍ NGHIỆM ĐÃ CHẠY (`.draft-C4.6/src/*.c`, `build.sh`, `locks_run.sh`, `bbuf_run.sh`; output ở `out/`: locks_uncont, locks,
-locks_ticket1cpu, cv, sem, rw, cas, mo, mo_plain_disasm, fx, bar, tls, once, bbuf, survey_i7; dự đoán + kết quả ở `out/predictions.txt`). CHƯA viết doc.
-Kết quả chính: mutex 2,8 ns khi một luồng (glibc SINGLE_THREAD_P, nguồn `.draft-tools/glibc-2.39/`) / 11,5 ns có luồng thứ hai; 4 luồng/1 CPU: mutex 78M,
-TAS 30M, ticket 13k–590k ops/s; spin dài 4 CPU vs mutex 1,27; `if` trong condvar: 1 lần thức trống → 549k item ma; 0 lần trả về giả với 1.000 tín hiệu;
-broadcast 8 lần/item; rwlock mặc định: writer đói 3 s, PREFER_WRITER 1,6 ms max; rdlock không tăng theo luồng; CAS tệ nhất 34.645 lần thử; split lock
-2,5 µs, memcpy luồng khác 18,4→4,7 GB/s; TSan bắt relaxed MP trên x86; cờ int thường -O2 → vòng lặp vô tận (objdump); futex EAGAIN 119 ns; mutex
-ngây thơ 1 syscall/op; strace làm méo contention; barrier: spin 1,29 µs vs futex 57 µs (T=8), 8 luồng/2 CPU spin 12 ms, pthread NHANH hơn (15 µs);
-TLS exe 1,12 / dlopen 2,69 ns; 1 MiB .tdata +39 µs/luồng; DCLP relaxed chỉ bị TSan bắt khi luồng đến muộn; pthread_once đệ quy treo; checkpoint:
-đúng ở cap 1/16/1024 ± noise, idle 0,0 ms CPU, `if` SAI cả khi không noise (TSan vẫn 0 cảnh báo), onecv cap 1 tắc, nolock TSan bắt.
-KẾ TIẾP: viết doc 00–14 (dàn ý như C4.5: §1 mutex/spinlock … §10 once, §11 checkpoint, phụ lục A–D, tổng kết), ghép, doccheck, blockcheck, commit.
+C4.1–C4.6 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.7 (Mẫu concurrency ở tầng kiến trúc)** — 10 sub-leaf (actor, CSP/channel, fork-join + work stealing, pipeline,
+SEDA, backpressure, giới hạn hàng đợi + chính sách bỏ, pool luồng: định cỡ/hàng đợi/bỏ đói, tránh chia sẻ vs chia sẻ có kiểm soát, một luồng + async vs đa luồng);
+checkpoint: pipeline 3 giai đoạn có backpressure, chứng minh bộ nhớ KHÔNG tăng vô hạn khi giai đoạn chậm nhất bị nghẽn. Dùng lại bounded buffer của C4.6 §11
+(`.draft-C4.6/src/bbuf.c`) làm kênh giữa các giai đoạn; Go 1.27.2 có trong `.draft-tools` (setup_env.sh) cho CSP/channel; đo RSS + cgroup memory (cách của C4.5).
+Bước đầu tiên cụ thể: tạo `.draft-C4.7/{doc,src,out}`, ghi `out/predictions.txt` cho pipeline (không giới hạn: RSS tăng tuyến tính theo hiệu tốc độ; có giới hạn:
+phẳng) và cho pool luồng (định cỡ theo Little: N = λ·W).
+LƯU Ý: C4.6 dẫn chiếu tới "C4.8 §8" (chẩn đoán: stack của mọi luồng, `wchan`) — C4.8 phải giữ §8 là mục chẩn đoán (đúng thứ tự sub-leaf của roadmap).
+
+C4.6 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.6-ConcurrencyPrimitives.md`, ~129 KB, ghép từ 15 file `.draft-C4.6/doc/NN-*.md`; doccheck 0 lỗi, 2 cảnh báo
+(C4.8 còn là khung); blockcheck 30 khối ✅, 271 dòng, 0 lệch. 41 dự đoán: 28 ✓ 10 ½ 3 ✗. Kết quả chính (để leaf sau dẫn đúng): glibc
+SINGLE_THREAD_P (mutex 2,79 → 11,45 ns), giá khóa bị che bởi việc độc lập, spinlock quá tải ×2,5, ticket 13k–590k ops/s, đoạn găng dài spin 146k@4 CPU vs
+mutex 58k@1,27; `if` → 549k phần tử ma; rwlock writer đói 3 s; CAS tệ nhất 34.645; split lock 2,5 µs, hàng xóm −75%; TSan bắt relaxed MP; cờ int → vòng vô tận;
+futex EAGAIN 119 ns; barrier nhanh hơn trên 2 CPU; TLS 1,12/2,69 ns, .tdata +40 µs/luồng; DCLP relaxed chỉ lộ với luồng đến muộn; checkpoint 5 biến thể,
+bảng phép kiểm nào bắt lỗi nào (TSan sạch với `if`). CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
 
 C4.5 (2026-10-30, claude-code Opus 5.5, phiên 2): `C4-…/C4.5-IOModels.md`, 177,8 KB, 1.687 dòng, ghép từ 14 file `.draft-C4.5/doc/NN-*.md`; doccheck 0/0;
 blockcheck 38 khối ✅, 466 dòng, 0 lệch. Nháp 00–09 của phiên 1 (viết vội, nông) được viết lại toàn bộ; ~15 thí nghiệm mới; server checkpoint viết lại.
@@ -288,6 +286,7 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 ## Last verification
 
+- 2026-10-30: `doccheck.py C4.6-ConcurrencyPrimitives.md`: 0 lỗi, 2 cảnh báo (C4.8 còn khung). `blockcheck.py … .draft-C4.6/out .draft-C4.6/src`: 30 khối ✅, 271 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.5-IOModels.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.5-IOModels.md .draft-C4.5/out .draft-C4.5/src`: 38 khối ✅, 466 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.4-Filesystems&Storage.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.4/out .draft-C4.4/src`: 30 khối ✅, 356 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.3-VirtualMemory&Paging.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.3-VirtualMemory&Paging.md .draft-C4.3/out .draft-C4.3/src`: 55 khối ✅, 599 dòng, 0 lệch.
