@@ -1,16 +1,29 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.4 xong; C4.5–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.5 xong; C4.6–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-30
-**Last session:** claude-code (Opus 5.5), 2026-10-30: viết xong C4.3 (§9–§12, phụ lục; thí nghiệm checkpoint mới); C4.4 viết xong (máy ảo QEMU có root, dm-log-writes, checkpoint cắt điện). Yêu cầu của người dùng không đổi:
+**Last session:** claude-code (Opus 5.5), 2026-10-30 (phiên 2): viết xong C4.5 (viết lại nháp vội của phiên 1, ~15 thí nghiệm mới, server checkpoint mới). Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1–C4.4 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.5 (Mô hình I/O)** — 9 sub-leaf của `roadmap.md`; checkpoint: một vòng lặp sự kiện một luồng phục vụ 10.000 kết nối,
-đo bộ nhớ và CPU, giải thích vì sao không sập khi số kết nối tăng. Làm được trên [i7] không root (epoll, io_uring có; `ulimit -n` 1.048.576; chạy client
-và server trong scope riêng `TasksMax`, theo dõi pids/memory của scope). Bước đầu tiên cụ thể: khảo sát (`/proc/sys/net/core/somaxconn`,
-`net.ipv4.ip_local_port_range` — 10.000 kết nối loopback cần đủ cổng; io_uring có bật không: `/proc/sys/kernel/io_uring_disabled`), ghi dự đoán.
+C4.1–C4.5 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.6 (Nguyên thủy concurrency)** — 10 sub-leaf của `roadmap.md` (mutex/spinlock, condvar + thức dậy giả, semaphore,
+rwlock + bỏ đói, atomic + CAS, thứ tự bộ nhớ relaxed/acquire/release/seq_cst, futex, barrier/latch, TLS, khởi tạo một lần); checkpoint: bounded buffer
+mutex + condvar, không busy-wait, xử lý thức dậy giả, sạch dưới TSan với 8 producer + 8 consumer. TSan trên kernel WSL cần `setarch $(uname -m) -R`.
+Thứ tự bộ nhớ yếu (MP/LB) cần ARM thật: runner `c3-arm-lab` (đã được phép) — gom mọi thứ cần ARM vào MỘT `run.sh`, đẩy sớm. Bước đầu tiên cụ thể: tạo
+`.draft-C4.6/{doc,src,out}`, khảo sát (`getconf _NPROCESSORS_ONLN`, glibc version, `ldd --version`, có `libtsan` không: `gcc -fsanitize=thread` thử một
+chương trình 3 dòng), ghi `out/predictions.txt` cho thí nghiệm đầu (giá mutex không tranh chấp / có tranh chấp / spinlock, futex đếm bằng strace -c).
+
+C4.5 (2026-10-30, claude-code Opus 5.5, phiên 2): `C4-…/C4.5-IOModels.md`, 177,8 KB, 1.687 dòng, ghép từ 14 file `.draft-C4.5/doc/NN-*.md`; doccheck 0/0;
+blockcheck 38 khối ✅, 466 dòng, 0 lệch. Nháp 00–09 của phiên 1 (viết vội, nông) được viết lại toàn bộ; ~15 thí nghiệm mới; server checkpoint viết lại.
+Kết quả chính (để leaf sau dẫn đúng): EAGAIN 122,6 ns; epoll_wait ~0,2 µs mọi N; poll 1.000 fd 36 µs (fd sẵn sàng đầu) / 100 µs (cuối) — đăng ký hàng đợi chờ
+tới fd sẵn sàng đầu (fs/select.c); epoll_ctl 655/427/361 ns; FD_SET(1100): FORTIFY abort / ghi đè im lặng; epoll giữ mô tả file (dup+close: sự kiện cho fd đã
+đóng); herd: poll/epoll riêng 8 lần ngủ mỗi kết nối, EPOLLEXCLUSIVE/accept 1, epoll chung LT 2,21; io_uring QD16 2,4 vs 13,5 µs CPU/IO; một CPU gửi ~115k IOPS
+(CPU 75–81% iowait); SQPOLL 0 syscall, 2 CPU quay; buffered không có io-wq (io_rw_should_retry); timer slack 50 µs, timeout/1000 cho timeout dài (1 s → ≥1.074 µs),
+timerfd không slack; signalfd → con có SigBlk 0x4002; sendfile CPU gửi ÷9, tổng ÷2,4, bên nhận chép lạnh (16 MiB: hết chênh); MSG_ZEROCOPY loopback COPIED;
+sockfill 2,50 MiB; readahead cửa sổ đầu 4 trang; đĩa sau 100 ms nghỉ 0,8 ms (không do CPU); bp queue chết ở NỬA giới hạn (gấp đôi khi lớn); checkpoint: 48 B +
+3,76 KiB kernel mỗi kết nối (3.632 B cấu trúc từ BTF), CPU/yêu cầu 36→7,3→4,6 µs, a=3,54 + b=38,6/ev; 50k: RSS 4,1, cgroup 188 MiB, 36% CPU; thread/conn 381 MiB;
+client không đọc: RSS phẳng. 58 dự đoán: 36 ✓ 13 ½ 9 ✗. Câu hỏi mở ở Phụ lục B.4. CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
 
 C4.4 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.4-Filesystems&Storage.md`, ~145 KB, ghép từ 13 file `.draft-C4.4/doc/NN-*.md`; doccheck 0/0; blockcheck 30 khối,
 356 dòng, 0 lệch. Công cụ máy ảo (root không sudo) ở `.draft-tools/vm/` + `.draft-tools/debs-vm/` — dùng lại cho C4.11/C4.12/C4.13 (cgroup/namespace thật,
@@ -254,7 +267,8 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 - Thư mục crash dump của WSL phía Windows (`%LOCALAPPDATA%\Temp\wsl-crashes`, đọc từ WSL là `/mnt/c/Users/<tài khoản>/AppData/Local/Temp/wsl-crashes`) đang giữ
   ~5,7 GiB file `.dmp` do chương trình thử của các phiên trước sinh ra (hai file edgetpu 4,6 GiB + 1,0 GiB ngày 2026-10-08, v.v.) và 2 file 450 kB của phiên 2026-10-12
-  (`wait_status`, trước khi tôi cho tiến trình con tự khai không dump). `core_pattern` của WSL là một pipe nên `ulimit -c 0` KHÔNG chặn được. Nằm NGOÀI dự án →
+  (`wait_status`, trước khi tôi cho tiến trình con tự khai không dump), và 1 file từ phiên 2026-10-30 (`idlelat` bản đầu sập SIGSEGV vì printf thiếu đối số).
+  `core_pattern` của WSL là một pipe nên `ulimit -c 0` KHÔNG chặn được. Nằm NGOÀI dự án →
   không tự xóa; hỏi người dùng. Từ nay chương trình cố ý sập phải gọi `prctl(PR_SET_DUMPABLE, 0)` trước.
 
 ## Blockers
@@ -264,6 +278,7 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 ## Last verification
 
+- 2026-10-30: `doccheck.py C4.5-IOModels.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.5-IOModels.md .draft-C4.5/out .draft-C4.5/src`: 38 khối ✅, 466 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.4-Filesystems&Storage.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.4/out .draft-C4.4/src`: 30 khối ✅, 356 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.3-VirtualMemory&Paging.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.3-VirtualMemory&Paging.md .draft-C4.3/out .draft-C4.3/src`: 55 khối ✅, 599 dòng, 0 lệch.
 
