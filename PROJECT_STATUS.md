@@ -1,29 +1,26 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2, C4.3 xong; C4.4 thí nghiệm §1–§6 xong; C4.5–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.4 xong; C4.5–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-30
-**Last session:** claude-code (Opus 5.5), 2026-10-30: viết xong C4.3 (§9–§12, phụ lục; thí nghiệm checkpoint mới); C4.4: dựng máy ảo có root, thí nghiệm §1–§6. Yêu cầu của người dùng không đổi:
+**Last session:** claude-code (Opus 5.5), 2026-10-30: viết xong C4.3 (§9–§12, phụ lục; thí nghiệm checkpoint mới); C4.4 viết xong (máy ảo QEMU có root, dm-log-writes, checkpoint cắt điện). Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1, C4.2, C4.3 ĐÃ VIẾT XONG. ĐANG LÀM: **C4.4 (Hệ thống file & lưu trữ)** — cập nhật 2026-10-30. Chưa viết chữ nào của leaf; thí nghiệm §1–§6 xong.
-- MÁY ẢO ĐỂ CÓ ROOT (không sudo): `.draft-tools/vm/setup_vm.sh` (giải nén `.draft-tools/debs-vm/*.deb`: qemu 8.2, kernel Ubuntu 6.17.0-42-generic +
-  modules + extra, busybox, xfsprogs, btrfs-progs, f2fs-tools, zstd; initramfs busybox nạp 9p + overlay, gắn / của máy thật CHỈ-ĐỌC làm lớp dưới của
-  overlay → mọi công cụ của [i7] có trong khách, chạy với root) và `.draft-tools/vm/vm.sh SHARE IMG...` (TCG, ~6 s mỗi lần khởi động; SHARE/guest.sh
-  chạy trong khách; `kill -9` QEMU = cắt điện). Trong khách: `modprobe -d $C4ROOT/vm dm_flakey`; dmsetup cần `--noudevsync` + `dmsetup mknodes`.
-- `.draft-C4.4/src/`: `vfs.c`, `fdtable.c`, `dcache.c`, `wcache.c`, `fsyncerr.c`, `lwload.c` + `lwparse.py` + `lwreplay.py` + `lw.sh` (dm-log-writes:
-  ghi lại mọi lệnh ghi theo thứ tự đã bền, đánh dấu từng bước, dựng lại đĩa tại một điểm = cắt điện ở đó), `ext_regions.py`, `stalecheck.py`,
-  `stale.sh`, `vmrun.sh`. Kết quả + dự đoán ở `out/predictions.txt` (đọc trước khi viết). Chính: drvfs 3.090 µs/file so với ext4 7,6 µs; O_APPEND
-  12,8 MB đủ, không O_APPEND mất 47–48 %; ghi đè 4 KiB + fsync: ext4 4 khối tại chỗ, xfs ~1, ext2 2, f2fs 2 tại chỗ (ổ ≤16 GB ép IPU; mode=lfs → khối
-  mới), btrfs 18 khối, khối mới mỗi lần; data=journal ghi 2 lần; fdatasync ghi đè = 1 khối; STALE: writeback+nodelalloc cắt điện sau commit → file mới
-  chứa 240/256 khối của file đã xóa; ordered → đúng; delalloc → dài 0; Dirty 64 MiB hết hạn đúng 31,5–32 s; cgroup 512M: write() chặn ~210 ms mỗi chu
-  kỳ; fsync lỗi: EIO một lần rồi 0, dữ liệu mới mất, trang không còn bẩn.
-- CÒN (thí nghiệm): §7 phân mảnh do COW (btrfs vs ext4, filefrag) · §8 lớp block trên [i7] (QD 1–64 O_DIRECT, merge, scheduler) · §9 FTL mô phỏng
-  (WA theo mức đầy/OP/TRIM) + TRIM thật trong VM (discard=unmap, ảnh đĩa co lại) · §10 LittleFS (tải mã nguồn, emubd đếm erase, cắt điện ngẫu nhiên)
-  · §11 checkpoint: chương trình ghi + báo "đã ghi" qua console, `kill -9` QEMU ngẫu nhiên, khởi động lại, so: không fsync mất, có fsync 0 mất (N lượt);
-  biến thể dm-flakey drop_writes. Rồi viết leaf theo dàn ý 0–11 + Phụ lục (như C4.3), ghép, kiểm, commit.
-- Tải mã nguồn kernel: raw.githubusercontent bị 429 → dùng `gh api repos/torvalds/linux/contents/PATH?ref=v6.18 -H "Accept: application/vnd.github.raw"`.
+C4.1–C4.4 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.5 (Mô hình I/O)** — 9 sub-leaf của `roadmap.md`; checkpoint: một vòng lặp sự kiện một luồng phục vụ 10.000 kết nối,
+đo bộ nhớ và CPU, giải thích vì sao không sập khi số kết nối tăng. Làm được trên [i7] không root (epoll, io_uring có; `ulimit -n` 1.048.576; chạy client
+và server trong scope riêng `TasksMax`, theo dõi pids/memory của scope). Bước đầu tiên cụ thể: khảo sát (`/proc/sys/net/core/somaxconn`,
+`net.ipv4.ip_local_port_range` — 10.000 kết nối loopback cần đủ cổng; io_uring có bật không: `/proc/sys/kernel/io_uring_disabled`), ghi dự đoán.
+
+C4.4 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.4-Filesystems&Storage.md`, ~145 KB, ghép từ 13 file `.draft-C4.4/doc/NN-*.md`; doccheck 0/0; blockcheck 30 khối,
+356 dòng, 0 lệch. Công cụ máy ảo (root không sudo) ở `.draft-tools/vm/` + `.draft-tools/debs-vm/` — dùng lại cho C4.11/C4.12/C4.13 (cgroup/namespace thật,
+systemd, ftrace/eBPF trong khách). Kết quả chính: drvfs 3.090 µs/file; không O_APPEND mất 47–48%; ghi đè 4 KiB + fsync: ext4 4 khối, btrfs 18; f2fs ổ ≤16 GB
+ghi tại chỗ; data=journal 2×; STALE (writeback lộ file đã xóa 240/256 khối; delalloc → 0 byte); Dirty hết hạn 31,5–32 s; cgroup 512M: write() chặn ~210 ms;
+fsync lỗi: EIO một lần rồi 0, dữ liệu mất; btrfs 1 → 3.535 extent; QD1 9k → QD64 183k IOPS, Little đúng; FTL WA 7,28/1,95/1,22; TRIM thật; checkpoint: không
+fsync mất 804/4.000/3.961/3.690, có fsync 0/5 lượt, dm-flakey drop_writes mất 1.487/1.476 dù fsync.
+⚠️ CẦN NGƯỜI DÙNG QUYẾT: biên dịch + chạy LittleFS v2.11.3 tải từ GitHub (`.draft-C4.4/ext/lfs`, untracked) bị bộ phân loại an toàn chặn → §10 dùng mô hình
+`mpsim.py` của tôi. Nếu người dùng cho phép, chạy LittleFS thật và thay §10.3 (ghi trong §11.8 mục 3 và B.4).
+CHƯA (để lượt rà soát nhánh): đọc lại toàn văn C4.4 đã ghép.
 
 C4.3 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.3-VirtualMemory&Paging.md`, 215,1 KB, 2.000 dòng, ghép từ 14 file `.draft-C4.3/doc/NN-*.md`. Kiểm trên file thật:
 `doccheck.py` 0 lỗi 0 cảnh báo; `blockcheck.py` 55 khối ✅, 599 dòng, 0 lệch; CRLF; không đường dẫn cục bộ. Đã rà văn xuôi §1–§12 với file (sửa: §8.3 đổi kB→MiB
@@ -267,6 +264,7 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 ## Last verification
 
+- 2026-10-30: `doccheck.py C4.4-Filesystems&Storage.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.4/out .draft-C4.4/src`: 30 khối ✅, 356 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.3-VirtualMemory&Paging.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.3-VirtualMemory&Paging.md .draft-C4.3/out .draft-C4.3/src`: 55 khối ✅, 599 dòng, 0 lệch.
 
 - 2026-10-12: `doccheck.py C4.2-Scheduling.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.2-Scheduling.md .draft-C4.2/out .draft-C4.2/src`: 62 khối ✅, 534 dòng, 0 lệch.
