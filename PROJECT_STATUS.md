@@ -1,18 +1,29 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2, C4.3 xong; C4.4–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1, C4.2, C4.3 xong; C4.4 thí nghiệm §1–§6 xong; C4.5–C4.13 chưa bắt đầu)
 **Updated:** 2026-10-30
-**Last session:** claude-code (Opus 5.5), 2026-10-30: viết xong C4.3 (§9–§12, phụ lục; thí nghiệm checkpoint mới), chuẩn bị C4.4. Yêu cầu của người dùng không đổi:
+**Last session:** claude-code (Opus 5.5), 2026-10-30: viết xong C4.3 (§9–§12, phụ lục; thí nghiệm checkpoint mới); C4.4: dựng máy ảo có root, thí nghiệm §1–§6. Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1, C4.2, C4.3 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.4 (Hệ thống file & lưu trữ ở tầng OS)** — 10 sub-leaf của `roadmap.md`; checkpoint: chứng minh mất dữ liệu
-khi thiếu `fsync` bằng cắt điện thật hoặc mô phỏng (`dm-flakey`/VM), rồi sửa và chứng minh không mất. Cần runner (root: loop device, mkfs, dm-flakey, mount
-tùy chọn; rootfs của runner gắn nobarrier,data=writeback → KHÔNG đo độ bền trên rootfs) hoặc QEMU khởi động một kernel + đĩa ảo rồi "giết" QEMU (cắt điện
-thật hơn dm-flakey: mất cả cache ghi của "đĩa"). Bước đầu tiên cụ thể: khảo sát chỉ đọc trên [i7] (`mount`, `findmnt -o +OPTIONS`, `/sys/block/*/queue/*`,
-scheduler, `stat -f`, `debugfs` không cần root? không) → `.draft-C4.4/out/survey_i7.txt`; tải qemu-system-x86 + một kernel/initramfs nhỏ vào scratchpad
-(C3 đã làm được với `apt download`); ghi dự đoán; viết `fsync` checkpoint chạy trong QEMU (virtio-blk cache=writeback, kill -9 QEMU) — chạy được không root.
+C4.1, C4.2, C4.3 ĐÃ VIẾT XONG. ĐANG LÀM: **C4.4 (Hệ thống file & lưu trữ)** — cập nhật 2026-10-30. Chưa viết chữ nào của leaf; thí nghiệm §1–§6 xong.
+- MÁY ẢO ĐỂ CÓ ROOT (không sudo): `.draft-tools/vm/setup_vm.sh` (giải nén `.draft-tools/debs-vm/*.deb`: qemu 8.2, kernel Ubuntu 6.17.0-42-generic +
+  modules + extra, busybox, xfsprogs, btrfs-progs, f2fs-tools, zstd; initramfs busybox nạp 9p + overlay, gắn / của máy thật CHỈ-ĐỌC làm lớp dưới của
+  overlay → mọi công cụ của [i7] có trong khách, chạy với root) và `.draft-tools/vm/vm.sh SHARE IMG...` (TCG, ~6 s mỗi lần khởi động; SHARE/guest.sh
+  chạy trong khách; `kill -9` QEMU = cắt điện). Trong khách: `modprobe -d $C4ROOT/vm dm_flakey`; dmsetup cần `--noudevsync` + `dmsetup mknodes`.
+- `.draft-C4.4/src/`: `vfs.c`, `fdtable.c`, `dcache.c`, `wcache.c`, `fsyncerr.c`, `lwload.c` + `lwparse.py` + `lwreplay.py` + `lw.sh` (dm-log-writes:
+  ghi lại mọi lệnh ghi theo thứ tự đã bền, đánh dấu từng bước, dựng lại đĩa tại một điểm = cắt điện ở đó), `ext_regions.py`, `stalecheck.py`,
+  `stale.sh`, `vmrun.sh`. Kết quả + dự đoán ở `out/predictions.txt` (đọc trước khi viết). Chính: drvfs 3.090 µs/file so với ext4 7,6 µs; O_APPEND
+  12,8 MB đủ, không O_APPEND mất 47–48 %; ghi đè 4 KiB + fsync: ext4 4 khối tại chỗ, xfs ~1, ext2 2, f2fs 2 tại chỗ (ổ ≤16 GB ép IPU; mode=lfs → khối
+  mới), btrfs 18 khối, khối mới mỗi lần; data=journal ghi 2 lần; fdatasync ghi đè = 1 khối; STALE: writeback+nodelalloc cắt điện sau commit → file mới
+  chứa 240/256 khối của file đã xóa; ordered → đúng; delalloc → dài 0; Dirty 64 MiB hết hạn đúng 31,5–32 s; cgroup 512M: write() chặn ~210 ms mỗi chu
+  kỳ; fsync lỗi: EIO một lần rồi 0, dữ liệu mới mất, trang không còn bẩn.
+- CÒN (thí nghiệm): §7 phân mảnh do COW (btrfs vs ext4, filefrag) · §8 lớp block trên [i7] (QD 1–64 O_DIRECT, merge, scheduler) · §9 FTL mô phỏng
+  (WA theo mức đầy/OP/TRIM) + TRIM thật trong VM (discard=unmap, ảnh đĩa co lại) · §10 LittleFS (tải mã nguồn, emubd đếm erase, cắt điện ngẫu nhiên)
+  · §11 checkpoint: chương trình ghi + báo "đã ghi" qua console, `kill -9` QEMU ngẫu nhiên, khởi động lại, so: không fsync mất, có fsync 0 mất (N lượt);
+  biến thể dm-flakey drop_writes. Rồi viết leaf theo dàn ý 0–11 + Phụ lục (như C4.3), ghép, kiểm, commit.
+- Tải mã nguồn kernel: raw.githubusercontent bị 429 → dùng `gh api repos/torvalds/linux/contents/PATH?ref=v6.18 -H "Accept: application/vnd.github.raw"`.
 
 C4.3 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.3-VirtualMemory&Paging.md`, 215,1 KB, 2.000 dòng, ghép từ 14 file `.draft-C4.3/doc/NN-*.md`. Kiểm trên file thật:
 `doccheck.py` 0 lỗi 0 cảnh báo; `blockcheck.py` 55 khối ✅, 599 dòng, 0 lệch; CRLF; không đường dẫn cục bộ. Đã rà văn xuôi §1–§12 với file (sửa: §8.3 đổi kB→MiB
