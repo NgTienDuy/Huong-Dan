@@ -1,23 +1,28 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.7 xong; C4.8–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.8 xong; C4.9–C4.13 chưa bắt đầu)
 **Updated:** 2026-11-02
-**Last session:** claude-code (Opus 5.5), 2026-11-02 (phiên 3): chạy lại mọi thí nghiệm C4.7 sau khi sửa dụng cụ đo, thêm ~25 thí nghiệm, viết xong C4.7.
-Yêu cầu của người dùng không đổi: viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước.
-Công cụ ở `C4-…/.draft-tools/`.
+**Last session:** claude-code (Opus 5.5), 2026-11-02 (phiên 3): viết xong C4.7 và C4.8 (mọi thí nghiệm chạy trong phiên). Yêu cầu của người dùng không đổi:
+viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1–C4.7 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.8 (Bế tắc, livelock, bỏ đói)** — 8 sub-leaf theo roadmap (bốn điều kiện Coffman · thứ tự khóa và phân cấp khóa ·
-phát hiện vs ngăn ngừa vs tránh (banker) · bế tắc phân tán vs cục bộ · livelock và ngẫu nhiên hóa · bỏ đói và công bằng · convoy effect · chẩn đoán: stack dump
-toàn bộ luồng, đồ thị chờ); checkpoint: cho stack dump mọi luồng của một tiến trình treo, xác định chu trình chờ và hai khóa gây bế tắc (gdb `thread apply all bt`,
-`/proc/PID/task/*/stack` cần root → VM của `.draft-tools/vm/`; `wchan`; glibc lưu chủ của mutex ở `__data.__owner` → dựng đồ thị chờ tự động bằng gdb Python).
-TIẾN ĐỘ C4.8 (2026-11-02, phiên 3): MỌI THÍ NGHIỆM ĐÃ CHẠY (trừ `hang_verify` đang chạy: TSan bản gốc/bản sửa + bản sửa chạy 5 phút → `out/hang_verify.txt`).
-`.draft-C4.8/src`: dl.c (abba/bank 5 cách/self/hier), flk.c (khóa file POSIX/OFD/flock, vòng N), svc.py (bế tắc giữa 2 dịch vụ), livelock.c + livelock_sim.py
-(mô hình), fair.c (starve/convoy, khóa MCS-futex), hang.c (+ -DFIXED) + hang_run.sh + waitfor.py (gdb Python dựng đồ thị chờ), godl (Go), banker.py,
-các *_run.sh, *_summary/table.py. `out/`: dl_{abba,naive,fixes,self,hier,tsan}(+_summary/_table/_cycles), flk, svc, livelock(+_table,_sim), fair_{starve,convoy,negctl},
-hang_{run,dump,proc,owner,waitfor,times}, godl, banker, predictions.txt (kết quả đã đối chiếu). VIỆC KẾ TIẾP: đọc `out/hang_verify.txt`; viết doc 00–13
-(§1 Coffman, §2 thứ tự/phân cấp, §3 phát hiện/ngăn/tránh, §4 phân tán vs cục bộ, §5 livelock, §6 bỏ đói, §7 convoy, §8 chẩn đoán, §9 checkpoint), assemble, kiểm.
+C4.1–C4.8 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.9 (IPC)** — 9 sub-leaf theo roadmap (pipe và named pipe · socket Unix domain · bộ nhớ chia sẻ + đồng bộ ·
+hàng đợi thông điệp POSIX/System V · tín hiệu như IPC và giới hạn · eventfd/signalfd/timerfd · truyền fd qua socket · D-Bus khái niệm · đánh đổi thông lượng/độ trễ/
+độ phức tạp/khả năng gỡ lỗi); checkpoint: ba tình huống (thông lượng cao / độ trễ thấp / nhiều tiến trình không tin nhau) — chọn cơ chế và bảo vệ bằng đo đạc.
+Bước đầu tiên: tạo `.draft-C4.9/{doc,src,out}`, ghi `out/predictions.txt`. Dùng lại: giá đánh thức (C4.7 §4.3: 7,4–7,7 µs gửi / ~12 µs thức) — mọi phép đo độ trễ
+IPC khứ hồi giữa 2 tiến trình sẽ bị nó chi phối, nên đo cả ghim cùng CPU / khác CPU / spin_idle; C4.5 đã đo signalfd/timerfd/eventfd một phần (§5) và socket buffer
+(sockfill 2,50 MiB) — dẫn chiếu, đừng đo lại. D-Bus: kiểm `busctl`/`dbus-send` có sẵn không (systemd --user có bus của người dùng).
+
+C4.8 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.8-Deadlock&Livelock.md`, 126 KB, 1.450 dòng, ghép từ 13 file `.draft-C4.8/doc/NN-*.md`; doccheck 0/0;
+blockcheck 24 khối ✅, 424 dòng, 0 lệch; C4.6/C4.7 hết cảnh báo "C4.8 còn khung" (C4.8 §8 = chẩn đoán, đúng như hai leaf đó dẫn chiếu). 19 dự đoán: 12 ✓ 4 ½ 3 ✗.
+Kết quả chính: AB/BA chặt treo ngay lần chạy chồng đầu (40/40, 36 lượt luồng 2 chưa xong vòng nào); ngây thơ 8/1.000 tài khoản treo sau 585–1.609 / 34.660–2.797.423
+lượt; khóa toàn cục nhanh nhất khi 8 tài khoản (13,3 vs 3,9 triệu/s), trylock 55,9 > có thứ tự 38,7 > toàn cục 10,6 khi 1.000; timedlock 1 ms sụp còn 9–44 nghìn/s;
+TSan 608 chu trình 2–20 mutex trong 0,5 s; kernel EDEADLK cho vòng POSIX ≤ 12 tiến trình (MAX_DEADLK_ITERATIONS), không OFD/flock; 2 dịch vụ gọi nhau: ss Recv-Q 1
+trên socket nghe; timeout để lại việc mồ côi; livelock chỉ khi thử lại ngay (604 vs 892.729/s), mọi kiểu lùi → W/(W+lùi) = 34 %; mô hình không nhiễu: lùi cố định 100 %
+mãi; mutex glibc p99 0,53–0,99 ms vs FIFO 40–80 µs; convoy khóa FIFO 74 nghìn vs 3,1 triệu/s, 1 vcsw/lần, 1/thông lượng = 13,5 µs = độ trễ thức; checkpoint
+tag server 11 luồng treo 3–11 s, dump gdb + /proc (futex op 0x80/0x189) + __owner + waitfor.py → poll-2 ↔ archiver, tags_lock/hist_lock; bản sửa: TSan sạch,
+300 s không treo. CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
 
 C4.7 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.7-ConcurrencyPatterns.md`, 199 KB, 2.057 dòng, ghép từ 15 file `.draft-C4.7/doc/NN-*.md`; doccheck 0 lỗi,
 3 cảnh báo (C4.8 còn khung); blockcheck 39 khối ✅, 692 dòng, 0 lệch. 39 dự đoán: 24 ✓ 10 ½ 4 ✗ 1 không kiểm được (đếm bằng `src/b3_count.py`).
@@ -303,6 +308,8 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 ## Last verification
 
+- 2026-11-02: `doccheck.py C4.8-Deadlock&Livelock.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.8/out .draft-C4.8/src`: 24 khối ✅, 424 dòng, 0 lệch.
+  Sau C4.8: `doccheck.py C4.6 C4.7`: 0 lỗi, 0 cảnh báo.
 - 2026-11-02: `doccheck.py C4.7-ConcurrencyPatterns.md`: 0 lỗi, 3 cảnh báo (C4.8 còn khung). `blockcheck.py … .draft-C4.7/out .draft-C4.7/src`: 39 khối ✅, 692 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.6-ConcurrencyPrimitives.md`: 0 lỗi, 2 cảnh báo (C4.8 còn khung). `blockcheck.py … .draft-C4.6/out .draft-C4.6/src`: 30 khối ✅, 271 dòng, 0 lệch.
 - 2026-10-30: `doccheck.py C4.5-IOModels.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.5-IOModels.md .draft-C4.5/out .draft-C4.5/src`: 38 khối ✅, 466 dòng, 0 lệch.
