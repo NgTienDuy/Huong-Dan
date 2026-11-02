@@ -12,9 +12,12 @@ C4.1–C4.7 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.8 (Bế tắc, livelock, bỏ đ
 phát hiện vs ngăn ngừa vs tránh (banker) · bế tắc phân tán vs cục bộ · livelock và ngẫu nhiên hóa · bỏ đói và công bằng · convoy effect · chẩn đoán: stack dump
 toàn bộ luồng, đồ thị chờ); checkpoint: cho stack dump mọi luồng của một tiến trình treo, xác định chu trình chờ và hai khóa gây bế tắc (gdb `thread apply all bt`,
 `/proc/PID/task/*/stack` cần root → VM của `.draft-tools/vm/`; `wchan`; glibc lưu chủ của mutex ở `__data.__owner` → dựng đồ thị chờ tự động bằng gdb Python).
-Bước đầu tiên: tạo `.draft-C4.8/{doc,src,out}`, ghi `out/predictions.txt`. §8 PHẢI là mục chẩn đoán (C4.6 và C4.7 dẫn chiếu "C4.8 §8": stack dump mọi luồng,
-dump goroutine theo trạng thái). Dùng lại được: C4.7 `pool nested` (bế tắc không khóa — bỏ đói pool), Go `csp deadlock` (runtime phát hiện bế tắc toàn cục),
-C4.6 rwlock bỏ đói writer (C4.6 §4.1), ticket lock quá tải (C4.6 §1.4), C4.2 §6 đảo ưu tiên.
+TIẾN ĐỘ C4.8 (2026-11-02, phiên 3): MỌI THÍ NGHIỆM ĐÃ CHẠY (trừ `hang_verify` đang chạy: TSan bản gốc/bản sửa + bản sửa chạy 5 phút → `out/hang_verify.txt`).
+`.draft-C4.8/src`: dl.c (abba/bank 5 cách/self/hier), flk.c (khóa file POSIX/OFD/flock, vòng N), svc.py (bế tắc giữa 2 dịch vụ), livelock.c + livelock_sim.py
+(mô hình), fair.c (starve/convoy, khóa MCS-futex), hang.c (+ -DFIXED) + hang_run.sh + waitfor.py (gdb Python dựng đồ thị chờ), godl (Go), banker.py,
+các *_run.sh, *_summary/table.py. `out/`: dl_{abba,naive,fixes,self,hier,tsan}(+_summary/_table/_cycles), flk, svc, livelock(+_table,_sim), fair_{starve,convoy,negctl},
+hang_{run,dump,proc,owner,waitfor,times}, godl, banker, predictions.txt (kết quả đã đối chiếu). VIỆC KẾ TIẾP: đọc `out/hang_verify.txt`; viết doc 00–13
+(§1 Coffman, §2 thứ tự/phân cấp, §3 phát hiện/ngăn/tránh, §4 phân tán vs cục bộ, §5 livelock, §6 bỏ đói, §7 convoy, §8 chẩn đoán, §9 checkpoint), assemble, kiểm.
 
 C4.7 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.7-ConcurrencyPatterns.md`, 199 KB, 2.057 dòng, ghép từ 15 file `.draft-C4.7/doc/NN-*.md`; doccheck 0 lỗi,
 3 cảnh báo (C4.8 còn khung); blockcheck 39 khối ✅, 692 dòng, 0 lệch. 39 dự đoán: 24 ✓ 10 ½ 4 ✗ 1 không kiểm được (đếm bằng `src/b3_count.py`).
