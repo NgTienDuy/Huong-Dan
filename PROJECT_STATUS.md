@@ -1,25 +1,30 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.8 xong; C4.9–C4.13 chưa bắt đầu)
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.9 xong; C4.10–C4.13 chưa bắt đầu)
 **Updated:** 2026-11-02
-**Last session:** claude-code (Opus 5.5), 2026-11-02 (phiên 3): viết xong C4.7 và C4.8 (mọi thí nghiệm chạy trong phiên). Yêu cầu của người dùng không đổi:
+**Last session:** claude-code (Opus 5.5), 2026-11-02 (phiên 3): viết xong C4.7, C4.8, C4.9 (mọi thí nghiệm chạy trong phiên). Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1–C4.8 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.9 (IPC)** — 9 sub-leaf theo roadmap (pipe và named pipe · socket Unix domain · bộ nhớ chia sẻ + đồng bộ ·
-hàng đợi thông điệp POSIX/System V · tín hiệu như IPC và giới hạn · eventfd/signalfd/timerfd · truyền fd qua socket · D-Bus khái niệm · đánh đổi thông lượng/độ trễ/
-độ phức tạp/khả năng gỡ lỗi); checkpoint: ba tình huống (thông lượng cao / độ trễ thấp / nhiều tiến trình không tin nhau) — chọn cơ chế và bảo vệ bằng đo đạc.
-TIẾN ĐỘ C4.9 (2026-11-02, phiên 3): MỌI THÍ NGHIỆM ĐÃ CHẠY. `.draft-C4.9/src`: ipc.c (11 cơ chế: lat ping-pong 64 B ở CPU khác/cùng CPU/không ghim; bw 64 B–1 MiB;
--P dung lượng pipe), pipe_atomic.c, robust.c, fdpass.c (SO_PEERCRED socketpair vs connect, SCM_RIGHTS file đã unlink, memfd niêm phong, giá truyền fd),
-dbus_lat.py, ipc_run.sh, build.sh. `out/`: ipc_lat, ipc_bw, pipe_atomic, robust, fdpass, dbus, predictions.txt (đã đối chiếu). Kết quả chính: khác CPU mọi cơ chế
-ngủ 11,5–13,2 µs một chiều; cùng CPU 0,80–1,97 µs; shm quay 0,06 µs (cùng CPU: 3.976 µs = lát thời gian); 64 B: pipe 4,28 triệu/s … tcp 0,53; 64 KiB: pipe 3,0 GB/s
-(dung lượng 64 KiB) / 7,0 (1 MiB), unix 13,3, tcp 8,0, shm 50; mq từ chối > 8 KiB; PIPE_BUF: 4.097 B đã bị cắt; robust EOWNERDEAD/ENOTRECOVERABLE; SO_PEERCRED của
-socketpair = tiến trình tạo; truyền fd 25,2–25,9 µs/khứ hồi; D-Bus 47 µs trong tiến trình / 8,70 ms mỗi busctl. VIỆC KẾ TIẾP: viết doc 00–13 (§1 pipe/FIFO,
-§2 socket Unix, §3 shm + đồng bộ, §4 mq, §5 tín hiệu, §6 eventfd/signalfd/timerfd, §7 truyền fd, §8 D-Bus, §9 đánh đổi, §10 checkpoint 3 tình huống), assemble, kiểm.
+C4.1–C4.9 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.10 (RTOS & tính toán thời gian thực)** — 10 sub-leaf (tác vụ/trạng thái/chuyển tiếp · tick vs tickless · ISR: quy tắc,
+độ dài, được gọi gì · giao tiếp ISR ↔ tác vụ (queue, notification) · mutex kế thừa ưu tiên trong RTOS · stack mỗi tác vụ + phát hiện tràn · WCET · jitter: nguồn gốc
+và đo · FreeRTOS vs Zephyr · cứng vs mềm); checkpoint: jitter tác vụ chu kỳ 1 ms trên MCU dưới tải < 50 µs, giải thích từng nguồn. KHÔNG có MCU nối máy (Blockers) →
+kế hoạch C4 cũ: FreeRTOS/Zephyr trên QEMU (hoặc Renode, C3.11 có công thức vá STM32G0) cho phần hành vi (thời gian mô phỏng!), đo jitter THẬT trên Linux
+(clock_nanosleep 1 ms; SCHED_FIFO cần runner GitHub hoặc VM `.draft-tools/vm/` có root; WSL không có rtprio) + phần MCU thật để "Mở rộng". Bước đầu tiên:
+tạo `.draft-C4.10/{doc,src,out}`, ghi `out/predictions.txt`; kiểm có `qemu-system-arm` (apt download, C3) và mã nguồn FreeRTOS (tải về = mã bên thứ ba: lần trước
+bộ phân loại an toàn CHẶN biên dịch/chạy LittleFS tải về (C4.4) → hỏi người dùng hoặc tự viết bộ lập lịch tối giản làm MÔ HÌNH, ghi rõ là mô hình).
+LƯU Ý cho lượt rà soát nhánh: C4.9 mỏng hơn (63 KB) — cân nhắc thêm: ưu tiên của hàng đợi POSIX, `RLIMIT_SIGPENDING`/EAGAIN của sigqueue, ngữ nghĩa `open` của FIFO,
+`vmsplice`; lặp lại lượt thông lượng 1 MiB của bộ nhớ chung khi máy rảnh.
+
+C4.9 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.9-IPC.md`, 63 KB, 672 dòng, ghép từ 4 file `.draft-C4.9/doc/NN-*.md`; doccheck 0/0; blockcheck 10 khối,
+143 dòng, 0 lệch. 10 dự đoán: 6 ✓ 3 ½ 1 ✗. Kết quả chính: khác CPU mọi cơ chế ngủ 11,5–13,2 µs một chiều; cùng CPU 0,80–1,97 µs (eventfd/futex nhanh nhất, TCP chậm
+nhất); shm quay 0,06 µs / 3.976 µs cùng CPU; 64 B: pipe 4,28 triệu/s, unix 2,5–2,7, sysv 3,0, posix-mq 0,95, tcp 0,53, shm 13–14; 64 KiB: pipe 3,0 GB/s (7,0 với
+1 MiB), unix 13,3, tcp 8,0, shm 50; mq từ chối > 8 KiB; PIPE_BUF 4.097 B → 191 đoạn chen; robust EOWNERDEAD → consistent / ENOTRECOVERABLE; SO_PEERCRED của
+socketpair trước fork = tiến trình tạo; truyền fd +~2 µs; D-Bus 47 µs / 8,70 ms mỗi busctl. CHƯA: đọc lại toàn văn đã ghép.
 
 C4.8 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.8-Deadlock&Livelock.md`, 126 KB, 1.450 dòng, ghép từ 13 file `.draft-C4.8/doc/NN-*.md`; doccheck 0/0;
-blockcheck 24 khối ✅, 424 dòng, 0 lệch; C4.6/C4.7 hết cảnh báo "C4.8 còn khung" (C4.8 §8 = chẩn đoán, đúng như hai leaf đó dẫn chiếu). 19 dự đoán: 12 ✓ 4 ½ 3 ✗.
+blockcheck 24 khối ✅, 426 dòng, 0 lệch (1.452 dòng sau lần sửa cuối); C4.6/C4.7 hết cảnh báo "C4.8 còn khung" (C4.8 §8 = chẩn đoán, đúng như hai leaf đó dẫn chiếu). 19 dự đoán: 12 ✓ 4 ½ 3 ✗.
 Kết quả chính: AB/BA chặt treo ngay lần chạy chồng đầu (40/40, 36 lượt luồng 2 chưa xong vòng nào); ngây thơ 8/1.000 tài khoản treo sau 585–1.609 / 34.660–2.797.423
 lượt; khóa toàn cục nhanh nhất khi 8 tài khoản (13,3 vs 3,9 triệu/s), trylock 55,9 > có thứ tự 38,7 > toàn cục 10,6 khi 1.000; timedlock 1 ms sụp còn 9–44 nghìn/s;
 TSan 608 chu trình 2–20 mutex trong 0,5 s; kernel EDEADLK cho vòng POSIX ≤ 12 tiến trình (MAX_DEADLK_ITERATIONS), không OFD/flock; 2 dịch vụ gọi nhau: ss Recv-Q 1
@@ -312,6 +317,7 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 ## Last verification
 
+- 2026-11-02: `doccheck.py C4.9-IPC.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.9/out .draft-C4.9/src`: 10 khối ✅, 143 dòng, 0 lệch.
 - 2026-11-02: `doccheck.py C4.8-Deadlock&Livelock.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.8/out .draft-C4.8/src`: 24 khối ✅, 424 dòng, 0 lệch.
   Sau C4.8: `doccheck.py C4.6 C4.7`: 0 lỗi, 0 cảnh báo.
 - 2026-11-02: `doccheck.py C4.7-ConcurrencyPatterns.md`: 0 lỗi, 3 cảnh báo (C4.8 còn khung). `blockcheck.py … .draft-C4.7/out .draft-C4.7/src`: 39 khối ✅, 692 dòng, 0 lệch.
