@@ -10,9 +10,13 @@ viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nh
 C4.1–C4.8 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.9 (IPC)** — 9 sub-leaf theo roadmap (pipe và named pipe · socket Unix domain · bộ nhớ chia sẻ + đồng bộ ·
 hàng đợi thông điệp POSIX/System V · tín hiệu như IPC và giới hạn · eventfd/signalfd/timerfd · truyền fd qua socket · D-Bus khái niệm · đánh đổi thông lượng/độ trễ/
 độ phức tạp/khả năng gỡ lỗi); checkpoint: ba tình huống (thông lượng cao / độ trễ thấp / nhiều tiến trình không tin nhau) — chọn cơ chế và bảo vệ bằng đo đạc.
-Bước đầu tiên: tạo `.draft-C4.9/{doc,src,out}`, ghi `out/predictions.txt`. Dùng lại: giá đánh thức (C4.7 §4.3: 7,4–7,7 µs gửi / ~12 µs thức) — mọi phép đo độ trễ
-IPC khứ hồi giữa 2 tiến trình sẽ bị nó chi phối, nên đo cả ghim cùng CPU / khác CPU / spin_idle; C4.5 đã đo signalfd/timerfd/eventfd một phần (§5) và socket buffer
-(sockfill 2,50 MiB) — dẫn chiếu, đừng đo lại. D-Bus: kiểm `busctl`/`dbus-send` có sẵn không (systemd --user có bus của người dùng).
+TIẾN ĐỘ C4.9 (2026-11-02, phiên 3): MỌI THÍ NGHIỆM ĐÃ CHẠY. `.draft-C4.9/src`: ipc.c (11 cơ chế: lat ping-pong 64 B ở CPU khác/cùng CPU/không ghim; bw 64 B–1 MiB;
+-P dung lượng pipe), pipe_atomic.c, robust.c, fdpass.c (SO_PEERCRED socketpair vs connect, SCM_RIGHTS file đã unlink, memfd niêm phong, giá truyền fd),
+dbus_lat.py, ipc_run.sh, build.sh. `out/`: ipc_lat, ipc_bw, pipe_atomic, robust, fdpass, dbus, predictions.txt (đã đối chiếu). Kết quả chính: khác CPU mọi cơ chế
+ngủ 11,5–13,2 µs một chiều; cùng CPU 0,80–1,97 µs; shm quay 0,06 µs (cùng CPU: 3.976 µs = lát thời gian); 64 B: pipe 4,28 triệu/s … tcp 0,53; 64 KiB: pipe 3,0 GB/s
+(dung lượng 64 KiB) / 7,0 (1 MiB), unix 13,3, tcp 8,0, shm 50; mq từ chối > 8 KiB; PIPE_BUF: 4.097 B đã bị cắt; robust EOWNERDEAD/ENOTRECOVERABLE; SO_PEERCRED của
+socketpair = tiến trình tạo; truyền fd 25,2–25,9 µs/khứ hồi; D-Bus 47 µs trong tiến trình / 8,70 ms mỗi busctl. VIỆC KẾ TIẾP: viết doc 00–13 (§1 pipe/FIFO,
+§2 socket Unix, §3 shm + đồng bộ, §4 mq, §5 tín hiệu, §6 eventfd/signalfd/timerfd, §7 truyền fd, §8 D-Bus, §9 đánh đổi, §10 checkpoint 3 tình huống), assemble, kiểm.
 
 C4.8 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.8-Deadlock&Livelock.md`, 126 KB, 1.450 dòng, ghép từ 13 file `.draft-C4.8/doc/NN-*.md`; doccheck 0/0;
 blockcheck 24 khối ✅, 424 dòng, 0 lệch; C4.6/C4.7 hết cảnh báo "C4.8 còn khung" (C4.8 §8 = chẩn đoán, đúng như hai leaf đó dẫn chiếu). 19 dự đoán: 12 ✓ 4 ½ 3 ✗.
