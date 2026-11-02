@@ -1,8 +1,8 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
 **State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.6 xong; C4.7–C4.13 chưa bắt đầu)
-**Updated:** 2026-10-30
-**Last session:** claude-code (Opus 5.5), 2026-10-30 (phiên 2): viết xong C4.5 và C4.6; C4.7 đang đo (dừng vì hết hạn mức). Yêu cầu của người dùng không đổi:
+**Updated:** 2026-11-02
+**Last session:** claude-code (Opus 5.5), 2026-11-02 (phiên 3): chạy toàn bộ thí nghiệm C4.7 (xem TIẾN ĐỘ C4.7); đang viết doc C4.7. Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
@@ -13,13 +13,19 @@ checkpoint: pipeline 3 giai đoạn có backpressure, chứng minh bộ nhớ KH
 (`.draft-C4.6/src/bbuf.c`) làm kênh giữa các giai đoạn; Go 1.27.2 có trong `.draft-tools` (setup_env.sh) cho CSP/channel; đo RSS + cgroup memory (cách của C4.5).
 Bước đầu tiên cụ thể: tạo `.draft-C4.7/{doc,src,out}`, ghi `out/predictions.txt` cho pipeline (không giới hạn: RSS tăng tuyến tính theo hiệu tốc độ; có giới hạn:
 phẳng) và cho pool luồng (định cỡ theo Little: N = λ·W).
-TIẾN ĐỘ C4.7 (2026-10-30, dừng vì hết hạn mức): `.draft-C4.7/` có `src/pipe.c` (pipeline 3 giai đoạn, -q/-p/-x/-m), `pipe_run.sh`, `build.sh`,
-`sync.h`; `out/predictions.txt` (P1–P4, W1–W3, J1, G1–G3, H1, I1, M1 + ghi chú lỗi dụng cụ). Đã sửa cách đếm blk_% và "offered" (trước: chỉ ghi khi
-hết chặn và chỉ khi > 1 ms) và thêm `-m 1` (malloc_trim) — ĐÃ build + thử nhanh, đúng. VIỆC KẾ TIẾP: chạy lại MỌI lượt pipe (`bash src/pipe_run.sh
-{base,seda,ckpt,policy}` > out/pipe_*.txt; thêm lượt ckpt với `-m 1` để kiểm M1: RSS 66 MiB sau khi xả có trở về ~2 MiB không); rồi viết pool.c (W1–W3),
-fj.c (J1), Go (G1–G3), share.c (H1), inflight (I1); rồi doc 00–14 như C4.6. Kết quả lượt pipe đầu (còn đúng, chỉ cột blk_%/offered sai): chặn s3 5 s,
-không giới hạn: RSS 1,9 → 105,7 MiB, xả trong ~1,5 s, RSS ở lại 66 MiB; có giới hạn 64: RSS phẳng 1,9–2,1; quá tải 50k/s: block giao 21,6k/s vs không
-giới hạn 26,2k/s; dropnew/dropold bỏ ~57%, p50 5,77/4,19 ms; s2 30 µs cho ~26k/s (≈8 µs phí mỗi phần tử); SEDA 2 worker ×1,78, 3 worker giữ 80k/s.
+TIẾN ĐỘ C4.7 (2026-11-02, phiên 3): MỌI THÍ NGHIỆM ĐÃ CHẠY, output ở `.draft-C4.7/out/` (pipe_{base,handoff,seda,ckpt,ckpt2,trim,oom,policy,wake,negctl},
+pool_{cpu,io,nested,starve,overload}, fj_{loop,grain,stress}, wakecost (+ _run1_contaminated), go_{chan,actor,leak,deadlock,pipe} (+ go_pipe_run1_untouched),
+misc_{share,inflight,asyncio}, survey_i7, predictions.txt có đối chiếu kết quả). Mã: `src/` (pipe.c có -v/-h/-u/-B/-S; pool.c; fj.c Chase-Lev; wakecost.c;
+spin_idle.c; share.c; inflight.c; asyncio_lag.py; go/main.go; *_run.sh; build.sh). VIỆC KẾ TIẾP: viết doc `.draft-C4.7/doc/00-head.md … 14-summary.md` như C4.6
+(§1 actor, §2 CSP, §3 fork-join, §4 pipeline + giá đánh thức, §5 SEDA, §6 backpressure, §7 hàng đợi/chính sách bỏ, §8 pool, §9 chia sẻ, §10 đơn luồng+async,
+§11 checkpoint (+ script kiểm tự động có đối chứng âm, CHƯA viết: `src/ckpt_check.py`), Phụ lục A–D, Tổng kết) rồi assemble + doccheck + blockcheck.
+Kết quả chính: đánh thức luồng đang ngủ tốn bên gọi 7,3–7,6 µs (CPU đích HLT, không cpuidle driver), 2,2–2,5 µs khi mọi CPU bận, ~1,2 µs khi đích chưa kịp ngủ;
+bounded+block 21,6k/s vs 26,1k/s vì s2 đánh thức 1,93 luồng/phần tử; hysteresis 0,5 trả về 26,1k/s (kernel làm vậy: pipe_read chỉ đánh thức khi từng đầy,
+sock_writeable khi trống nửa); SEDA 2 worker: báo hiệu sau unlock +35 %; drop-oldest giảm trễ 5,77 → 4,19 ms; OOM 64M: chết sau 3 s, 137; bounded phẳng
+2,1 MiB (q 64) / +12,7 MiB (q 4096) bất kể stall 5/10/20 s; glibc giữ 66 MiB khi đỉnh > 64 MiB (heap arena), trả hết khi < 64 MiB; malloc_trim → 2,3;
+fj: block 1,84× (lý thuyết 1,875) trên dốc, 1,09× trên heavy ngẫu nhiên; grain U 0,49× → 6,60×; bỏ fence Chase-Lev: 779/935 lấy đôi = số bị mất;
+pool: lồng nhau khóa chết 4/4, prio p99 50 ms vs bulkhead 0,29; Go: chan 126–135 ns, đệm 28–30; actor 2,4×/1,36× mutex; goroutine 2,69 KiB;
+share: striped không mở rộng (dòng cache), local 3,4–5,1×; luồng chặn 35,5 KiB (8,31 RSS + 16 kstack + 10,9 slab); asyncio task 929 B; chặn 50 ms → trễ 51 ms.
 LƯU Ý: C4.6 dẫn chiếu tới "C4.8 §8" (chẩn đoán: stack của mọi luồng, `wchan`) — C4.8 phải giữ §8 là mục chẩn đoán (đúng thứ tự sub-leaf của roadmap).
 
 C4.6 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.6-ConcurrencyPrimitives.md`, ~129 KB, ghép từ 15 file `.draft-C4.6/doc/NN-*.md`; doccheck 0 lỗi, 2 cảnh báo
