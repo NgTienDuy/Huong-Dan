@@ -1,19 +1,31 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.9 xong; C4.10–C4.13 chưa bắt đầu)
-**Updated:** 2026-11-02
-**Last session:** claude-code (Opus 5.5), 2026-11-02 (phiên 3): viết xong C4.7, C4.8, C4.9 (mọi thí nghiệm chạy trong phiên). Yêu cầu của người dùng không đổi:
+**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.10 xong; C4.11–C4.13 chưa bắt đầu)
+**Updated:** 2026-11-05
+**Last session:** claude-code (Opus 5.5), 2026-11-04/05 (phiên 4): viết xong C4.10 (FreeRTOS thật trên QEMU + Linux [i7] + runner run24–26). Trước đó (phiên 3, 2026-11-02): C4.7, C4.8, C4.9. Yêu cầu của người dùng không đổi:
 viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
 
 ## NEXT ACTION
 
-C4.1–C4.9 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.10 (RTOS & tính toán thời gian thực)** — 10 sub-leaf (tác vụ/trạng thái/chuyển tiếp · tick vs tickless · ISR: quy tắc,
-độ dài, được gọi gì · giao tiếp ISR ↔ tác vụ (queue, notification) · mutex kế thừa ưu tiên trong RTOS · stack mỗi tác vụ + phát hiện tràn · WCET · jitter: nguồn gốc
-và đo · FreeRTOS vs Zephyr · cứng vs mềm); checkpoint: jitter tác vụ chu kỳ 1 ms trên MCU dưới tải < 50 µs, giải thích từng nguồn. KHÔNG có MCU nối máy (Blockers) →
-kế hoạch C4 cũ: FreeRTOS/Zephyr trên QEMU (hoặc Renode, C3.11 có công thức vá STM32G0) cho phần hành vi (thời gian mô phỏng!), đo jitter THẬT trên Linux
-(clock_nanosleep 1 ms; SCHED_FIFO cần runner GitHub hoặc VM `.draft-tools/vm/` có root; WSL không có rtprio) + phần MCU thật để "Mở rộng". Bước đầu tiên:
-tạo `.draft-C4.10/{doc,src,out}`, ghi `out/predictions.txt`; kiểm có `qemu-system-arm` (apt download, C3) và mã nguồn FreeRTOS (tải về = mã bên thứ ba: lần trước
-bộ phân loại an toàn CHẶN biên dịch/chạy LittleFS tải về (C4.4) → hỏi người dùng hoặc tự viết bộ lập lịch tối giản làm MÔ HÌNH, ghi rõ là mô hình).
+C4.1–C4.10 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.11 (Container & ảo hóa)** — 9 sub-leaf (namespace PID/net/mount/user/IPC/UTS · cgroup v2 CPU/mem/IO/pid ·
+overlayfs · OCI image + runtime · seccomp/capability/giảm quyền · phá vỡ container + mô hình đe dọa · VM vs container · microVM (Firecracker) khái niệm ·
+chi phí hiệu năng thật/huyền thoại); checkpoint: "container" tối giản bằng `unshare` + cgroup + `chroot` (không Docker), cô lập mạng, PID, bộ nhớ.
+[i7] có `unshare -Ur` (user ns) + cgroup ủy quyền `systemd-run --user`; phần cần root (veth, cgroup io, seccomp đầy đủ, Docker so sánh) → runner (`c3-arm-lab`,
+c410/ là thư mục của C4.10; tạo c411/) hoặc VM `.draft-tools/vm/`. Bước đầu: tạo `.draft-C4.11/{doc,src,out}`, ghi `out/predictions.txt`.
+Sau C4.11: C4.12, C4.13 (C4.10 hứa: C4.13 đi sâu `timerlat`/`osnoise`, threaded IRQ/softirq — phải giữ), rồi rà soát toàn nhánh C4.
+
+C4.10 (2026-11-05, claude-code Opus 5.5, phiên 4): `C4-…/C4.10-RTOS&RealTime.md`, 189,5 KB, 2.287 dòng, ghép từ 10 file `.draft-C4.10/doc/NN-*.md`;
+doccheck 0/0; blockcheck 61 khối ✅, 1.015 dòng, 0 lệch; `src/prosenums.py` (mới: đối chiếu mọi số thập phân trong văn xuôi với out/) → 39 số không nguyên văn,
+đã kiểm từng số: 38 là số suy ra/làm tròn đúng, 1 lỗi đã sửa (sleep=on). 20 dự đoán: 10 ✓ 7 ½ 3 ✗ (`src/b3_count.py`).
+Nền tảng: FreeRTOS-Kernel V11.3.1 thật trên QEMU 8.2.2 mps2-an385, icount 8 ns/lệnh (`src/setup_arm.sh`, `src/fr/run_all.sh` tái tạo mọi out MCU trong 3,7 phút);
+Linux [i7] (`src/linux/run_i7.sh`); runner run24/25/26 (`src/runner/run2{4,5,6}.sh`, artifact `out/runner2{4,5,6}/`). Zephyr v4.4.2 chỉ đọc mã nguồn.
+Kết quả chính (để leaf sau dẫn đúng): taskYIELD 59 lệnh, trao tay notify/sem/queue 379/673/718 (§1.2); TCB 88 B, tác vụ 256 từ = 1.128 B (§1.3); tick ISR ~45 lệnh
+(§2.1); vTaskDelay(1) 5,5 µs–1 ms (§2.2); tickless 10 ngắt/s, kernel trôi −30 ppm do bù dừng SysTick (§2.4); API sai trong ISR khi tắt assert → cả hệ treo ở
+vListInsert list.c:192 (§3.2); vùng găng 20 µs → ngắt 0x80 trễ 20,24 µs, 0x20 không (§3.3); ISR→tác vụ notify 1,96 / sem 2,16 / queue 2,76 / event group 8,28 µs,
+quên yield TB 501 µs (§4); PI: sem 52 ms vs mutex 2 ms; chuỗi không bắc cầu FreeRTOS 52 ms, Linux rt_mutex 2,06 ms (§5); tràn nhảy qua thắng method 1/2 và MPU guard,
+nổ ở tác vụ khác (§6); WCET tĩnh = đo 4.254 lệnh, ngẫu nhiên 78 %; trên CPU thật đầu vào ngẫu nhiên chậm hơn đầu vào ngược 1,2–2,3× (34,55 vs 1,00 lần đoán sai) (§7);
+Linux: slack 50 µs; FIFO thắng tải CPU (33–74 µs) nhưng không thắng ngắt đĩa/softirq trên cùng CPU (timerlat: NVMe 491 µs, VMbus tasklet 292–344 µs); cô lập + dời IRQ
+12–43 µs (§8); checkpoint MCU 482 ms → 2,16 µs, nguồn cộng tuyến tính 480 = 300 + 100 + 80, nguồn chỉ hại khi trùng pha (§11).
 LƯU Ý cho lượt rà soát nhánh: C4.9 mỏng hơn (63 KB) — cân nhắc thêm: ưu tiên của hàng đợi POSIX, `RLIMIT_SIGPENDING`/EAGAIN của sigqueue, ngữ nghĩa `open` của FIFO,
 `vmsplice`; lặp lại lượt thông lượng 1 MiB của bộ nhớ chung khi máy rảnh.
 
@@ -317,6 +329,7 @@ Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
 
 ## Last verification
 
+- 2026-11-05: `doccheck.py C4.10-RTOS&RealTime.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.10/out .draft-C4.10/src`: 61 khối ✅, 1.015 dòng, 0 lệch.
 - 2026-11-02: `doccheck.py C4.9-IPC.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.9/out .draft-C4.9/src`: 10 khối ✅, 143 dòng, 0 lệch.
 - 2026-11-02: `doccheck.py C4.8-Deadlock&Livelock.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.8/out .draft-C4.8/src`: 24 khối ✅, 424 dòng, 0 lệch.
   Sau C4.8: `doccheck.py C4.6 C4.7`: 0 lỗi, 0 cảnh báo.
