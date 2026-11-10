@@ -2,13 +2,11 @@
 
 **State:** C1, C2, C3, C4 hoàn tất. Nhánh kế tiếp chưa được người dùng chỉ định.
 **Updated:** 2026-11-10
-**Last session:** claude-code (Opus 5.5), 2026-11-10 (phiên 6): viết xong C4.12 và C4.13; trả nợ của C4.1 (posix_spawn, XSAVE, EPYC, 215 ns), làm dày C4.9, sửa dẫn chiếu tới C4.12/C4.13 trong C4.2/C4.3/C4.5/C4.10/C4.11; rà soát toàn nhánh C4; xóa mọi nháp `.draft-*` của C4.
+**Last session:** claude-code (Opus 5.5), 2026-11-10 (phiên 6): viết xong C4.12 và C4.13; trả nợ của C4.1 (posix_spawn, XSAVE, EPYC, 215 ns), làm dày C4.9, sửa dẫn chiếu tới C4.12/C4.13 trong C4.2/C4.3/C4.5/C4.10/C4.11; rà soát toàn nhánh C4 (kiểm tự động trên mọi leaf trước khi xóa nháp, rồi đọc lại toàn văn C4.2–C4.9: 17 chỗ sửa văn xuôi — số liệu lệch giữa thân bài và bảng/phụ lục, câu đếm B.3 thô, diễn đạt quá mạnh); xóa mọi nháp `.draft-*` của C4.
 
 ## NEXT ACTION
 
-Rà soát nhánh C4 — đọc lại toàn văn đã ghép (phần còn nợ từ khi viết): C4.2, C4.3, C4.4, C4.5, C4.6, C4.7, C4.8, C4.9. Đã đọc: (cập nhật khi xong từng leaf).
-Chỉ sửa văn xuôi (nháp và `out/` đã xóa — không sửa khối ✅). Sửa bằng Python đọc/ghi giữ CRLF, mỗi chuỗi cũ phải xuất hiện đúng một lần. Xong thì commit + push.
-Sau đó: chờ người dùng chọn nhánh tiếp (C5 Networking là nhánh kế theo số thứ tự).
+Chờ người dùng chọn nhánh tiếp theo (C5 Networking là nhánh kế theo số thứ tự: `E2E-SYSTEM/C5-Networking/`, 16 leaf + INDEX). Bước đầu của nhánh mới: dựng lại bộ công cụ kiểm (xem "Quy ước"), tạo `.draft-C5.1/{doc,src,out}`, ghi `out/predictions.txt` trước mọi phép đo.
 
 ## Completed
 
@@ -66,3 +64,4 @@ Sau đó: chờ người dùng chọn nhánh tiếp (C5 Networking là nhánh k�
 - 2026-11-10, trước khi xóa nháp: `doccheck.py C4.*.md`: 13 leaf 0 lỗi 0 cảnh báo (17 lỗi chỉ ở `C4.0-INDEX.md` — file mục lục, không theo khuôn leaf).
   `blockcheck.py C4.N-*.md .draft-C4.N/out [src]` cho N = 1…13: 90/62/55/30/38/30/39/24/15/61/72/48/47 khối ✅, tổng 7.838 dòng, 0 lệch.
   Kiểm dẫn chiếu `C4.N §X` giữa các leaf: 361, 0 sai (đối chứng âm: bắt đúng 2/2 dẫn chiếu sai cài sẵn). Mọi leaf CRLF, 0 dòng LF trần.
+- 2026-11-10, sau khi đọc lại và sửa C4.2–C4.9 (không còn nháp): dẫn chiếu giữa các leaf 361/0 sai; CRLF 13/13; số cột của mọi bảng nhất quán (bộ kiểm có đối chứng âm). Không khối ✅ nào bị sửa.
