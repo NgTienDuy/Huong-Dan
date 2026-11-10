@@ -1,361 +1,68 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** IN PROGRESS — nhánh C1, C2, C3 hoàn tất; đang viết nhánh C4 (C4.1–C4.11 xong; C4.12–C4.13 chưa bắt đầu)
+**State:** C1, C2, C3, C4 hoàn tất. Nhánh kế tiếp chưa được người dùng chỉ định.
 **Updated:** 2026-11-10
-**Last session:** claude-code (Opus 5.5), 2026-11-06 (phiên 5): rà bản nháp C4.11 thừa hưởng, làm lại toàn bộ thí nghiệm, viết xong C4.11. Trước đó 2026-11-04/05 (phiên 4): viết xong C4.10 (FreeRTOS thật trên QEMU + Linux [i7] + runner run24–26). Trước đó (phiên 3, 2026-11-02): C4.7, C4.8, C4.9. Yêu cầu của người dùng không đổi:
-viết C4.1 → C4.13 theo cách của C1, bám `roadmap.md`, rà soát toàn nhánh sau C4.13; điều chắc chắn đúng không buộc phải thử trước. Công cụ ở `C4-…/.draft-tools/`.
+**Last session:** claude-code (Opus 5.5), 2026-11-10 (phiên 6): viết xong C4.12 và C4.13; trả nợ của C4.1 (posix_spawn, XSAVE, EPYC, 215 ns), làm dày C4.9, sửa dẫn chiếu tới C4.12/C4.13 trong C4.2/C4.3/C4.5/C4.10/C4.11; rà soát toàn nhánh C4; xóa mọi nháp `.draft-*` của C4.
 
 ## NEXT ACTION
 
-PHIÊN 6 (2026-11-10, claude-code Opus 5.5). Yêu cầu: hoàn tất C4.12 + C4.13 → rà soát TOÀN BỘ C4 → xóa mọi nháp → rút gọn file này → commit + push.
-TRẠNG THÁI: C4.12 VIẾT XONG (`C4.12-LinuxAsAPlatform.md` ghép từ `.draft-C4.12/doc`, doccheck 0 lỗi, blockcheck 0 lệch; sau sửa udev_gaps/sysctl cần GHÉP LẠI + kiểm lại). Kết quả: U-Boot heap/SP (§1.3), lm75 v6.18 bug xác nhận bằng thanh ghi thô 0x00→0x60→0x00 (§4.5, run39), runner boot 98 s = device job Azure (§1.2), udev = 31 READ_10 + ~20 exec (§3.4), sysctl -w nói dối (§7.3).
-C4.13: doc đã viết 10-proc, 20-ftrace, 30-kprobe, 50-bpftrace (`.draft-C4.13/doc`). Runner run38 (ftrace/irq OK; apt hỏng), run39 (ARM OK: ckpt chạy đúng với loop direct-io, uprobe malloc, overhead; x86 đã tải, CHƯA đọc hết). CẦN run40: verif.bpf.c volatile (clang biến vòng lặp thành __multi3), bpftool thật trên ARM (linux-tools-generic), bcc.sh stdbuf (đồng hồ "first output"), ckpt.sh ulimit -n + fincore (util-linux-extra), bpftrace STRLEN=200 in đầy đủ — script đã sửa trong src/c413 trừ apt (thêm linux-tools-generic util-linux-extra). CÒN VIẾT: 00-head, 40-bpf, 60-bcc, 70-overhead (src/overhead_table.py), 80-prod (lockdown, NET_RX trong python3, osnoise/timerlat+AppArmor stack), 90-ckpt, 99-appendix; predictions T1–T27 chấm.
-RÀ NHÁNH: C4.1 ĐÃ SỬA nợ (posix_spawn = môi trường không phải scope, out/spawn_recheck.txt; §1.3 khép bằng công thức XSAVE 10.640 B; EPYC → C4.11 §7.5; 215 ns → C4.13 §2.7). Còn: sửa dẫn chiếu tới C4.12/C4.13 trong C4.2/C4.3/C4.5/C4.10/C4.11; làm dày C4.9; đọc lại văn xuôi các leaf; doccheck+blockcheck mọi leaf TRƯỚC khi xóa nháp; helper `.draft-tools/leafedit.py` (sửa leaf CRLF bằng thay chuỗi chính xác).
-
-
-(Ghi chú các phiên trước, giữ cho lượt rà nhánh:)
-
-(Trước đó:) C4.11 ĐÃ VIẾT XONG (2026-11-06, claude-code Opus 5.5, phiên 5). KẾ TIẾP: **C4.12 (Linux như một nền tảng)** — 9 sub-leaf (khởi động firmware→bootloader→kernel→init · systemd: unit, target, khởi động lại, journal · udev · device tree · driver model + sysfs · Buildroot/Yocto khái niệm · sysctl · ulimit/giới hạn · secure boot nhúng); checkpoint: một unit systemd có chính sách khởi động lại đúng + một device tree overlay kích hoạt cảm biến trên SBC — cả hai sống qua khởi động lại. Không có SBC: dùng QEMU (`.draft-tools/vm/` cho systemd thật với root; QEMU `virt` ARM + DT overlay; runner cho systemd/udev thật). Bước đầu: tạo `.draft-C4.12/{doc,src,out}`, ghi `out/predictions.txt`. Sau C4.12: C4.13 (C4.10 hứa: `timerlat`/`osnoise`, threaded IRQ/softirq; C4.11 §7.5 hứa: eBPF đã tìm ra tracepoint của provjobd), rồi rà soát toàn nhánh C4.
-
-C4.11 (2026-11-06, phiên 5): `C4-…/C4.11-Containers&Virtualization.md`, 209 KB, 2.272 dòng, ghép từ 12 file `.draft-C4.11/doc/NN-*.md` (bản nháp thừa hưởng 53 KB ở `doc-old/`, đã viết lại toàn bộ); doccheck 0/0; blockcheck 72 khối ✅, 898 dòng, 0 lệch; prosenums: 75 số không nguyên văn, đã kiểm từng số (làm tròn/suy ra đúng; sửa 2: 63→~62 GiB, ~100→~95 MiB). 40 dự đoán: 30 ✓ 7 ½ 3 ✗. Trích nguồn qua `src/quotes.sh` (Linux v6.18, util-linux 2.39.3, glibc 2.39, musl 1.2.5, moby v28.0.4 — các file nguồn ở `.draft-tools/{ksrc-6.18,glibc-2.39,musl-1.2.5,moby-28.0.4}`). Runner run27–31 (repo lab ab3cb17, cabf29b, 8b2c341, d68b129, 6d0f785).
-Kết quả chính (để leaf sau dẫn đúng): netns 247,5–263,5 µs, +97 KiB kernel; user/uts/pid/cgroup 5,5–7,1 µs (§1.3) · root của userns làm kernel TỰ NẠP dummy.ko + tạo dummy0 ở host (§1.4) · /proc cũ: ps "lookup self" (§1.5) · CL_SLAVE; thoát chroot 46 mục (§1.6) · veth = loopback 24–26 µs, pasta/slirp 50–55 µs (§1.7) · EBUSY nút trong; DefaultTasksMax 15 % → pids.max 8422 trong Docker; page cache tính cho người đọc trước (§2.1–§2.4) · memory.max 64M + io.max 10 MiB/s → OOM kill dd anon 1 MiB (§2.5) · io.max: write() 0,027 s, sync 9,97 MiB/s (§2.6) · Go 1.27 GOMAXPROCS 2, Python/nproc 10, musl dùng affinity, JVM 128 MiB (§2.7) · copy-up 0,53–0,60 s [i7], 2,44 s runner (fsync), rename dir EXDEV, tra cứu ~0,8 µs/lớp lần đầu (§3) · seccomp cache: 6–7 ns cố định; +0,43 ns/luật khi đọc args; int 0x80 thủng bộ lọc không kiểm arch; AppArmor deny mount im lặng (§5) · userns-remap 100000 (§6.2) · hàng xóm ×3,8–5,8 (§7.2) · SRSO Safe RET ×2,1–2,5, tracepoint +31/+68 ns; EPYC = laptop theo chu kỳ (§7.5) · microvm thiếu RTC 3,4 s; rtc=on 0,57 s; Firecracker 1,0 s, VMM 2 vs 65 MiB (§8) · docker-proxy ×3, mạng không root ×2–2,7 (§9) · checkpoint: OOMPolicy=stop giết minict, PID 1 sống tới SIGKILL sau TimeoutStopSec (§10.4).
-TRẢ NỢ CHO LƯỢT RÀ NHÁNH: (a) C4.1 §4.3 "EPYC chậm 3–5×" → khép bằng C4.11 §7.5 (SRSO Safe RET + tracepoint provjobd; số trong out/runner31/…/c411-a-guestab); (b) C4.1 "posix_spawn chậm trong scope" → nghi LD_LIBRARY_PATH có ":" cuối (C4.11 §0.4), kiểm lại; (c) mọi số khởi động/exec đo với setup_env.sh cũ ở C4.1–C4.10.
-
-(Ghi chú cũ, trước phiên 5:) C4.1–C4.10 ĐÃ VIẾT XONG. KẾ TIẾP: **C4.11 (Container & ảo hóa)** — 9 sub-leaf (namespace PID/net/mount/user/IPC/UTS · cgroup v2 CPU/mem/IO/pid ·
-overlayfs · OCI image + runtime · seccomp/capability/giảm quyền · phá vỡ container + mô hình đe dọa · VM vs container · microVM (Firecracker) khái niệm ·
-chi phí hiệu năng thật/huyền thoại); checkpoint: "container" tối giản bằng `unshare` + cgroup + `chroot` (không Docker), cô lập mạng, PID, bộ nhớ.
-[i7] có `unshare -Ur` (user ns) + cgroup ủy quyền `systemd-run --user`; phần cần root (veth, cgroup io, seccomp đầy đủ, Docker so sánh) → runner (`c3-arm-lab`,
-c410/ là thư mục của C4.10; tạo c411/) hoặc VM `.draft-tools/vm/`. Bước đầu: tạo `.draft-C4.11/{doc,src,out}`, ghi `out/predictions.txt`.
-Sau C4.11: C4.12, C4.13 (C4.10 hứa: C4.13 đi sâu `timerlat`/`osnoise`, threaded IRQ/softirq — phải giữ), rồi rà soát toàn nhánh C4.
-
-C4.10 (2026-11-05, claude-code Opus 5.5, phiên 4): `C4-…/C4.10-RTOS&RealTime.md`, 189,5 KB, 2.287 dòng, ghép từ 10 file `.draft-C4.10/doc/NN-*.md`;
-doccheck 0/0; blockcheck 61 khối ✅, 1.015 dòng, 0 lệch; `src/prosenums.py` (mới: đối chiếu mọi số thập phân trong văn xuôi với out/) → 39 số không nguyên văn,
-đã kiểm từng số: 38 là số suy ra/làm tròn đúng, 1 lỗi đã sửa (sleep=on). 20 dự đoán: 10 ✓ 7 ½ 3 ✗ (`src/b3_count.py`).
-Nền tảng: FreeRTOS-Kernel V11.3.1 thật trên QEMU 8.2.2 mps2-an385, icount 8 ns/lệnh (`src/setup_arm.sh`, `src/fr/run_all.sh` tái tạo mọi out MCU trong 3,7 phút);
-Linux [i7] (`src/linux/run_i7.sh`); runner run24/25/26 (`src/runner/run2{4,5,6}.sh`, artifact `out/runner2{4,5,6}/`). Zephyr v4.4.2 chỉ đọc mã nguồn.
-Kết quả chính (để leaf sau dẫn đúng): taskYIELD 59 lệnh, trao tay notify/sem/queue 379/673/718 (§1.2); TCB 88 B, tác vụ 256 từ = 1.128 B (§1.3); tick ISR ~45 lệnh
-(§2.1); vTaskDelay(1) 5,5 µs–1 ms (§2.2); tickless 10 ngắt/s, kernel trôi −30 ppm do bù dừng SysTick (§2.4); API sai trong ISR khi tắt assert → cả hệ treo ở
-vListInsert list.c:192 (§3.2); vùng găng 20 µs → ngắt 0x80 trễ 20,24 µs, 0x20 không (§3.3); ISR→tác vụ notify 1,96 / sem 2,16 / queue 2,76 / event group 8,28 µs,
-quên yield TB 501 µs (§4); PI: sem 52 ms vs mutex 2 ms; chuỗi không bắc cầu FreeRTOS 52 ms, Linux rt_mutex 2,06 ms (§5); tràn nhảy qua thắng method 1/2 và MPU guard,
-nổ ở tác vụ khác (§6); WCET tĩnh = đo 4.254 lệnh, ngẫu nhiên 78 %; trên CPU thật đầu vào ngẫu nhiên chậm hơn đầu vào ngược 1,2–2,3× (34,55 vs 1,00 lần đoán sai) (§7);
-Linux: slack 50 µs; FIFO thắng tải CPU (33–74 µs) nhưng không thắng ngắt đĩa/softirq trên cùng CPU (timerlat: NVMe 491 µs, VMbus tasklet 292–344 µs); cô lập + dời IRQ
-12–43 µs (§8); checkpoint MCU 482 ms → 2,16 µs, nguồn cộng tuyến tính 480 = 300 + 100 + 80, nguồn chỉ hại khi trùng pha (§11).
-LƯU Ý cho lượt rà soát nhánh: C4.9 mỏng hơn (63 KB) — cân nhắc thêm: ưu tiên của hàng đợi POSIX, `RLIMIT_SIGPENDING`/EAGAIN của sigqueue, ngữ nghĩa `open` của FIFO,
-`vmsplice`; lặp lại lượt thông lượng 1 MiB của bộ nhớ chung khi máy rảnh.
-
-C4.9 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.9-IPC.md`, 63 KB, 672 dòng, ghép từ 4 file `.draft-C4.9/doc/NN-*.md`; doccheck 0/0; blockcheck 10 khối,
-143 dòng, 0 lệch. 10 dự đoán: 6 ✓ 3 ½ 1 ✗. Kết quả chính: khác CPU mọi cơ chế ngủ 11,5–13,2 µs một chiều; cùng CPU 0,80–1,97 µs (eventfd/futex nhanh nhất, TCP chậm
-nhất); shm quay 0,06 µs / 3.976 µs cùng CPU; 64 B: pipe 4,28 triệu/s, unix 2,5–2,7, sysv 3,0, posix-mq 0,95, tcp 0,53, shm 13–14; 64 KiB: pipe 3,0 GB/s (7,0 với
-1 MiB), unix 13,3, tcp 8,0, shm 50; mq từ chối > 8 KiB; PIPE_BUF 4.097 B → 191 đoạn chen; robust EOWNERDEAD → consistent / ENOTRECOVERABLE; SO_PEERCRED của
-socketpair trước fork = tiến trình tạo; truyền fd +~2 µs; D-Bus 47 µs / 8,70 ms mỗi busctl. CHƯA: đọc lại toàn văn đã ghép.
-
-C4.8 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.8-Deadlock&Livelock.md`, 126 KB, 1.450 dòng, ghép từ 13 file `.draft-C4.8/doc/NN-*.md`; doccheck 0/0;
-blockcheck 24 khối ✅, 426 dòng, 0 lệch (1.452 dòng sau lần sửa cuối); C4.6/C4.7 hết cảnh báo "C4.8 còn khung" (C4.8 §8 = chẩn đoán, đúng như hai leaf đó dẫn chiếu). 19 dự đoán: 12 ✓ 4 ½ 3 ✗.
-Kết quả chính: AB/BA chặt treo ngay lần chạy chồng đầu (40/40, 36 lượt luồng 2 chưa xong vòng nào); ngây thơ 8/1.000 tài khoản treo sau 585–1.609 / 34.660–2.797.423
-lượt; khóa toàn cục nhanh nhất khi 8 tài khoản (13,3 vs 3,9 triệu/s), trylock 55,9 > có thứ tự 38,7 > toàn cục 10,6 khi 1.000; timedlock 1 ms sụp còn 9–44 nghìn/s;
-TSan 608 chu trình 2–20 mutex trong 0,5 s; kernel EDEADLK cho vòng POSIX ≤ 12 tiến trình (MAX_DEADLK_ITERATIONS), không OFD/flock; 2 dịch vụ gọi nhau: ss Recv-Q 1
-trên socket nghe; timeout để lại việc mồ côi; livelock chỉ khi thử lại ngay (604 vs 892.729/s), mọi kiểu lùi → W/(W+lùi) = 34 %; mô hình không nhiễu: lùi cố định 100 %
-mãi; mutex glibc p99 0,53–0,99 ms vs FIFO 40–80 µs; convoy khóa FIFO 74 nghìn vs 3,1 triệu/s, 1 vcsw/lần, 1/thông lượng = 13,5 µs = độ trễ thức; checkpoint
-tag server 11 luồng treo 3–11 s, dump gdb + /proc (futex op 0x80/0x189) + __owner + waitfor.py → poll-2 ↔ archiver, tags_lock/hist_lock; bản sửa: TSan sạch,
-300 s không treo. CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
-
-C4.7 (2026-11-02, claude-code Opus 5.5, phiên 3): `C4-…/C4.7-ConcurrencyPatterns.md`, 199 KB, 2.057 dòng, ghép từ 15 file `.draft-C4.7/doc/NN-*.md`; doccheck 0 lỗi,
-3 cảnh báo (C4.8 còn khung); blockcheck 39 khối ✅, 692 dòng, 0 lệch. 39 dự đoán: 24 ✓ 10 ½ 4 ✗ 1 không kiểm được (đếm bằng `src/b3_count.py`).
-Kết quả chính (để leaf sau dẫn đúng): đánh thức luồng đang ngủ 7,4–7,7 µs phía gửi / 11,7–12,5 µs thức dậy (CPU HLT, không cpuidle driver; IPI qua hypervisor),
-2,2–2,5 µs khi mọi CPU bận, ~1,2 µs khi đích chưa kịp ngủ, 37–58 µs thức dậy khi ngủ ≥ 500 µs (§4.3–§4.4); pipeline 10/30/10 µs: 26.042/s thay vì 33.333 (§4.2);
-backpressure ngây thơ 21.643/s vs hysteresis 26.119/s (kernel: pipe_read chỉ đánh thức khi từng đầy + sau unlock; sock_writeable nửa) (§6.4); SEDA 2 worker báo hiệu
-sau unlock +35 % (§5.2); dropold p50 4,19 vs 5,77 ms (Little, §7.2); không giới hạn +20,7 MiB/s = 20k × 1.088 B; OOM 64M sau ~3 s, 137 (§6.2); cận (3·cap+3)×1.088 B
-đo khớp 0,1 MiB, 5/10/20 s (§11); glibc heap arena 64 MiB: RSS kẹt 66 MiB khi đỉnh > 64 (§6.5); fj chia khối dốc 1,84 (lý thuyết 1,875), phí lá 14 ns, Chase-Lev
-không fence 779/935 lấy đôi = mất (§3); pool lồng nhau khóa chết, prio 50,3 vs vách ngăn 0,29 ms (§8); Go chan 126–135 / 28–30 ns, goroutine 2,69 KiB, actor ask 250 ns;
-share: 64 khóa phân dải phẳng ~77 Mupd/s (dòng cache), riêng+gộp 3,8–5,1× (§9); luồng chờ 35,5 KiB, asyncio task 929 B, GIL: CPU sang luồng vẫn trễ 5–10 ms (§10).
-CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
-
-LƯU Ý: C4.6 dẫn chiếu tới "C4.8 §8" (chẩn đoán: stack của mọi luồng, `wchan`) — C4.8 phải giữ §8 là mục chẩn đoán (đúng thứ tự sub-leaf của roadmap).
-
-C4.6 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.6-ConcurrencyPrimitives.md`, ~129 KB, ghép từ 15 file `.draft-C4.6/doc/NN-*.md`; doccheck 0 lỗi, 2 cảnh báo
-(C4.8 còn là khung); blockcheck 30 khối ✅, 271 dòng, 0 lệch. 41 dự đoán: 28 ✓ 10 ½ 3 ✗. Kết quả chính (để leaf sau dẫn đúng): glibc
-SINGLE_THREAD_P (mutex 2,79 → 11,45 ns), giá khóa bị che bởi việc độc lập, spinlock quá tải ×2,5, ticket 13k–590k ops/s, đoạn găng dài spin 146k@4 CPU vs
-mutex 58k@1,27; `if` → 549k phần tử ma; rwlock writer đói 3 s; CAS tệ nhất 34.645; split lock 2,5 µs, hàng xóm −75%; TSan bắt relaxed MP; cờ int → vòng vô tận;
-futex EAGAIN 119 ns; barrier nhanh hơn trên 2 CPU; TLS 1,12/2,69 ns, .tdata +40 µs/luồng; DCLP relaxed chỉ lộ với luồng đến muộn; checkpoint 5 biến thể,
-bảng phép kiểm nào bắt lỗi nào (TSan sạch với `if`). CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
-
-C4.5 (2026-10-30, claude-code Opus 5.5, phiên 2): `C4-…/C4.5-IOModels.md`, 177,8 KB, 1.687 dòng, ghép từ 14 file `.draft-C4.5/doc/NN-*.md`; doccheck 0/0;
-blockcheck 38 khối ✅, 466 dòng, 0 lệch. Nháp 00–09 của phiên 1 (viết vội, nông) được viết lại toàn bộ; ~15 thí nghiệm mới; server checkpoint viết lại.
-Kết quả chính (để leaf sau dẫn đúng): EAGAIN 122,6 ns; epoll_wait ~0,2 µs mọi N; poll 1.000 fd 36 µs (fd sẵn sàng đầu) / 100 µs (cuối) — đăng ký hàng đợi chờ
-tới fd sẵn sàng đầu (fs/select.c); epoll_ctl 655/427/361 ns; FD_SET(1100): FORTIFY abort / ghi đè im lặng; epoll giữ mô tả file (dup+close: sự kiện cho fd đã
-đóng); herd: poll/epoll riêng 8 lần ngủ mỗi kết nối, EPOLLEXCLUSIVE/accept 1, epoll chung LT 2,21; io_uring QD16 2,4 vs 13,5 µs CPU/IO; một CPU gửi ~115k IOPS
-(CPU 75–81% iowait); SQPOLL 0 syscall, 2 CPU quay; buffered không có io-wq (io_rw_should_retry); timer slack 50 µs, timeout/1000 cho timeout dài (1 s → ≥1.074 µs),
-timerfd không slack; signalfd → con có SigBlk 0x4002; sendfile CPU gửi ÷9, tổng ÷2,4, bên nhận chép lạnh (16 MiB: hết chênh); MSG_ZEROCOPY loopback COPIED;
-sockfill 2,50 MiB; readahead cửa sổ đầu 4 trang; đĩa sau 100 ms nghỉ 0,8 ms (không do CPU); bp queue chết ở NỬA giới hạn (gấp đôi khi lớn); checkpoint: 48 B +
-3,76 KiB kernel mỗi kết nối (3.632 B cấu trúc từ BTF), CPU/yêu cầu 36→7,3→4,6 µs, a=3,54 + b=38,6/ev; 50k: RSS 4,1, cgroup 188 MiB, 36% CPU; thread/conn 381 MiB;
-client không đọc: RSS phẳng. 58 dự đoán: 36 ✓ 13 ½ 9 ✗. Câu hỏi mở ở Phụ lục B.4. CHƯA (để lượt rà soát nhánh): đọc lại toàn văn đã ghép.
-
-C4.4 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.4-Filesystems&Storage.md`, ~145 KB, ghép từ 13 file `.draft-C4.4/doc/NN-*.md`; doccheck 0/0; blockcheck 30 khối,
-356 dòng, 0 lệch. Công cụ máy ảo (root không sudo) ở `.draft-tools/vm/` + `.draft-tools/debs-vm/` — dùng lại cho C4.11/C4.12/C4.13 (cgroup/namespace thật,
-systemd, ftrace/eBPF trong khách). Kết quả chính: drvfs 3.090 µs/file; không O_APPEND mất 47–48%; ghi đè 4 KiB + fsync: ext4 4 khối, btrfs 18; f2fs ổ ≤16 GB
-ghi tại chỗ; data=journal 2×; STALE (writeback lộ file đã xóa 240/256 khối; delalloc → 0 byte); Dirty hết hạn 31,5–32 s; cgroup 512M: write() chặn ~210 ms;
-fsync lỗi: EIO một lần rồi 0, dữ liệu mất; btrfs 1 → 3.535 extent; QD1 9k → QD64 183k IOPS, Little đúng; FTL WA 7,28/1,95/1,22; TRIM thật; checkpoint: không
-fsync mất 804/4.000/3.961/3.690, có fsync 0/5 lượt, dm-flakey drop_writes mất 1.487/1.476 dù fsync.
-⚠️ CẦN NGƯỜI DÙNG QUYẾT: biên dịch + chạy LittleFS v2.11.3 tải từ GitHub (`.draft-C4.4/ext/lfs`, untracked) bị bộ phân loại an toàn chặn → §10 dùng mô hình
-`mpsim.py` của tôi. Nếu người dùng cho phép, chạy LittleFS thật và thay §10.3 (ghi trong §11.8 mục 3 và B.4).
-CHƯA (để lượt rà soát nhánh): đọc lại toàn văn C4.4 đã ghép.
-
-C4.3 (2026-10-30, claude-code Opus 5.5): `C4-…/C4.3-VirtualMemory&Paging.md`, 215,1 KB, 2.000 dòng, ghép từ 14 file `.draft-C4.3/doc/NN-*.md`. Kiểm trên file thật:
-`doccheck.py` 0 lỗi 0 cảnh báo; `blockcheck.py` 55 khối ✅, 599 dòng, 0 lệch; CRLF; không đường dẫn cục bộ. Đã rà văn xuôi §1–§12 với file (sửa: §8.3 đổi kB→MiB
-chia 1.000; §7.1 "max tệ hơn mười lần" chỉ đúng với p99,9; §3.4 tỉ lệ 65–80×; bảng B.3 hàng R2). CHƯA: đọc lại toàn văn đã ghép từ đầu tới cuối (để lượt rà soát nhánh).
-Kết quả chính (để leaf sau dẫn đúng): bảng trang 32 kB / 16,4 MiB / 32,8 MiB cho 16 MiB rải 4 KiB/2 MiB/1 GiB (§1.2) · lỗi nhỏ ~1 µs, lớn 68–84 µs; 79 so với
-1.024 lỗi file (6.18 so với 6.17, §3.3) · COW Pss 64→32→48→64; ghi lại sau khi con thoát: lỗi không chép (§4) · mmap 1,6× read trong cache, chậm hơn khi
-ngẫu nhiên lạnh (§5.3) · cache bẩn đẩy anon ra swap (§6.3) · THP 256 lỗi, p99,9 184 µs, 2.048 kB/byte (§7) · 1.328 B slab/file (§8.3, §11.3) · 4 TiB
-hứa / 18 MiB có mặt; điểm OOM = rss+swap+pgtables+adj·T/1000; runner thừa kế adj 500 (§9) · thrashing = 16(1−R/W), ×357 khi vượt 6%, ~115–130 µs mỗi lỗi
-(§10.1) · PSI: chỉ trang từng active; gộp theo CPU (§10.5) · OOM ở đúng giới hạn: 10/10 LRU hai danh sách, 0/10 MGLRU (§11.4) · memory.low: 3,3 triệu → ~1k
-yêu cầu/s không bảo vệ, 0 lỗi có bảo vệ (§11.6) · checkpoint §12: 200→320 MiB, chẩn đoán 7 bước từ diag.sh, sửa bằng set-property, hồi sau 2,5 s.
-Câu hỏi mở của C4.3 ở Phụ lục B.4 (3/37 lượt chậm; cơ chế MGLRU; 80 MiB "file" sau 300.000 file; read chậm trên EPYC…).
-
-C4.2 (2026-10-12, claude-code Opus 5.5): `C4-…/C4.2-Scheduling.md`, 220,4 KB, 2.084 dòng, ghép từ 19 file `.draft-C4.2/doc/NN-*.md`. Kiểm trên file thật: `doccheck.py` 0 lỗi 0 cảnh báo;
-`blockcheck.py` 62 khối ✅, 534 dòng, 0 lệch; mọi dòng CRLF; không đường dẫn cục bộ. Số runner lấy từ run21 (`c3-arm-lab` b27ffa3; artifact ở `.draft-C4.2/out/runner21/`); run19 và run20
-giữ lại ở `out/runner19`, `out/runner20` vì leaf trích hai chỗ từ chúng (EBUSY của SCHED_DEADLINE; lần khựng 4,82 ms trên N2).
-CHƯA làm cho C4.2 (để lượt rà soát nhánh): đọc lại TOÀN BỘ văn bản đã ghép từ đầu tới cuối (mới rà từng mục khi viết + rà các đoạn điền số runner với bảng).
-Kết quả chính của C4.2 (để leaf sau dẫn đúng): chia theo trọng số khớp bảng tới 2 chữ số (§2.3) · EEVDF: slice riêng xóa đuôi 3,95 ms → 0,19 ms trên [i7], nhưng runner KHÔNG có đuôi đó (§2.4, §3.4)
-· đọc CLOCK_THREAD_CPUTIME_ID là điểm preempt; lượt chạy thật = 1 tick (§2.5) · 43–44 % "không tự nguyện" trên pipe = chen ngang lúc thức dậy (§2.6) · giá đổi lượt 0,52 µs / 6,5–6,9 µs với 1 MiB (§3.3)
-· RM S2: 60/300 lỡ, 72,05 ms = RTA; EDF 0 lỡ; nghiệm RTA trên mép bậc thang → +C1 (§5.5) · ngưỡng tiếp nhận DEADLINE 90 % (máy chủ công bằng chiếm 5 %) (§5.4) · PI: 540,1 → 45,0 ms; trần 40,0;
-PI vô dụng giữa các luồng SCHED_OTHER (1.017 → 1.047 ms) nhưng có tác dụng khi bên đợi là FIFO (540,2 → 43,7 ms) (§6) · nice vô nghĩa giữa hai cgroup (§7.2) · máy chủ công bằng 50 ms/s (§7.5)
-· 3 luồng/2 CPU: 33/33/33 ([i7], EPYC) nhưng 50/25/25 trên N2 (§8.2) · CPUQuota 30 % trên tác vụ cần 40 %: p99 2,9 → 31 ms (§8.4) · timer slack 50 µs (§9.2).
-Dữ liệu trả nợ C4.1 (CHƯA đưa vào C4.1 — việc của lượt rà soát nhánh): trong `.draft-C4.2/out/runner2{0,1}/…/c41-m-paired-*.txt` và `c41-n-state-*.txt`, CÙNG một máy một lần chạy (EPYC 7763):
-bảng ctxsw (sys 211 ns, pipe-thr 3.284 ns…), trạng thái mitigation (spectre_v2 Retpolines; SRSO Safe RET; tsa, SSB Vulnerable), `x86/fpu … context size is 872 bytes`, sizeof(task_struct) 9.664 (BTF)
-và slab object_size 10.640 → dư 976 B trên 7763 (so với 2.576 B trên 9V74 có AVX-512) → khép câu hỏi §1.3 của C4.1: phần dư đi theo cỡ vùng XSAVE của từng CPU. Câu "[EPYC] chậm vì mitigation?" vẫn
-chỉ có trạng thái + số đo trên cùng máy, chưa có phép bật/tắt. Ngoài ra C4.1 §4.8 (lượt 3,9 ms = tick) và câu "43 % không tự nguyện" của §4.3 nay đã có cơ chế ở C4.2 §2.5, §2.6 → thêm dẫn chiếu.
-
-Quy tắc làm việc (C4.1 + C4.2; áp dụng cho mọi leaf sau): (1) số trong văn xuôi phải rà với file — blockcheck không kiểm văn xuôi; (2) bảng tổng hợp do script sinh cũng phải đối chiếu với
-giá trị đã biết, và script phải tự bác dữ liệu hỏng (assert số vòng, assert tổng CPU = thời gian chạy); cột "max" là max thật, không phải trung vị của các max; (3) con số đếm phải đếm bằng
-script; (4) nối build với chạy bằng `&&`, không nối ống ở lệnh làm cổng; (5) sửa file này bằng thay chuỗi chính xác trong khoảng tiêu đề … dấu `/NEXT`; (6) trước khi viết thông điệp commit,
-grep nội dung đã stage; (7) thí nghiệm nặng chạy trong `systemd-run --user --scope`; (8) GHI DỰ ĐOÁN vào `out/predictions.txt` TRƯỚC khi chạy (C4.2: 7/26 sai hoặc đúng một nửa — chính chúng là
-nội dung hay nhất); (9) dụng cụ đo không được tạo ra thứ nó đo: không gọi syscall trong vòng lặp đo lập lịch; không giữ mảng mẫu lớn khi đo bộ nhớ; mọi luồng chung một thời điểm bắt đầu/kết thúc;
-định giờ bằng CLOCK_MONOTONIC_RAW; (10) một phép thử phải phân biệt được hai giả thuyết trước khi đọc kết quả của nó (PI/nice với M quá ngắn; `admit` với tác vụ chưa từng chạy);
-(11) chờ runner bằng `scratchpad/waitrun.sh RUN_ID` chạy nền (lệnh `sleep` tiền cảnh bị chặn); runner mất ~15–20 phút mỗi lượt → gom mọi thứ cần root vào MỘT script, đẩy sớm, viết trong lúc chờ;
-(12) khi điền văn bản bằng Python, đừng dùng toán tử `%` trên chuỗi có ký tự `%` — dùng `.replace` với một token; (13) mã nguồn kernel v6.18 gốc ở `.draft-tools/ksrc-6.18/` (không phải bản
-Microsoft/Azure đang chạy): trích thì ghi rõ, và luôn đặt một phép đo bên cạnh.
-
-<!-- /NEXT : khi viết lại mục "việc kế tiếp" ở trên, chỉ thay đoạn từ tiêu đề của nó tới dấu này. Ngày 2026-10-12 một lần thay "tới tiêu đề kế" đã xóa mất
-     DÀN Ý và mục run18 (chúng chưa từng được commit; thông điệp của commit 1a397d4 nói có là SAI). Hai mục dưới đây được KHÔI PHỤC CÓ BỔ SUNG (không phải nguyên văn):
-     thêm file nào đã viết, cột objsize của slabinfo, và việc không runner nào đặt mitigations=. Trước khi viết thông điệp commit: grep nội dung đã stage. -->
-
-DÀN Ý C4.1 ĐÃ CHỐT (viết từng file ở `.draft-C4.1/doc/NN-*.md`, ghép + sinh Mục lục + CRLF ở cuối; đã viết: `00-head.md`, `01-pcb.md`):
-- §0 Cách dùng tài liệu: 0.1 nguyên tắc · 0.2 bộ công cụ · 0.3 môi trường ([i7], [N2], [EPYC]=7763 run17, [9V74]=run18)
-- §1 Khối điều khiển tiến trình: 1.1 một tác vụ là gì (task_struct, BTF) · 1.2 đọc nó qua /proc (`pcb_proc`) · 1.3 cỡ thật trong slab (run18; x86 dư 2.576 B, ARM dư 0) ·
-  1.4 mỗi cờ CLONE_* chia sẻ một thứ (`clone_share`, strace `thr_one`)
-- §2 fork/exec/wait: 2.1 fork trả về hai lần (`fork_basic`) · 2.2 ⚠️ bộ đệm stdio bị nhân đôi (`fork_stdio`, bản lỗi `wait_status_run1_buggy`) · 2.3 exec giữ gì (`exec_inherit`) ·
-  2.4 wait và mã trạng thái (`wait_status`, core_pattern) · 2.5 ⚠️ `1/z` không sinh SIGFPE (objdump) · 2.6 giá của fork theo cỡ bộ nhớ (`fork_cost` 4k/THP; cột "warm" sai nhãn;
-  chỉ báo THP lấy mẫu sai lúc) · 2.7 fork trong tiến trình nhiều luồng (`fork_mt`)
-- §3 Luồng: 3.1 luồng là tác vụ chung mm (`ids`) · 3.2 một luồng tốn gì (`thread_cost`) · 3.3 ⚠️ giới hạn thật là cgroup (9.391, pids.max; scope riêng) ·
-  3.4 mô hình lai: Go nhìn từ /proc (`go_threads`) · 3.5 preempt bằng tín hiệu (`go_preempt2`; bản hỏng `go_preempt`)
-- §4 Chi phí chuyển ngữ cảnh: 4.1 phải lưu gì (pt_regs, inactive_task_frame, FPU) · 4.2 ⚠️ thước đo: 19 GHz, và vì sao dùng ns · 4.3 cùng CPU trên ba máy + perf đếm lại ·
-  4.4 tiến trình so với luồng · 4.5 tập làm việc: "chi phí gián tiếp" (`ctxsw_wset`) · 4.6 khác CPU, CPU nghỉ/bận · 4.7 ⚠️ trạng thái AVX (hai lượt vô hiệu, lượt thứ ba + đối chứng) ·
-  4.8 chuyển không tự nguyện (`hog`)
-- §5 Coroutine và luồng xanh: 5.1 chuyển bằng 15 lệnh asm, khung 7 giá trị (`switch.S`, `uctx`, strace swapcontext) [trước ghi nhầm "bảy lệnh" — đếm từ file] · 5.2 thư viện N:1 (`green order`) · 5.3 100.000 luồng xanh · 5.4 ⚠️ một syscall chặn làm
-  chết tất cả (`green block/nonblock`) · 5.5 coroutine không stack (`proto`)
-- §6 Cây tiến trình: 6.1 zombie (`zombie`) · 6.2 mồ côi và subreaper (`orphan`, chuỗi cha ở WSL, runner) · 6.3 SIGCHLD không đếm (`reap`) · 6.4 PID 1 không thu dọn (`init_noreap`) ·
-  6.5 PID bị dùng lại và pidfd (`pid_reuse`)
-- §7 Nhóm tiến trình, phiên, điều khiển tác vụ: 7.1 nhóm và phiên (`job_groups`, `ids`) · 7.2 ^C (`job_ctrl_c`) · 7.3 đọc terminal từ nền (`job_ttin`) · 7.4 ^Z, bg (`job_ctrl_z`) ·
-  7.5 mất terminal (`job_hangup`) · 7.6 bốn nghĩa vụ của shell (`fgjob`)
-- §8 Tín hiệu: 8.1 bitmap và hàng đợi (`sig_queue`) · 8.2 khung trên stack và giá một lần giao (`sig_frame`, `sig_frame_align`, 3 máy) · 8.3 EINTR, SA_RESTART (`sig_eintr`) ·
-  8.4 ⚠️ handler không an toàn: 4 chế độ + gdb (và lần đầu gcc xóa malloc) · 8.5 errno (`sig_errno`) · 8.6 mất lần đánh thức (`sig_race`) · 8.7 luồng nào nhận (`sig_threads`) ·
-  8.8 mask và ignore qua exec (`sig_mask`) · 8.9 stack riêng cho handler (`sig_altstack`)
-- §9 Checkpoint: 9.1 yêu cầu · 9.2 benchmark · 9.3 con số · 9.4 phân rã · 9.5 Tự chấm · 9.6 Mở rộng (máy không ảo hóa; run19; Windows gốc)
-- Phụ lục A bảng tra · B triệu chứng → nguyên nhân (gồm bảng "thí nghiệm bị tầng dưới làm lệch": hiệu chuẩn add $1; vzeroupper; 1/z; malloc bị xóa ×2 (handler, zombie);
-  cột warm; chỉ báo THP; vòng Go có lời gọi; stdio nhân đôi — ĐẾM LẠI khi viết, đừng ghi con số trước) · C checklist · D đọc tiếp · Tổng kết mười điều · chân trang
-
-Runner run18 (commit 4818af5 của `c3-arm-lab`, artifact `out/runner18/`) — CHÚ Ý máy x86 lần này là EPYC 9V74, KHÁC máy 7763 của run17:
-- cùng một máy, cùng lần khởi động: x86 (9V74, AVX-512) `sizeof(task_struct)` 9.664 B (BTF) nhưng `object_size` slab 12.240 B → dư 2.576 B mỗi tác vụ; `thread_struct` 184 B,
-  `struct fpu` 4.224 B không nằm trong đó. ARM (N2) `sizeof` 8.960 = `object_size` 8.960 → dư 0; `thread_struct` 1.680 B. "2.576 B là trạng thái FPU" RẤT CÓ KHẢ NĂNG
-  nhưng CHƯA khép: dòng dmesg "context size" bị `head -8` của tôi cắt mất.
-  Cột `objsize` của `/proc/slabinfo` = `slab_size` (12.288 ở 9V74), KHÔNG phải `object_size` (12.240) → số 10.688 của 7763 ở run17 là cỡ ô slab; đừng lấy nó trừ `sizeof`.
-- N2 có `sve`, `sve2` trong Features (run17 chưa biết); cả hai runner là khách Hyper-V (dmesg).
-- mitigation của 9V74 (KHÔNG phải của 7763): spectre_v2 và retbleed "Not affected"; SRSO "Safe RET, no microcode"; tsa, SSB "Vulnerable"; không runner nào có `mitigations=`
-  trên dòng lệnh kernel. Vì vậy câu hỏi "7763 chậm 3–5× có phải do mitigation" VẪN CHƯA được thử: có trạng thái của máy không có số đo, và số đo của máy không có trạng thái.
-  `cpu MHz` (3.654 ở 9V74; 2.803 ở laptop trong khi chuỗi hiệu chuẩn đọc 4,4–4,8 GHz) là số danh nghĩa — KHÔNG dùng để kiểm hiệu chuẩn.
-- run19 (tùy chọn, CHƯA làm): trong MỘT script trên MỘT máy: `ctxsw sys|pipe1|pipe-thr` + vulnerabilities + `dmesg | grep -i "x86/fpu"` đầy đủ (không `head`) + BTF sizeof + slab.
-
-Độ chắc của số liệu C4.1 (sau lượt lặp lại 2026-10-12) — SỬA các con số ghi ở dưới nếu mâu thuẫn:
-- Chính xác/tất định: cờ clone; ma trận `clone_share`; thừa kế qua exec; mã trạng thái wait; SỐ lỗi trang (1/trang, 0, 1/trang); AnonHugePages 1024→0 qua lượt cow
-  (3 lần); ánh xạ sp mod 64 → {976, 992, 1008, 1024} / khung 1440…1488 (2 lần, pha đổi theo ASLR, ánh xạ không đổi); che/bỏ qua qua exec; perf = getrusage ± 13;
-  giới hạn luồng = `pids.max`.
-- Lặp lại được, có dải: fork 1 GiB/4 KiB 5,0 / 5,5 / 5,6 ms; THP 0,17 / 0,27 / 0,20 ms; luồng: VmRSS 8,28–8,29 KiB, KernelStack 15,96–15,99 KiB (N = 2.000 và 9.391);
-  luồng xanh 19,1–20,5 ns (6 lần), 4,03 KiB; `gt_switch` 7,2–7,4 ns; `swapcontext` 134–140 ns; lượt chạy 3,92–3,99 ms; bảng cùng CPU trên 3 máy; chiều nghỉ > bận 4/4 × 3 máy.
-- Mềm / phụ thuộc điều kiện: mất đánh thức tự nhiên 5, 14, 16, 23 trên 200.000 (4 lần; KHÔNG phải "1/9.000–14.000"); nới 20 µs: 23% và 36% (2 lần);
-  `sigsuspend` 0/804.000; slab mỗi luồng 8,6–11,4 KiB (tổng thường trú ~33–36 KiB); ảnh hưởng cỡ stack lên thời gian tạo CHƯA xác lập (1,5× rồi 1,1×);
-  posix_spawn 226–387 µs ngoài scope nhưng 660–1.363 µs trong scope (chưa rõ vì sao; câu "phẳng, nhích ở 1 GiB" không gộp được); giá mỗi lỗi trang
-  ~0,5 µs / ~2–3 µs (±50% theo điều kiện); AVX +13 ns; độ lớn khác-CPU theo từng máy.
-- Còn mở: cụm chậm ~395 ns ở lượt hai tác vụ; chu kỳ preempt Go ~20 ms; số lỗi sau fork vùng THP (13.637 / 20.698 / 22.786 cho 512 trang lớn — không phải "8% ổn định");
-  SigQ 1002; SigIgn của subshell `trap "" TERM` (lặp lại được, chưa giải thích); EPYC chậm 3–5×; posix_spawn chậm trong scope.
-
-Điểm mà output nói ÍT HƠN lời giải thích — phải ghi rõ là suy luận/tài liệu khi viết, hoặc bổ sung thí nghiệm:
-- `zombie.txt`: dòng "ls fd: Permission denied" KHÔNG chứng minh fd đã đóng. `job_ttin.txt`: đuôi file không cho thấy job chết sau `kill -9`.
-- `init_noreap`: PID 1 tự gửi SIGTERM cho mình (chưa thử con gửi). `job_hangup`: thấy ai nhận SIGHUP, không thấy ai gửi (bash chuyển tiếp là theo tài liệu).
-- `sig_queue`: thứ tự handler (USR1 chạy sau 1000 RT) là quan sát; cơ chế "khung lồng nhau" là đọc kernel. SigQ 1002 (gửi 1001) chưa giải thích.
-- `sig_threads`: mọi tín hiệu tới một luồng là quan sát; `curr_target` là theo trí nhớ. `core_pattern`: "RLIMIT_CORE=1 là giá trị đặc biệt" CHƯA kiểm.
-- `ids.txt` chạy từ script nên pgid = pid của script (không phải của chính nó) — đúng ý §7, đừng viết "pgid = pid".
-- Dao động giữa các lần chạy (đã LƯU thêm: `out/reap_runs.txt` 5 lần, `out/sig_threads_runs.txt` 3 lần, `out/orphan_ancestors.txt`): `reap` naive thu được 78–122 trên 200,
-  luôn còn zombie; handler vòng lặp chạy 15–122 lần cho 200 con, luôn thu đủ. `sig_unsafe` hỏng sau 1…487 vòng. `sig_threads`: mọi tín hiệu tới MỘT luồng ở cả 16 hàng
-  đã lưu, nhưng số đếm được là 1.989–2.000 trên 2.000 (thiếu 0–11) — câu "thiếu nhiều nhất 1" trước đây SAI (nó dựa trên 2 lần chạy, một lần chỉ in màn hình).
-
-Trạng thái C4.1 (2026-10-12): mã ở `.draft-C4.1/src/` (31 chương trình C, `pty_job.py`, `ctxsw_paired.py`, `pcb.sh`) đã biên dịch và chạy thử.
-Đã ghi `out/`: `pcb_*`, `wait_status_run1_buggy.txt`, `core_pattern.txt`, `sig_unsafe_elided.txt`, `calib_chains.txt`, `ctxsw_run1_badcalib.txt`,
-`ctxsw_paired*.txt`. Các output khác mới in ra màn hình — CHƯA ghi file; phải chạy lại qua `run.sh`.
-Kết quả đã có, kèm giới hạn:
-- `core_ghz()` bản đầu dùng chuỗi `add $1` → 17–23 GHz (lặp lại đúng lỗi C3.5 §2.6 đã ghi); đã đổi sang `add %reg`; cột chu kỳ của lượt đầu vô hiệu.
-- 15 vòng xen kẽ, hostload 11–12% (`out/ctxsw_paired_ns.txt`, tính lại từ `ctxsw_paired_raw.txt`). ĐƠN VỊ CHÍNH LÀ ns: quy đổi chu kỳ bằng hiệu chuẩn
-  từng mẫu (3,86–4,84 GHz, trung vị 4,68) thêm nhiễu và đổi cả dấu ở cặp pipe; chỉ dùng "ns × 4,68 GHz" để định cỡ.
-  Chuyển luồng cùng CPU so với cùng lời gọi không chuyển: +215 ns (yield, dải 210–272), +509 ns (pipe, 491–558) — 15/15.
-  Tiến trình so với luồng: +99 ns (yield, 43–176, 15/15), +87 ns (futex, 45–150, 15/15), +53 ns (pipe, −8,5–99, 14/15).
-  → không phải một con số (phụ thuộc đường đi, ±60 ns mỗi vòng); CHƯA tách được CR3/TLB; đuôi chậm của hai chế độ yield (18–23% theo ns) chưa rõ nguyên nhân.
-  `out/ctxsw_paired.txt` (hiệu theo chu kỳ) giữ làm bằng chứng của cách tính kém, không trích làm kết quả.
-- Quét tập làm việc (`out/ctxsw_wset.txt`, 7 vòng xen kẽ): phần riêng của lần chuyển (pipe-thr − base2) phẳng ~460–525 ns tới 256 KiB/tác vụ;
-  ở 1 MiB/tác vụ lần chuyển tốn 22,5 µs nhưng MỘT tác vụ luân phiên hai vùng 1 MiB không chuyển gì cũng tốn 21,8 µs (pipe1 15,2 µs) → "chi phí gián
-  tiếp" là hai tập làm việc chia một cache (2 MiB > L2 1,25 MiB), không phải cơ chế chuyển. Hàng 4 MiB và 16 MiB KHÔNG dùng được (nhiễu ≫ 0,5 µs).
-  512 trang/tác vụ: proc 2.978 ns so với thr 3.212 ns → không có dấu vết xả TLB khi đổi tiến trình (hợp với PCID; cơ chế chưa chứng minh, không tắt được PCID).
-  tiến trình − luồng: 49–65 ns tới 64 KiB, không phân biệt được ở trên đó. Cỡ cache/TLB đã kiểm: `out/cache_sizes.txt`, C3.6 §5.2 (dTLB 96, STLB ~2.048).
-- Khác CPU (`out/ctxsw_cross_cpu.txt`, `ctxsw_cross_idle.txt`): mỗi lần trao tay ~12 µs (khứ hồi 23–26 µs, ba cặp CPU); futex chỉ ngủ 0,75–1,10 lần/vòng
-  → chỉ dùng số khứ hồi. Thí nghiệm bác bỏ được: giữ hai CPU bận bằng `spin_idle` (SCHED_IDLE), xen kẽ 4 lần → 2,6 µs so với 12 µs, 4/4, không chồng lấn.
-  → ~9,4 µs gắn với việc CPU đích đang nghỉ; CHƯA tách được hypervisor / idle của khách / C-state; 2,6 µs còn lại (3,4× cùng CPU) chưa phân rã.
-- Chuyển ở mức người dùng (`out/uctx.txt`, `uctx_strace.txt`): gọi hàm 0,42 ns; `gt_switch` 7,2 ns; `swapcontext` 134–137 ns; `strace -c` đếm
-  200.001 `rt_sigprocmask` cho 200.000 lần chuyển (đã kiểm). Dưới strace `swapcontext` thành 48,5 µs (chi phí tracer) còn `gt_switch` vẫn 7,23 ns.
-- `hog` (`out/hog.txt`): hai luồng bận trên một CPU chạy 3,94–3,99 ms mỗi lượt ≈ một tick 250 Hz; không đọc được `sched/debug` → cơ chế để C4.2.
-- Trạng thái AVX: `out/ctxsw_ymm.txt` và `ctxsw_ymm2.txt` VÔ HIỆU (đã ghi chú trong file): gcc tự thêm `vzeroupper` cuối `dirty_ymm()` nên `-f` không
-  làm gì; lần 2 build hỏng nên chạy nhị phân cũ. Sửa: `dirty_ymm` viết bằng asm (`src/ymm.S`), `ctxsw` tự đọc XINUSE (XGETBV ECX=1) trước mỗi lần
-  trao tay. Hợp lệ: `ctxsw_ymm3.txt` (0/11,2 triệu so với 11,2 triệu/11,2 triệu): +13,1 ns trên giá trị nhỏ nhất, 7/8 cặp, dải −37…+57;
-  đối chứng không chuyển `ctxsw_ymm_noswitch.txt`: +0,2 ns (−0,2…+2,2). → hiệu ứng nhỏ (~4%), sát ngưỡng phân giải ±10 ns; cơ chế (XSAVES lưu thêm
-  256 B) là suy luận. CÒN MỞ: cụm chậm ~395–400 ns (so với ~345) chỉ xuất hiện ở các lượt hai tác vụ, không liên quan cờ; chưa rõ nguyên nhân.
-- Go 1.27.2 (`out/go_threads.txt`, `go_preempt2*.txt`): 10.000 goroutine đỗ → Threads 5→11; 200 goroutine trong `read(2)` chặn → 203; 200 đọc `os.Pipe`
-  (netpoller) → 6. Preempt: `go_preempt.txt` VÔ HIỆU (vòng "không gọi hàm" có gọi hàm mỗi 2^20 vòng; 48 = 48). Bản đúng `preempt2` (objdump: 0 CALL):
-  mặc định ticker chạy 71–73 lần/1,48 s, strace đếm 72 SIGURG; `asyncpreemptoff=1`: 1 lần (đúng lúc vòng lặp kết thúc), 0 SIGURG. CÒN MỞ: chu kỳ ~20 ms thay vì 10.
-- Runner run17 (commit 4aa4e5c của `c3-arm-lab`, artifact ở `out/runner17/`): [N2] Neoverse-N2 4 lõi; [EPYC] 7763 2 lõi × 2 luồng (CPU 1,2 khác lõi; 2,3 cùng lõi).
-  Hiệu chuẩn N2 3,358–3,390 GHz (C3.14: 3,39 → đã kiểm); EPYC 3,18–3,21 (chưa có đối chiếu). `ctxsw_paired_ns.py` tái tạo đúng bảng laptop rồi áp cho runner
-  (`out/runner17/paired_ns_*.txt`). ns trung vị i7 / N2 / EPYC: syscall rỗng 62 / 173 / 211; chuyển−không chuyển yield +215 / +289 / +1.077, pipe +509 / +670 / +2.353;
-  tiến trình−luồng yield +99 / +100 / +106, pipe +53 / +109 / +38, futex +87 / +148 / +91 (runner: 15/15, dải hẹp). KHÔNG khẳng định "100 ns phổ quát".
-  perf đếm lại: 1.200.020 / 1.200.018 so với getrusage 1.200.007 / 1.200.005 (chỉ kiểm cho pipe-thr cùng CPU); gắn perf làm chậm 7–12,5%.
-  Khác CPU, đích nghỉ / bận (µs mỗi lần trao tay): i7 11,6–12,1 / 2,6; N2 7,55 / 6,2–6,4; EPYC 12,8–13,4 / 6,2–6,4 → chiều lặp lại 4/4 trên cả ba máy,
-  nhưng độ lớn riêng từng môi trường (phần "do nghỉ" 9,4 / 1,3 / 6,6 µs — tính bằng `ctxsw_cross_three.py`): câu "9,4 trên 12 µs" CHỈ đúng cho laptop. Cơ chế chưa tách trên máy nào.
-- `fork_cost` (đã chạy lần đầu hôm nay; `out/fork_cost_4k.txt` có cột "warm" GHI NHÃN SAI — đã chú thích; dùng `_4k_v2`, `_thp_v2`):
-  trang 4 KiB: `fork()` 40–67 µs ở 1 MiB → 5,0–5,5 ms ở 1 GiB (≈5 µs/MiB, hai lần chạy); fork+wait ≈ 2× ; vfork 17–44 µs không theo cỡ;
-  posix_spawn 226–291 µs, riêng 1 GiB 361/387 µs (hai lần cùng chiều, chưa giải thích). Ghi một byte mỗi trang (kèm số lỗi trang, getrusage):
-  sau fork, con đã chết: 1 lỗi/trang, 494–509 ns; lặp lại ngay: 0 lỗi, 14,5–15 ns; con còn sống: 1 lỗi/trang, 2,4–2,7 µs.
-  → 1 GiB: lời gọi 5 ms nhưng phần trả sau 0,13 s (con đã chết) tới 0,7 s (con còn sống). "Không sao chép khi con đã chết" là suy từ giá thấp hơn 5×.
-  THP (`-t`): AnonHugePages của tiến trình 1024 MiB sau lần chạm đầu, sau 30 fork, sau lượt ghi đầu; = 0 sau lượt cow (đo trực tiếp ở 3 cỡ) →
-  fork 1 GiB chỉ 0,17–0,27 ms (hai lần); ghi khi con còn sống: 1 lỗi mỗi trang 4 KiB và trang lớn bị tách.
-  SAI DỰ ĐOÁN: VmPTE vẫn 2.100 kB khi vùng đang là trang lớn → VmPTE KHÔNG phân biệt được THP với 4 KiB (lý do "bảng trang đặt sẵn" là trí nhớ, chưa kiểm).
-  CÒN MỞ: lượt ghi sau fork với THP có 20.698/22.786 lỗi cho 512 trang lớn (~44 lỗi mỗi trang lớn) trong khi AnonHugePages không đổi.
-- `thread_cost` (`out/thread_cost.txt`, bản nhị phân trước khi thêm in errno nên dòng lỗi ghi "create failed at 9391"): tạo luồng DỪNG ở 9.391, không tới
-  10.000, cả với stack 8 MiB lẫn 64 KiB. Nguyên nhân đã kiểm (`out/thread_limit_cgroup.txt`): shell của phiên nằm trong `init.scope`, `pids.max` = 9516
-  (DefaultTasksMax), KHÔNG phải `ulimit -u` 31.721 — câu "dư chỗ" trước đó sai. Cơ chế đo trong scope riêng TasksMax=300 (`thread_limit_scope.txt`):
-  hỏng sau 297 luồng, EAGAIN, `pids.events max` 0→1, nhóm chung không đổi. Số đo cho 9.391 luồng: tạo+join 46,0 µs (8 MiB) / 30,8 µs (64 KiB);
-  fork+exit+wait ~100 µs; mỗi luồng: VmSize +8.196 / +68 KiB, VmRSS +8,29 KiB, KernelStack +15,98–15,99 KiB (đo trực tiếp), SUnreclaim ~11,3 KiB.
-  Cột PageTables VÔ HIỆU (+3,22 rồi −1,29 KiB: số toàn hệ thống).
-  QUY TẮC TỪ NAY: thí nghiệm tạo nhiều tác vụ / dùng nhiều bộ nhớ chạy trong `systemd-run --user --scope -q -p TasksMax=… [-p MemoryMax=…]`;
-  không chạy lại 10.000 luồng trong nhóm chung (nhóm này chung với tiến trình của người dùng).
-- `sig_race` (`out/sig_race.txt`, chạy lần đầu): kiểm-rồi-`pause()` mất 23 và 14 lần đánh thức trên 200.000 vòng (cửa sổ tự nhiên, không ghim CPU);
-  `sigsuspend` 0/200.000 hai lần (đồng thời là đối chứng: watchdog không báo giả); nới cửa sổ 20 µs: 721/2.000 (36%, một lần chạy) so với 0/2.000.
-- `sig_unsafe threaded hold` + gdb (`out/sig_unsafe_gdb.txt`, `sig_unsafe_gdb2.txt` không lọc): main → malloc → <signal handler called> → bad_handler → malloc →
-  `__lll_lock_wait_private`, hai lần chạy. ĐÃ THẤY tự khóa chết trên một khóa trong malloc (là mutex của arena: suy từ thiết kế glibc, khung #4 không có ký hiệu).
-  SỬA MÔ TẢ: lúc treo tiến trình chỉ còn MỘT luồng (`/proc/PID/task` có 1 mục, `Threads: 1`, gdb không cảnh báo) — luồng "idle" đã thoát.
-  Vậy cặp đối lập là "chưa từng tạo luồng → hỏng heap" và "đã tạo luồng (nay đã thoát) → khóa chết", KHÔNG phải "có luồng thứ hai đang chạy".
-  ĐÃ KIỂM bằng hai biến thể (`out/sig_unsafe_modes.txt`, 3 lần mỗi chế độ): `masked` (luồng phụ che SIGALRM) → treo, Threads: 2 (3/3); `joined` (tạo rồi join
-  trước vòng lặp) → treo, Threads: 1 (3/3); `threaded` → treo, Threads: 1 (3/3); `single` → abort (3/3; hai thông điệp khác nhau: "corrupted double-linked list"
-  và assertion `sysmalloc`; hỏng sau 1…487 vòng). → điều quyết định là "đã từng tạo luồng", không phải "đang có luồng thứ hai".
-  Còn là suy luận: masked/joined treo trên CÙNG khóa (chưa có backtrace cho hai chế độ này); luồng nào chạy handler nào (0 handler xong ở masked/joined, 1–3 ở threaded).
-- Bốn kết quả cuối (2026-10-12): `sig_unsafe_gdb_joined.txt` — chế độ `joined` cũng main→malloc→<signal>→bad_handler→malloc→`__lll_lock_wait_private`, 1 task
-  (chỉ còn `masked` chưa có backtrace). `sig_mask.txt` — `sleep` exec với SIGTERM bị che / bị bỏ qua sống sót `kill -TERM` (SigBlk 0x4000 → ShdPnd 0x4000), chết với
-  SIGKILL; ba tiến trình có ba tập SigIgn khác nhau (0x6; 0x1001006; 0x4000) — hàng subshell `trap "" TERM` thiếu INT/QUIT CHƯA giải thích, đừng phát biểu quy tắc
-  "job nền bỏ qua INT/QUIT" khi chưa đọc manual bash. `sig_frame_align.txt` — fpregs luôn chia hết 64; sp−fpregs ∈ {976, 992, 1008, 1024} theo sp mod 64, chu kỳ 64;
-  khung = 1440…1488 B (khớp mọi mẫu lẻ trước đó; 128 red zone + 836 = 964 nằm trong khoảng (960, 976] mà số liệu ép ra). `green_many.txt` (scope riêng, 3 lần) —
-  19,4–19,5 ns/lần chuyển trên 100.000 ngữ cảnh (2 ngữ cảnh: 7,2 ns), 4,03 KiB RSS mỗi luồng xanh, spawn 0,9–1,5 µs (dao động; "do lỗi trang đầu" là suy luận).
-- Bài học đưa vào leaf: BỐN lần trình biên dịch gỡ mất/vô hiệu chính thứ đang thử (trước đây tôi ghi "ba", quên vụ zombie) — gcc -O2 xóa cặp `malloc/free`
-  không dùng trong handler (handler "không an toàn" hóa rỗng), xóa `malloc`+`memset` của tiến trình con trong `zombie.c` (con chỉ có 292 kB), gấp `1/z` thành so sánh
-  (không SIGFPE), thêm `vzeroupper` (trạng thái AVX "bẩn" hóa sạch);
-  `printf(..., syscall(), strerror(errno))` sai vì thứ tự tính đối số; stdio chưa flush trước `fork` in lặp.
-
-## Kế hoạch C4 (máy nào cho việc gì)
-
-- Công cụ: `source C4-…/.draft-tools/setup_env.sh` (đặt `C4ROOT`, `C4BUILD` trong scratchpad; giải nén `.draft-tools/debs/*.deb`: strace, gdb, perf 6.17,
-  bpftool, pahole). `doccheck.py FILE…`, `blockcheck.py LEAF.md OUTDIR [SRCDIR]` ở cùng thư mục. Biên dịch vào `$C4BUILD` (ext4), không chạy trên `/mnt/d`.
-- [i7] WSL2 không root: user namespace (`unshare -Ur`), cgroup v2 ủy quyền qua `systemd-run --user` (cpu, memory, pids), swap 8 GiB, io_uring, BTF đọc được.
-  KHÔNG có: SCHED_FIFO (rtprio 0), eBPF/ftrace/tracepoint (cần root), dm-flakey, Docker (chưa bật WSL integration), /dev/kvm.
-- Việc cần root → runner GitHub (`NgTienDuy/c3-arm-lab`, sudo, systemd, Docker, KVM trên x86): C4.2 (FIFO/DEADLINE, đảo ưu tiên), C4.4 (dm-flakey,
-  mkfs), C4.11 (cgroup/veth/seccomp thật), C4.12 (QEMU khởi động + DT overlay), C4.13 (ftrace, bpftrace, bcc).
-- C4.4 trên runner: rootfs của runner gắn `nobarrier,data=writeback,journal_async_commit,commit=30` (đọc từ /proc/cmdline, run18) → KHÔNG đo fsync/độ bền trên
-  rootfs của runner; tự tạo loop device + mkfs + tùy chọn mount riêng.
-- C4.10: không có MCU nối máy → FreeRTOS/Zephyr trên QEMU/Renode (thời gian mô phỏng) + đo jitter thật trên Linux; phần MCU thật để "Mở rộng".
+Rà soát nhánh C4 — đọc lại toàn văn đã ghép (phần còn nợ từ khi viết): C4.2, C4.3, C4.4, C4.5, C4.6, C4.7, C4.8, C4.9. Đã đọc: (cập nhật khi xong từng leaf).
+Chỉ sửa văn xuôi (nháp và `out/` đã xóa — không sửa khối ✅). Sửa bằng Python đọc/ghi giữ CRLF, mỗi chuỗi cũ phải xuất hiện đúng một lần. Xong thì commit + push.
+Sau đó: chờ người dùng chọn nhánh tiếp (C5 Networking là nhánh kế theo số thứ tự).
 
 ## Completed
 
 | Nhánh | Kết quả | Kiểm chứng |
 |---|---|---|
-| C1 | ✅ trước 2026-09-24 (theo người dùng: "đã viết xong C1, trừ C1.0-INDEX.md") | — |
-| C2 (C2.1–C2.13) | ✅ 2026-09-26 | mọi output chạy thật; doccheck 13/13 file 0 lỗi; rà soát cuối 2026-09-26 |
-| C3 (C3.1–C3.14) | ✅ 2026-10-09 | doccheck 14/14 file: 0 lỗi, 0 cảnh báo (anchor, fence, cột bảng, CRLF, mọi § và mọi `Cx.y §z` tồn tại); blockcheck C3.7–C3.14: mọi dòng của mọi khối ✅ có trong file output (2.834 dòng, 0 lệch) trước khi xóa nháp |
+| C1 | ✅ trước 2026-09-24 (người dùng viết; trừ C1.0-INDEX.md) | — |
+| C2 (C2.1–C2.13) | ✅ 2026-09-26 | mọi output chạy thật; doccheck 13/13 file 0 lỗi |
+| C3 (C3.1–C3.14) | ✅ 2026-10-09 | doccheck 14/14 file 0/0; blockcheck C3.7–C3.14: 2.834 dòng, 0 lệch, trước khi xóa nháp |
+| C4 (C4.1–C4.13) | ✅ 2026-11-10 | doccheck 13/13 leaf 0 lỗi 0 cảnh báo; blockcheck 13/13 leaf: 611 khối ✅, 7.838 dòng, 0 lệch; 361 dẫn chiếu `C4.N §X` giữa các leaf, 0 sai; trước khi xóa nháp |
 
-Rà soát cuối C3 (2026-10-09) — các sửa nội dung đáng nhớ:
-- C3.6 §3.4: "+56% 4K aliasing ở d ≡ 16" phần lớn là **lệnh ghi 32 B vắt dòng** (×1,28 ở mọi offset lệch 32 B); 4K aliasing thật chỉ thêm ~×1,10 khi
-  b nằm ngay sau a (đo lại bằng tỉ số kẹp tham chiếu, `alias4`, C3.14 §7.3). `alias2`/`alias3` trước đó đo nhầm vòng vô hướng (đọc objdump mới thấy).
-- C3.4 §9.7 / C3.14 §7.1: hai cụm thời gian của bản AVX2 KHÔNG do lõi P/E, anh em SMT hay xung (ghim + hiệu chuẩn từng lượt); cơ chế còn mở.
-- Đồng hồ WSL2 lệch 2,5–3,3%, chiều đổi theo lần khởi động và trong một phiên (tick 9.715–9.749 rồi 10.271–10.331) → ghi chú ở C3.5–C3.12.
-- C3.13 §8.6: Windows tự hạ QoS tiến trình tải không cửa sổ khởi từ WSL → −27% thông lượng ở cùng 55 W; tự khai HighQoS trả lại; biện pháp
-  "một luồng mỗi lõi vật lý" +3,8% chỉ ở trạng thái QoS thấp, không phân biệt được khi HighQoS.
-
-## Quy ước viết leaf (rút từ C1, giữ cho mọi nhánh)
+## Quy ước viết leaf (giữ cho mọi nhánh)
 
 - Ghi đè hoàn toàn file khung (bỏ front-matter YAML); không sửa `Cx.0-INDEX.md`. Mở đầu `# Cx.y · <tên> — \`Lv\``, khối `> Mục tiêu của tài liệu`
-  + tiên quyết + điều kiện hoàn thành, `## Mục lục` (bảng, anchor). §0 (nguyên tắc, bộ công cụ, môi trường kiểm chứng, ký hiệu ✅ 🔬 ⚠️);
-  mỗi sub-leaf của roadmap một mục; Checkpoint có lời giải + Tự chấm + Mở rộng; Phụ lục A–D; "Tổng kết: mười điều"; chân trang môi trường đo.
-- Mọi ✅ là output chạy thật, chép nguyên văn (`…` = dòng lược); ghi mọi output sẽ trích ra file trước khi viết; kiểm bằng doccheck + blockcheck.
-- Tiếng Việt, code/identifier tiếng Anh; file CRLF. Nháp ở `.draft-Cx.y/` (không commit), xóa khi xong nhánh.
+  + tiên quyết + điều kiện hoàn thành, `## Mục lục`. §0 (nguyên tắc, bộ công cụ, môi trường kiểm chứng, ký hiệu ✅ 🔬 ⚠️);
+  mỗi sub-leaf của roadmap một mục; Checkpoint có lời giải + Tự chấm + Mở rộng; Phụ lục A–D; "Tổng kết: mười điều"; chân trang `*Môi trường đo: …*`.
+- Mọi ✅ là output chạy thật, chép nguyên văn bằng công cụ ghép (`…` = dòng lược); dự đoán ghi vào `out/predictions.txt` TRƯỚC khi chạy, chấm nghiêm ở Phụ lục B.3
+  (đúng cơ chế nhưng sai con số là ½) bằng `out/grades.txt` + script đếm.
+- Tiếng Việt, code/identifier tiếng Anh; file CRLF. Nháp ở `<nhánh>/.draft-Cx.y/` (không commit), xóa khi xong nhánh.
+- Công cụ kiểm (đã xóa cùng nháp C4; dựng lại cho nhánh sau): ghép `doc/*.md` + `{{out:FILE[:A-B][:cut=N]}}`; doccheck (cấu trúc, anchor, mọi §, chân trang);
+  blockcheck (mỗi dòng của khối ✅ có trong `out/`); prosenums (số trong văn xuôi không có nguyên văn trong `out/`); kiểm dẫn chiếu giữa các leaf
+  (phải thử với một dẫn chiếu sai trước khi tin "0 lỗi").
 - Không đăng lời giải `.hdl` của nand2tetris (repo public).
 
 ## Môi trường (chỉ những gì leaf sau cần)
 
-- Không sudo: `apt download <gói>` + `dpkg -x` vào scratchpad (qemu, iverilog/yosys, cross gcc, valgrind `VALGRIND_LIB`, mingw-w64, opam/herdtools7).
-- [i7] i7-13650HX lai P/E, WSL2 không PMU; số đo thật phía Windows qua interop không cần admin: `Get-Counter` (`\Energy Meter(*)`, xung từng CPU
-  logic, nhiệt TZ0), chương trình mingw ghim lõi (`SetThreadAffinityMask`) và **tự khai HighQoS** (`SetProcessInformation`, ProcessPowerThrottling).
-- ARM/x86 thật: runner GitHub qua scratch repo `NgTienDuy/c3-arm-lab` (commit với tác giả `Luca <215770720+NgTienDuy@users.noreply.github.com>`;
-  email riêng bị chặn khi push). Runner x86 đổi CPU giữa các lần (EPYC 7763 / 9V45 / Xeon 8573C) — luôn in `lscpu`.
-- GPU RTX 4060 Laptop, CUDA 13.3 redist; `ncu` bị chặn quyền bộ đếm (ERR_NVGPUCTRPERM). Đồng hồ trong WSL: dùng `CLOCK_MONOTONIC_RAW`.
+- Không sudo trên [i7]: `apt download <gói>` + `dpkg -x` vào scratchpad. Việc nặng chạy trong `systemd-run --user --scope` (cgroup riêng).
+- [i7] i7-13650HX lai P/E, WSL2 (Linux 6.18, `CONFIG_HZ=250`), không root, không PMU; Windows counters qua interop (`Get-Counter`).
+- Root, ARM/x86 thật: runner GitHub qua repo thử nghiệm riêng `NgTienDuy/c3-arm-lab` (private; commit với tác giả
+  `Luca <215770720+NgTienDuy@users.noreply.github.com>`). Runner x86 đổi CPU giữa các lần (EPYC 7763/9V45/9V74, Xeon 8370C/8573C/6973P-C) — luôn in `lscpu`.
+  Runner hiện chạy Linux 7.0.0-1017-azure (`PREEMPT_LAZY`, HZ 1000); tác tử `provjobd` có chương trình BPF trên `sys_enter_mmap`.
+  Cài gói apt mỗi gói một lệnh. Mã nguồn kernel: `gh api -H "Accept: application/vnd.github.raw" repos/torvalds/linux/contents/PATH?ref=v6.18`.
+- GPU RTX 4060 Laptop, CUDA 13.3 redist; `ncu` bị chặn quyền bộ đếm. Đồng hồ trong WSL: `CLOCK_MONOTONIC_RAW`.
 
 ## Known problems
 
 - Git: Windows `autocrlf=true`, WSL thì không → mọi file hiện "modified". Xem thật: `git -c core.autocrlf=true status`; add: `git -c core.autocrlf=true add <file>`.
 - Thay đổi C1, `90-PROJECTS/`, `99-TAI-LIEU-CHUNG/` là của người dùng — không đụng, chỉ commit file mình viết.
-- Máy chủ dùng chung (game, Edge, tác vụ nền 7–25% CPU): in `hostload` cạnh mọi số đo, so sánh xen kẽ A/B trong cùng một chuỗi; đo năng lượng khi ≤ 8%.
+- Máy chủ dùng chung (game, Edge, tác vụ nền): in tải máy cạnh mọi số đo, so sánh xen kẽ A/B.
 - `pkill -f <mẫu>` có thể giết chính shell; tìm theo PID. WSL có tiến trình hmi-scada của người dùng (iedsim, hmikit) — không đụng.
-- TSan trên kernel WSL này cần `setarch $(uname -m) -R`. Renode 1.17.0 STM32G0 có 4 chỗ sai mô hình (DMA HT/TC, ADC chia nguyên, quantum, NVIC 4 bit)
-  — C3.11 §2.2 ghi cách vá. Edge TPU Compiler 14.1 không tất định — biên dịch lặp.
+- TSan trên kernel WSL này cần `setarch $(uname -m) -R`. Chương trình cố ý sập phải gọi `prctl(PR_SET_DUMPABLE, 0)` (core_pattern của WSL là pipe).
 
 ## Việc cần báo người dùng (chưa làm, cần họ quyết)
 
-- Thư mục crash dump của WSL phía Windows (`%LOCALAPPDATA%\Temp\wsl-crashes`, đọc từ WSL là `/mnt/c/Users/<tài khoản>/AppData/Local/Temp/wsl-crashes`) đang giữ
-  ~5,7 GiB file `.dmp` do chương trình thử của các phiên trước sinh ra (hai file edgetpu 4,6 GiB + 1,0 GiB ngày 2026-10-08, v.v.) và 2 file 450 kB của phiên 2026-10-12
-  (`wait_status`, trước khi tôi cho tiến trình con tự khai không dump), và 1 file từ phiên 2026-10-30 (`idlelat` bản đầu sập SIGSEGV vì printf thiếu đối số).
-  `core_pattern` của WSL là một pipe nên `ulimit -c 0` KHÔNG chặn được. Nằm NGOÀI dự án →
-  không tự xóa; hỏi người dùng. Từ nay chương trình cố ý sập phải gọi `prctl(PR_SET_DUMPABLE, 0)` trước.
+- Thư mục crash dump của WSL phía Windows (`%LOCALAPPDATA%\Temp\wsl-crashes`) giữ ~5,7 GiB file `.dmp` từ các phiên trước. Nằm ngoài dự án → không tự xóa.
+- C4.4 §10 dùng mô hình `mpsim.py` thay cho LittleFS v2.11.3 thật (biên dịch mã tải về bị bộ phân loại an toàn chặn). Nếu người dùng cho phép, tải lại,
+  chạy LittleFS thật và thay §10.3 (ghi trong C4.4 §11.8 mục 3 và B.4). Bản tải về cũ đã bị xóa cùng nháp.
 
 ## Blockers
 
-- Không có vi điều khiển nối vào máy (ESP32 DevKit, Arduino Uno có trong tay nhưng chưa nối), không Raspberry Pi/SBC, không NPU thật: các phép đo
-  đó để ở mục "Mở rộng" của C3.x. Mở khóa: người dùng nối thiết bị (USB → `usbipd` cho WSL).
+- Không có vi điều khiển nối vào máy (ESP32 DevKit, Arduino Uno có nhưng chưa nối), không SBC chạy Linux: phần cứng thật để ở "Mở rộng" và B.4 của các leaf.
+  Mở khóa: người dùng nối thiết bị (USB → `usbipd` cho WSL).
 
 ## Last verification
 
-- 2026-11-06: `doccheck.py C4.11-Containers&Virtualization.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.11/out .draft-C4.11/src`: 72 khối ✅, 898 dòng, 0 lệch.
-- 2026-11-05: `doccheck.py C4.10-RTOS&RealTime.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.10/out .draft-C4.10/src`: 61 khối ✅, 1.015 dòng, 0 lệch.
-- 2026-11-02: `doccheck.py C4.9-IPC.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.9/out .draft-C4.9/src`: 10 khối ✅, 143 dòng, 0 lệch.
-- 2026-11-02: `doccheck.py C4.8-Deadlock&Livelock.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.8/out .draft-C4.8/src`: 24 khối ✅, 424 dòng, 0 lệch.
-  Sau C4.8: `doccheck.py C4.6 C4.7`: 0 lỗi, 0 cảnh báo.
-- 2026-11-02: `doccheck.py C4.7-ConcurrencyPatterns.md`: 0 lỗi, 3 cảnh báo (C4.8 còn khung). `blockcheck.py … .draft-C4.7/out .draft-C4.7/src`: 39 khối ✅, 692 dòng, 0 lệch.
-- 2026-10-30: `doccheck.py C4.6-ConcurrencyPrimitives.md`: 0 lỗi, 2 cảnh báo (C4.8 còn khung). `blockcheck.py … .draft-C4.6/out .draft-C4.6/src`: 30 khối ✅, 271 dòng, 0 lệch.
-- 2026-10-30: `doccheck.py C4.5-IOModels.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.5-IOModels.md .draft-C4.5/out .draft-C4.5/src`: 38 khối ✅, 466 dòng, 0 lệch.
-- 2026-10-30: `doccheck.py C4.4-Filesystems&Storage.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py … .draft-C4.4/out .draft-C4.4/src`: 30 khối ✅, 356 dòng, 0 lệch.
-- 2026-10-30: `doccheck.py C4.3-VirtualMemory&Paging.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.3-VirtualMemory&Paging.md .draft-C4.3/out .draft-C4.3/src`: 55 khối ✅, 599 dòng, 0 lệch.
-
-- 2026-10-12: `doccheck.py C4.2-Scheduling.md`: 0 lỗi, 0 cảnh báo. `blockcheck.py C4.2-Scheduling.md .draft-C4.2/out .draft-C4.2/src`: 62 khối ✅, 534 dòng, 0 lệch.
-  (C4.1, cùng ngày: doccheck 0/0; blockcheck 87 khối, 831 dòng, 0 lệch.)
-
-- 2026-10-09: `doccheck.py` trên C3.1–C3.14: 14 file, 0 lỗi, 0 cảnh báo. `blockcheck.py` C3.7–C3.14 với `out/` của từng nháp: 0 dòng lệch
-  (C3.7 431, C3.8 209, C3.9 191, C3.10 286, C3.11 301, C3.12 618, C3.13 371, C3.14 427). Sau đó xóa `.draft-C3.7` … `.draft-C3.14`.
+- 2026-11-10, trước khi xóa nháp: `doccheck.py C4.*.md`: 13 leaf 0 lỗi 0 cảnh báo (17 lỗi chỉ ở `C4.0-INDEX.md` — file mục lục, không theo khuôn leaf).
+  `blockcheck.py C4.N-*.md .draft-C4.N/out [src]` cho N = 1…13: 90/62/55/30/38/30/39/24/15/61/72/48/47 khối ✅, tổng 7.838 dòng, 0 lệch.
+  Kiểm dẫn chiếu `C4.N §X` giữa các leaf: 361, 0 sai (đối chứng âm: bắt đúng 2/2 dẫn chiếu sai cài sẵn). Mọi leaf CRLF, 0 dòng LF trần.
