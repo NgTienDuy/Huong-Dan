@@ -1,12 +1,13 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1, C2, C3, C4 hoàn tất. Nhánh kế tiếp chưa được người dùng chỉ định.
-**Updated:** 2026-11-10
-**Last session:** claude-code (Opus 5.5), 2026-11-10 (phiên 6): viết xong C4.12 và C4.13; trả nợ của C4.1 (posix_spawn, XSAVE, EPYC, 215 ns), làm dày C4.9, sửa dẫn chiếu tới C4.12/C4.13 trong C4.2/C4.3/C4.5/C4.10/C4.11; rà soát toàn nhánh C4 (kiểm tự động trên mọi leaf trước khi xóa nháp, rồi đọc lại toàn văn C4.2–C4.9: 17 chỗ sửa văn xuôi — số liệu lệch giữa thân bài và bảng/phụ lục, câu đếm B.3 thô, diễn đạt quá mạnh); xóa mọi nháp `.draft-*` của C4.
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1 xong (2026-11-12); C5.2–C5.16 chưa bắt đầu.
+**Updated:** 2026-11-12
+**Last session:** claude-code (Opus 5.5), 2026-11-12 (phiên 7): dựng lại bộ công cụ kiểm cho C5 (`C5-Networking/.draft-tools/`: assemble, doccheck, blockcheck, prosenums, xrefcheck — có đối chứng âm; sửa lỗi regex § nhiều chữ số), dựng phòng lab mạng không root (user + network namespace), viết xong C5.1 (179 KB, 60 khối ✅, 40 dự đoán chấm 25 ✓ 13 ½ 2 ✗), runner run41 (FCS thật qua VF mlx5, ftrace một `sendto()`, tốc độ CRC x86/arm64). Người dùng giới hạn phiên này tới hết C5.1.
 
 ## NEXT ACTION
 
-Chờ người dùng chọn nhánh tiếp theo (C5 Networking là nhánh kế theo số thứ tự: `E2E-SYSTEM/C5-Networking/`, 16 leaf + INDEX). Bước đầu của nhánh mới: dựng lại bộ công cụ kiểm (xem "Quy ước"), tạo `.draft-C5.1/{doc,src,out}`, ghi `out/predictions.txt` trước mọi phép đo.
+Viết C5.2 (Ethernet, ARP, chuyển mạch — checkpoint: đọc bảng ARP, dựng tình huống IP trùng trong lab, giải thích triệu chứng). Tạo `E2E-SYSTEM/C5-Networking/.draft-C5.2/{doc,src,out}`, chép `lab.sh`/`inlab.sh` từ `.draft-C5.1/src/lab/`, ghi `out/predictions.txt` trước mọi phép đo. Người dùng muốn: làm tuần tự C5.2 → C5.16 theo `roadmap.md`, rồi rà soát toàn nhánh C5 (nhất quán, chi tiết, đầy đủ, chặt chẽ).
+<!-- /NEXT -->
 
 ## Completed
 
@@ -15,6 +16,7 @@ Chờ người dùng chọn nhánh tiếp theo (C5 Networking là nhánh kế th
 | C1 | ✅ trước 2026-09-24 (người dùng viết; trừ C1.0-INDEX.md) | — |
 | C2 (C2.1–C2.13) | ✅ 2026-09-26 | mọi output chạy thật; doccheck 13/13 file 0 lỗi |
 | C3 (C3.1–C3.14) | ✅ 2026-10-09 | doccheck 14/14 file 0/0; blockcheck C3.7–C3.14: 2.834 dòng, 0 lệch, trước khi xóa nháp |
+| C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C4 (C4.1–C4.13) | ✅ 2026-11-10 | doccheck 13/13 leaf 0 lỗi 0 cảnh báo; blockcheck 13/13 leaf: 611 khối ✅, 7.838 dòng, 0 lệch; 361 dẫn chiếu `C4.N §X` giữa các leaf, 0 sai; trước khi xóa nháp |
 
 ## Quy ước viết leaf (giữ cho mọi nhánh)
@@ -25,13 +27,15 @@ Chờ người dùng chọn nhánh tiếp theo (C5 Networking là nhánh kế th
 - Mọi ✅ là output chạy thật, chép nguyên văn bằng công cụ ghép (`…` = dòng lược); dự đoán ghi vào `out/predictions.txt` TRƯỚC khi chạy, chấm nghiêm ở Phụ lục B.3
   (đúng cơ chế nhưng sai con số là ½) bằng `out/grades.txt` + script đếm.
 - Tiếng Việt, code/identifier tiếng Anh; file CRLF. Nháp ở `<nhánh>/.draft-Cx.y/` (không commit), xóa khi xong nhánh.
-- Công cụ kiểm (đã xóa cùng nháp C4; dựng lại cho nhánh sau): ghép `doc/*.md` + `{{out:FILE[:A-B][:cut=N]}}`; doccheck (cấu trúc, anchor, mọi §, chân trang);
+- Công cụ kiểm (C5: ở `C5-Networking/.draft-tools/`, không commit; nếu mất thì dựng lại): ghép `doc/*.md` + `{{out:FILE[:A-B][:cut=N]}}`; doccheck (cấu trúc, anchor, mọi §, chân trang);
   blockcheck (mỗi dòng của khối ✅ có trong `out/`); prosenums (số trong văn xuôi không có nguyên văn trong `out/`); kiểm dẫn chiếu giữa các leaf
   (phải thử với một dẫn chiếu sai trước khi tin "0 lỗi").
 - Không đăng lời giải `.hdl` của nand2tetris (repo public).
 
 ## Môi trường (chỉ những gì leaf sau cần)
 
+- **Phòng lab mạng không root trên [i7]** (C5): `unshare --user --map-root-user --net --mount --fork bash`, rồi `mount -t tmpfs none /run; mkdir /run/netns` để dùng `ip netns`; veth, bridge, vxlan/ipip/gre, netem, dummy đều tự nạp module. tcpdump phải có `-Z root --immediate-mode -B 65536` và đọc dòng `dropped`; `nstat` cần `NSTAT_HISTORY` riêng mỗi namespace; `netem corrupt` trên máy gửi TCP chỉ trúng siêu gói GSO — đặt trên router ở giữa. Không bao giờ `| tee FILE | head` (SIGPIPE cắt file).
+- Runner (run41): VF `mlx5_core` của Azure nhận `ethtool -K rx-fcs on` → khung *nhận* mang FCS thật; `hv_netvsc` thì không.
 - Không sudo trên [i7]: `apt download <gói>` + `dpkg -x` vào scratchpad. Việc nặng chạy trong `systemd-run --user --scope` (cgroup riêng).
 - [i7] i7-13650HX lai P/E, WSL2 (Linux 6.18, `CONFIG_HZ=250`), không root, không PMU; Windows counters qua interop (`Get-Counter`).
 - Root, ARM/x86 thật: runner GitHub qua repo thử nghiệm riêng `NgTienDuy/c3-arm-lab` (private; commit với tác giả
@@ -65,3 +69,4 @@ Chờ người dùng chọn nhánh tiếp theo (C5 Networking là nhánh kế th
   `blockcheck.py C4.N-*.md .draft-C4.N/out [src]` cho N = 1…13: 90/62/55/30/38/30/39/24/15/61/72/48/47 khối ✅, tổng 7.838 dòng, 0 lệch.
   Kiểm dẫn chiếu `C4.N §X` giữa các leaf: 361, 0 sai (đối chứng âm: bắt đúng 2/2 dẫn chiếu sai cài sẵn). Mọi leaf CRLF, 0 dòng LF trần.
 - 2026-11-10, sau khi đọc lại và sửa C4.2–C4.9 (không còn nháp): dẫn chiếu giữa các leaf 361/0 sai; CRLF 13/13; số cột của mọi bảng nhất quán (bộ kiểm có đối chứng âm). Không khối ✅ nào bị sửa.
+- 2026-11-12, C5.1: `doccheck` 0 lỗi 0 cảnh báo; `blockcheck` 60 khối ✅ / 842 dòng / 0 lệch; `xrefcheck` 6 dẫn chiếu / 0 sai (đối chứng âm: bắt đủ anchor hỏng, § không tồn tại, dẫn chiếu `C4.13 §29`, một chữ số sửa trong khối ✅); `prosenums` 43/695 số không có nguyên văn trong `out/` — đã đọc từng số: phép suy ra viết ngay cạnh, trích dẫn tài liệu, năm, phiên bản. Không có MAC/IP/tên VPN/hostname của máy trong leaf hay `out/`.
