@@ -6,7 +6,16 @@
 
 ## NEXT ACTION
 
-Viết C5.4 (Tầng mạng: IP, subnetting, NAT, routing — checkpoint: chia subnet 200 thiết bị / 5 nhóm, viết bảng định tuyến, truy vết đường đi của gói bằng lập luận rồi xác nhận bằng `traceroute`). Lab không root làm được hết: nhiều namespace làm router, `ip route`, nftables NAT (masquerade, DNAT) trong namespace, PMTU/ICMP, multicast, rp_filter cho IP nguồn giả; OSPF/BGP: FRR có `apt download frr` (thử chạy trong netns) hoặc mô hình. Tạo `.draft-C5.4/{doc,src,out}`, dự đoán trước mọi lần chạy, giờ lấy từ `date -u`. Người dùng muốn: tuần tự C5.4 → C5.16 theo `roadmap.md`, rồi rà soát toàn nhánh C5.
+C5.4 (IP, subnetting, NAT, routing) đang làm trong `E2E-SYSTEM/C5-Networking/.draft-C5.4/` — thí nghiệm gần xong, CHƯA viết `doc/`.
+Đã có output thật trong `out/`: `subnet.txt` (VLSM 200 thiết bị → /23), `trace.txt` (Checkpoint: bảng định tuyến + `route_walk` + traceroute, khớp),
+`icmp.txt` (10 kiểu lỗi → errno + ICMP từ router nào), `nat.txt` (RFC 4787: mapping endpoint-independent, filtering address+port-dependent,
+timeout UDP 30 s; luồng "stream" chỉ khi còn hoạt động sau 2 s — đang chạy lại với luồng đối chứng 6004), `pmtu.txt` (IPv4 frag-needed + cache 600 s;
+IPv6 PTB — phần TCP và phần bắt gói IPv6 cần sửa: tcpdump bên gửi thấy siêu gói GSO, dùng TCP_MAXSEG/`ss -i`), `ospf.txt` (BIRD: hỏng im lặng 4,05 s;
+xóa link sau vòng hỏng im lặng → BIRD giữ route qua interface đã xóa, kernel black-hole, tái hiện 2/2 trong chuỗi đầy đủ, 0/2 trong `ospf_stale.sh` → câu hỏi mở),
+`bgp.txt` (hijack /25: lưu lượng chuyển sau ~40 ms, TTL 61→62, server thật thấy 98 gói). Còn làm: sửa pmtu.sh, `spoof.sh` (rp_filter/BCP38),
+`v6mc.sh` (broadcast/multicast không qua router, IGMP snooping, radvd/SLAAC), chấm `out/grades.txt`, viết doc, kiểm, commit. Dự đoán trong
+`out/predictions.txt` (giờ từ `date -u`). Công cụ: nft/conntrack/bird2/radvd/mtr có trong `.draft-tools/debs` (setup_env.sh giải nén).
+Sau C5.4: tuần tự C5.5 → C5.16 theo `roadmap.md`, rồi rà soát toàn nhánh C5.
 <!-- /NEXT -->
 
 ## Completed
