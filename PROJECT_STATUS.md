@@ -1,12 +1,12 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1 xong (2026-11-12); C5.2–C5.16 chưa bắt đầu.
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1, C5.2 xong (2026-11-12); C5.3–C5.16 chưa bắt đầu.
 **Updated:** 2026-11-12
-**Last session:** claude-code (Opus 5.5), 2026-11-12 (phiên 7): dựng lại bộ công cụ kiểm cho C5 (`C5-Networking/.draft-tools/`: assemble, doccheck, blockcheck, prosenums, xrefcheck — có đối chứng âm; sửa lỗi regex § nhiều chữ số), dựng phòng lab mạng không root (user + network namespace), viết xong C5.1 (179 KB, 60 khối ✅, 40 dự đoán chấm 25 ✓ 13 ½ 2 ✗), runner run41 (FCS thật qua VF mlx5, ftrace một `sendto()`, tốc độ CRC x86/arm64). Người dùng giới hạn phiên này tới hết C5.1.
+**Last session:** claude-code (Opus 5.5), 2026-11-12 (phiên 8): kiểm toán nháp C5.2 do một phiên trước bỏ dở (dự đoán có giờ mâu thuẫn mtime → viết lại dự đoán, chạy lại mọi thí nghiệm), thêm thí nghiệm mới (MSG_CONFIRM của ping, cuộc đua tự chữa sau giả mạo ARP, vòng lặp tích lũy broadcast, br_netfilter, hố đen TCP lặp 30+16+20 lần, Checkpoint IP trùng, mô hình PoE), runner run44/45b/46 (x86 đổi giữa AWS và Azure), viết xong C5.2 (182 KB, 29 khối ✅, 48 dự đoán: 35 ✓ 7 ½ 6 ✗).
 
 ## NEXT ACTION
 
-Viết C5.2 (Ethernet, ARP, chuyển mạch — checkpoint: đọc bảng ARP, dựng tình huống IP trùng trong lab, giải thích triệu chứng). Tạo `E2E-SYSTEM/C5-Networking/.draft-C5.2/{doc,src,out}`, chép `lab.sh`/`inlab.sh` từ `.draft-C5.1/src/lab/`, ghi `out/predictions.txt` trước mọi phép đo. Người dùng muốn: làm tuần tự C5.2 → C5.16 theo `roadmap.md`, rồi rà soát toàn nhánh C5 (nhất quán, chi tiết, đầy đủ, chặt chẽ).
+Viết C5.3 (Tầng liên kết cho edge: Wi-Fi, BLE, LoRa, Zigbee, cellular — checkpoint: chọn radio cho ba kịch bản, tính link budget, **đo thực tế**). Không có radio nối vào WSL: đo được Wi-Fi thật của [i7-host] (`netsh wlan`, RSSI/tốc độ/kênh theo thời gian, quét kênh lân cận), BLE/LoRa/cellular bằng mô hình + số liệu datasheet có trích nguồn; phần cứng ESP32 để ở Mở rộng. Tạo `E2E-SYSTEM/C5-Networking/.draft-C5.3/{doc,src,out}`, ghi `out/predictions.txt` trước mọi phép đo. Người dùng muốn: làm tuần tự C5.3 → C5.16 theo `roadmap.md`, rồi rà soát toàn nhánh C5.
 <!-- /NEXT -->
 
 ## Completed
@@ -17,6 +17,7 @@ Viết C5.2 (Ethernet, ARP, chuyển mạch — checkpoint: đọc bảng ARP, d
 | C2 (C2.1–C2.13) | ✅ 2026-09-26 | mọi output chạy thật; doccheck 13/13 file 0 lỗi |
 | C3 (C3.1–C3.14) | ✅ 2026-10-09 | doccheck 14/14 file 0/0; blockcheck C3.7–C3.14: 2.834 dòng, 0 lệch, trước khi xóa nháp |
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
+| C5.2 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 29 khối ✅, 866 dòng, 0 lệch; xrefcheck 17/0; CRLF; prosenums 67/629 đã đọc (dạng thập phân Việt của số trong `out/`, phép suy ra ghi cạnh); nháp `.draft-C5.2/` giữ lại |
 | C4 (C4.1–C4.13) | ✅ 2026-11-10 | doccheck 13/13 leaf 0 lỗi 0 cảnh báo; blockcheck 13/13 leaf: 611 khối ✅, 7.838 dòng, 0 lệch; 361 dẫn chiếu `C4.N §X` giữa các leaf, 0 sai; trước khi xóa nháp |
 
 ## Quy ước viết leaf (giữ cho mọi nhánh)
@@ -36,6 +37,8 @@ Viết C5.2 (Ethernet, ARP, chuyển mạch — checkpoint: đọc bảng ARP, d
 
 - **Phòng lab mạng không root trên [i7]** (C5): `unshare --user --map-root-user --net --mount --fork bash`, rồi `mount -t tmpfs none /run; mkdir /run/netns` để dùng `ip netns`; veth, bridge, vxlan/ipip/gre, netem, dummy đều tự nạp module. tcpdump phải có `-Z root --immediate-mode -B 65536` và đọc dòng `dropped`; `nstat` cần `NSTAT_HISTORY` riêng mỗi namespace; `netem corrupt` trên máy gửi TCP chỉ trúng siêu gói GSO — đặt trên router ở giữa. Không bao giờ `| tee FILE | head` (SIGPIPE cắt file).
 - Runner (run41): VF `mlx5_core` của Azure nhận `ethtool -K rx-fcs on` → khung *nhận* mang FCS thật; `hv_netvsc` thì không.
+- Runner x86 **đổi đám mây giữa các lần chạy** (run42/44: AWS EC2 m8id.large, Xeon 6975P-C, Linux 7.0.0-1014-aws, ENA, MTU 9001, gc_thresh 15360/16384; run43/45b/46: Azure EPYC 7763/9V45, 7.0.0-1017-azure, hv_netvsc, MTU 1500); arm luôn Azure. In `sys_vendor` ở dòng đầu. `/proc/net/stat/*` là theo CPU — cộng mọi dòng.
+- Lab C5.2: `br_netfilter` có nạp trên kernel WSL → namespace mới có `bridge-nf-call-iptables=1` → bridge kiểm MTU kiểu IP và tự phân mảnh; tắt bằng sysctl trong namespace của bridge. tcpdump phải ghi vào tmpfs (`TMPDIR` = scratchpad), ghi vào /mnt/d mất 96 % khung. Không sửa script khi nó đang chạy. `ip tcp_metrics flush` bị cấm trong userns; dùng `tcp_no_metrics_save=1`.
 - Không sudo trên [i7]: `apt download <gói>` + `dpkg -x` vào scratchpad. Việc nặng chạy trong `systemd-run --user --scope` (cgroup riêng).
 - [i7] i7-13650HX lai P/E, WSL2 (Linux 6.18, `CONFIG_HZ=250`), không root, không PMU; Windows counters qua interop (`Get-Counter`).
 - Root, ARM/x86 thật: runner GitHub qua repo thử nghiệm riêng `NgTienDuy/c3-arm-lab` (private; commit với tác giả
@@ -70,3 +73,4 @@ Viết C5.2 (Ethernet, ARP, chuyển mạch — checkpoint: đọc bảng ARP, d
   Kiểm dẫn chiếu `C4.N §X` giữa các leaf: 361, 0 sai (đối chứng âm: bắt đúng 2/2 dẫn chiếu sai cài sẵn). Mọi leaf CRLF, 0 dòng LF trần.
 - 2026-11-10, sau khi đọc lại và sửa C4.2–C4.9 (không còn nháp): dẫn chiếu giữa các leaf 361/0 sai; CRLF 13/13; số cột của mọi bảng nhất quán (bộ kiểm có đối chứng âm). Không khối ✅ nào bị sửa.
 - 2026-11-12, C5.1: `doccheck` 0 lỗi 0 cảnh báo; `blockcheck` 60 khối ✅ / 842 dòng / 0 lệch; `xrefcheck` 6 dẫn chiếu / 0 sai (đối chứng âm: bắt đủ anchor hỏng, § không tồn tại, dẫn chiếu `C4.13 §29`, một chữ số sửa trong khối ✅); `prosenums` 43/695 số không có nguyên văn trong `out/` — đã đọc từng số: phép suy ra viết ngay cạnh, trích dẫn tài liệu, năm, phiên bản. Không có MAC/IP/tên VPN/hostname của máy trong leaf hay `out/`.
+- 2026-11-12, C5.2: `doccheck` 0 lỗi 0 cảnh báo; `blockcheck` 29 khối ✅ / 866 dòng / 0 lệch (2 dấu ✅ còn lại là chú giải §0.4 và chân trang); `xrefcheck` 17 / 0 sai; `prosenums` 67/629 — đã đọc, một số sai thật đã sửa (khoảng thời gian bị lược ở §8.2), các số từ lần chạy bị ghi đè chép vào `out/overwritten_runs.txt`; CRLF 2066 dòng, 0 LF trần.
