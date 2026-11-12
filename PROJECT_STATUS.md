@@ -6,11 +6,16 @@
 
 ## NEXT ACTION
 
-Viết C5.6 (DNS — `In→Ad`). Checkpoint: chẩn đoán một sự cố do DNS cache (deploy xong nhưng một phần traffic vẫn đi về IP cũ) **bằng công cụ**,
-chỉ ra tầng cache nào đang giữ bản ghi cũ. Lab không root: dnsmasq / unbound / bind9 (`apt download`, kiểm chạy được trong userns như bird2 ở C5.4),
-nhiều tầng cache (stub resolver của glibc không cache; systemd-resolved nếu có; dnsmasq làm forwarder; unbound đệ quy; máy chủ có thẩm quyền),
-`dig +trace`, TTL và negative caching (SOA minimum), `/etc/hosts` và `nsswitch.conf` (mount namespace để thay), DNS qua TCP khi > 512/EDNS,
-mDNS (avahi?) nếu chạy được. Tạo `.draft-C5.6/{doc,src,out}`, dự đoán trước mọi lần chạy, giờ từ `date -u`. Sau đó C5.7 → C5.16, rồi rà soát toàn nhánh C5.
+Hoàn tất C5.6 (DNS) trong `.draft-C5.6/` (2026-11-12 ~22:10 UTC, dừng vì giới hạn sử dụng). Thí nghiệm xong (out/): resolve, records,
+ttl (nscd đã sửa), negative, client, transport (DoT chậm 40 ms do Nagle+ACK trễ), srv, mdns, failures (+_stale, _long), dnssec (lần 3,
+có đếm câu hỏi tới máy giả: AUTH2 16 / AUTH1 30), ckpt.txt (lần xáo 2) + ckpt_run1.txt — cả hai 4/4. Có thể còn đang/đã chạy:
+failures_nodiscard.txt (discard-timeout 0 VẪN không trả lời trong 200 s → discard-timeout KHÔNG phải lời giải thích duy nhất; sửa
+§0.5 mục 5, A.1, B.1, B.4 và Tổng kết 9 cho đúng). Doc đã viết: 00-head (có §0.5), 01-resolution, 02-cache, 03-client, 04-transport,
+05-discovery, 07-checkpoint, 10-appendix (còn placeholder GRADES_DISCUSSION). CÒN: viết 06 (§7 DNSSEC từ dnssec.txt, §10 failures),
+grades.txt P1–P14 + src/gradecount.py (chép từ .draft-C5.5) → grades_count.txt, assemble → `C5.6-DNS.md`, doccheck/blockcheck/xrefcheck/
+prosenums, CRLF, commit + push. Chấm sơ bộ: P1 ½ (143 ms do mồi gốc + ARP), P2 ✓, P3 ✓, P4 ✓, P5 ✓ (nscd theo TTL), P6 ✓, P7 ½
+(3 câu hỏi không phải 6: AI_ADDRCONFIG), P8 ✓, P9 ✓/½ (giả mạo bị chặn; nhưng không có SERVFAIL mà không trả lời), P10 ✓, P11 ✓,
+P12 ½/✗ (không SERVFAIL nhanh; serve-expired ✓), P13 ✓, P14 ✓. Sau đó C5.7 → C5.16, rồi rà soát toàn nhánh C5.
 <!-- /NEXT -->
 
 ## Completed
