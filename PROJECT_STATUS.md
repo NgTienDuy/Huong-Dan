@@ -1,16 +1,16 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.4 xong (2026-11-12); C5.5–C5.16 chưa bắt đầu.
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.5 xong (2026-11-12); C5.6–C5.16 chưa bắt đầu.
 **Updated:** 2026-11-12
-**Last session:** claude-code (Opus 5.5), 2026-11-12 (phiên 8): kiểm toán nháp C5.2 do một phiên trước bỏ dở (dự đoán có giờ mâu thuẫn mtime → viết lại dự đoán, chạy lại mọi thí nghiệm), thêm thí nghiệm mới (MSG_CONFIRM của ping, cuộc đua tự chữa sau giả mạo ARP, vòng lặp tích lũy broadcast, br_netfilter, hố đen TCP lặp 30+16+20 lần, Checkpoint IP trùng, mô hình PoE), runner run44/45b/46 (x86 đổi giữa AWS và Azure), viết xong C5.2 (182 KB, 29 khối ✅, 48 dự đoán: 35 ✓ 7 ½ 6 ✗); rồi viết C5.3 (87 KB, 15 khối ✅); rồi C5.4 (86 KB, 14 khối ✅) sau một lần chạm giới hạn sử dụng.
+**Last session:** claude-code (Opus 5.5), 2026-11-12 (phiên 8): kiểm toán nháp C5.2 do một phiên trước bỏ dở (dự đoán có giờ mâu thuẫn mtime → viết lại dự đoán, chạy lại mọi thí nghiệm), thêm thí nghiệm mới (MSG_CONFIRM của ping, cuộc đua tự chữa sau giả mạo ARP, vòng lặp tích lũy broadcast, br_netfilter, hố đen TCP lặp 30+16+20 lần, Checkpoint IP trùng, mô hình PoE), runner run44/45b/46 (x86 đổi giữa AWS và Azure), viết xong C5.2 (182 KB, 29 khối ✅, 48 dự đoán: 35 ✓ 7 ½ 6 ✗); rồi viết C5.3 (87 KB, 15 khối ✅); rồi C5.4 (86 KB, 14 khối ✅) sau một lần chạm giới hạn sử dụng; rồi C5.5 (120 KB, 18 khối ✅, 12 dự đoán: 7 ✓ 5 ½ 0 ✗) sau lần chạm giới hạn thứ hai: lab netns C—R—S với netem, 10 script (bắt tay/TIME_WAIT/RTO/TLP, zero window, SWS, reno/cubic/BDP, Nagle+delayed ACK, keepalive/USER_TIMEOUT/nửa mở, UDP, SYN flood, QUIC vs TCP bằng aioquic), Checkpoint chẩn đoán mù 4/4 trong ba lần xáo; runner run48b (BBR với root thật, Nagle ở HZ=1000) trên kernel 7.0 Azure.
 
 ## NEXT ACTION
 
-Viết C5.5 (Tầng transport: TCP, UDP, QUIC — `Ad→Ex`, leaf nặng nhất của C5). Checkpoint: từ packet capture của một kết nối không đạt thông lượng,
-xác định đúng nguyên nhân trong ba tình huống: giới hạn cửa sổ, mất gói gây tắc nghẽn, tương tác Nagle/delayed-ACK. Lab không root đủ: netem (trễ, mất,
-giới hạn băng thông), `ss -ti` (cwnd, rtt, rto), tcpdump + tshark (tcptrace-style), sysctl tcp_congestion_control (cubic/reno/bbr — kiểm module có
-trong WSL kernel không), SYN cookies, TIME_WAIT, keepalive; QUIC: thử `aioquic` (pip, venv) hoặc mô hình. Tạo `.draft-C5.5/{doc,src,out}`,
-dự đoán trước mọi lần chạy, giờ từ `date -u`. Sau đó C5.6 → C5.16, rồi rà soát toàn nhánh C5.
+Viết C5.6 (DNS — `In→Ad`). Checkpoint: chẩn đoán một sự cố do DNS cache (deploy xong nhưng một phần traffic vẫn đi về IP cũ) **bằng công cụ**,
+chỉ ra tầng cache nào đang giữ bản ghi cũ. Lab không root: dnsmasq / unbound / bind9 (`apt download`, kiểm chạy được trong userns như bird2 ở C5.4),
+nhiều tầng cache (stub resolver của glibc không cache; systemd-resolved nếu có; dnsmasq làm forwarder; unbound đệ quy; máy chủ có thẩm quyền),
+`dig +trace`, TTL và negative caching (SOA minimum), `/etc/hosts` và `nsswitch.conf` (mount namespace để thay), DNS qua TCP khi > 512/EDNS,
+mDNS (avahi?) nếu chạy được. Tạo `.draft-C5.6/{doc,src,out}`, dự đoán trước mọi lần chạy, giờ từ `date -u`. Sau đó C5.7 → C5.16, rồi rà soát toàn nhánh C5.
 <!-- /NEXT -->
 
 ## Completed
@@ -22,6 +22,7 @@ dự đoán trước mọi lần chạy, giờ từ `date -u`. Sau đó C5.6 →
 | C3 (C3.1–C3.14) | ✅ 2026-10-09 | doccheck 14/14 file 0/0; blockcheck C3.7–C3.14: 2.834 dòng, 0 lệch, trước khi xóa nháp |
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C5.4 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 14 khối ✅, 388 dòng, 0 lệch; xrefcheck 17/0; CRLF; 21 dự đoán 12 ✓ 6 ½ 3 ✗; nhà máy 4 router trong netns, nftables NAT, BIRD OSPF/BGP, radvd; câu hỏi mở: BIRD giữ route qua giao diện đã xóa (3/3 vs 0/4) |
+| C5.5 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 18 khối ✅, 217 dòng, 0 lệch; xrefcheck 17/0; CRLF; 12 dự đoán 7 ✓ 5 ½ 0 ✗; Checkpoint mù 4/4 ×3 lần xáo (thêm đối chứng khỏe); BBR trên runner; câu hỏi mở: phần dư 4,3 % của QUIC-1, đuôi độ trễ aioquic |
 | C5.3 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 15 khối ✅, 248 dòng, 0 lệch; xrefcheck 7/0; CRLF; 13 dự đoán 6 ✓ 4 ½ 3 ✗; Wi-Fi/BLE thật của [i7-host] (chỉ đọc), mac80211_hwsim trên runner (run47), modem LoRa tự viết, datasheet ESP32/SX1276/CC2640R2F; nháp giữ lại |
 | C5.2 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 29 khối ✅, 866 dòng, 0 lệch; xrefcheck 17/0; CRLF; prosenums 67/629 đã đọc (dạng thập phân Việt của số trong `out/`, phép suy ra ghi cạnh); nháp `.draft-C5.2/` giữ lại |
 | C4 (C4.1–C4.13) | ✅ 2026-11-10 | doccheck 13/13 leaf 0 lỗi 0 cảnh báo; blockcheck 13/13 leaf: 611 khối ✅, 7.838 dòng, 0 lệch; 361 dẫn chiếu `C4.N §X` giữa các leaf, 0 sai; trước khi xóa nháp |
@@ -45,6 +46,7 @@ dự đoán trước mọi lần chạy, giờ từ `date -u`. Sau đó C5.6 →
 - Runner (run41): VF `mlx5_core` của Azure nhận `ethtool -K rx-fcs on` → khung *nhận* mang FCS thật; `hv_netvsc` thì không.
 - Runner x86 **đổi đám mây giữa các lần chạy** (run42/44: AWS EC2 m8id.large, Xeon 6975P-C, Linux 7.0.0-1014-aws, ENA, MTU 9001, gc_thresh 15360/16384; run43/45b/46: Azure EPYC 7763/9V45, 7.0.0-1017-azure, hv_netvsc, MTU 1500); arm luôn Azure. In `sys_vendor` ở dòng đầu. `/proc/net/stat/*` là theo CPU — cộng mọi dòng.
 - C5.4: nft, conntrack, bird2, radvd, mtr chạy được trong userns (cache .deb ở `.draft-tools/debs`). tcpdump -r trong userns cần `-Z root`. `fwd` là từ khóa nft. rp_filter của netns mới = 2 trên mọi giao diện; hiệu lực = max(all, iface). IGMP snooping của bridge chỉ tỉa khi có querier (đợi > 10 s).
+- C5.5: netem đặt `delay` và `rate … limit` trên cùng giao diện thì gói trong hàng trễ bị tính vào limit — tách ra hai giao diện. tcp_bbr không tự nạp được trong userns (`capable()` ở tcp_ca_find_autoload) → BBR chạy trên runner với `sudo modprobe tcp_bbr`. Runner: user namespace con không đọc được checkout → `rootlab.sh` (unshare không --user). Lệnh nền không có stdin riêng nhận /dev/null (here-doc cho hàm chạy nền → ghi ra file). tshark 4.2 in boolean là True/False. aioquic 1.7.2 trong `$SP/venv`; luồng QUIC hai chiều chỉ trả hạn mức khi đóng cả hai chiều (dùng luồng một chiều).
 - C5.3: đo radio của [i7-host] qua PowerShell (`src/wifi/run_wifi.sh`, `src/ble/run_ble.sh` trong `.draft-C5.3`): KHÔNG BAO GIỜ ngắt Wi-Fi (ngắt = ngắt phiên). BLE WinRT cần C# biên dịch bằng csc.exe của .NET Framework với tham chiếu `System.Runtime.InteropServices.WindowsRuntime.dll`. `netsh wlan show networks` đọc bộ đệm — gọi `WlanScan` trước. Runner có `mac80211_hwsim` sẵn (gói modules-extra cài lỗi nhưng không cần). numpy: venv trong scratchpad. pdftotext: `apt download poppler-utils libpoppler134 libopenjp2-7 liblcms2-2 libnss3 libnspr4`. Nordic/SiLabs/u-blox chặn tải datasheet; TI, Espressif, Adafruit (Semtech) thì được.
 - Lab C5.2: `br_netfilter` có nạp trên kernel WSL → namespace mới có `bridge-nf-call-iptables=1` → bridge kiểm MTU kiểu IP và tự phân mảnh; tắt bằng sysctl trong namespace của bridge. tcpdump phải ghi vào tmpfs (`TMPDIR` = scratchpad), ghi vào /mnt/d mất 96 % khung. Không sửa script khi nó đang chạy. `ip tcp_metrics flush` bị cấm trong userns; dùng `tcp_no_metrics_save=1`.
 - Không sudo trên [i7]: `apt download <gói>` + `dpkg -x` vào scratchpad. Việc nặng chạy trong `systemd-run --user --scope` (cgroup riêng).
@@ -84,3 +86,4 @@ dự đoán trước mọi lần chạy, giờ từ `date -u`. Sau đó C5.6 →
 - 2026-11-12, C5.2: `doccheck` 0 lỗi 0 cảnh báo; `blockcheck` 29 khối ✅ / 866 dòng / 0 lệch (2 dấu ✅ còn lại là chú giải §0.4 và chân trang); `xrefcheck` 17 / 0 sai; `prosenums` 67/629 — đã đọc, một số sai thật đã sửa (khoảng thời gian bị lược ở §8.2), các số từ lần chạy bị ghi đè chép vào `out/overwritten_runs.txt`; CRLF 2066 dòng, 0 LF trần.
 - 2026-11-12, C5.3: `doccheck` 0/0; `blockcheck` 15 khối ✅ / 248 dòng / 0 lệch; `xrefcheck` 7/0; `prosenums` 57/451 đã đọc (năm, kênh, số hiệu chuẩn; hai chỗ sửa); CRLF 790 dòng.
 - 2026-11-12, C5.4: `doccheck` 0/0; `blockcheck` 14 khối ✅ / 388 dòng / 0 lệch; `xrefcheck` 17/0; `prosenums` 36/384 (phiên bản, mặt nạ, hằng số chuẩn); CRLF 953 dòng.
+- 2026-11-12, C5.5: `doccheck` 0/0; `blockcheck` 18 khối ✅ / 217 dòng / 0 lệch; `xrefcheck` 17/0; `prosenums` 52/542 (phiên bản, năm, phép tính có ghi mô hình); CRLF 1343 dòng.
