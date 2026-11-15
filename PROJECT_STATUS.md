@@ -6,10 +6,11 @@
 
 ## NEXT ACTION
 
-Viết C5.7 (HTTP 1.1/2/3) theo roadmap: dựng `.draft-C5.7/` (src/doc/out, công cụ ở `.draft-tools/`), viết dự đoán vào `out/predictions.txt` bằng `date -u`
-TRƯỚC khi chạy, thí nghiệm trong lab netns (nghĩa phương thức/idempotency, keep-alive và pipelining, HTTP/2 khung + HPACK + ghép luồng, HTTP/3 trên QUIC,
-cache/ETag, CORS, so với gRPC), Checkpoint: chứng minh HOL blocking ở tầng nào trong HTTP/1.1, /2, /3 bằng thí nghiệm. Nợ chuyển tiếp: C5.6 §2 hứa
-C5.10 đo Happy Eyeballs (RFC 8305). Sau đó C5.8 → C5.16, rồi rà soát toàn nhánh C5.
+Viết tài liệu C5.7 (HTTP) từ `.draft-C5.7/` (2026-11-15 ~17:10 UTC): thí nghiệm XONG, output trong `out/` — hol.txt (Checkpoint HOL, 20 lần/điều kiện,
+ảnh bắt gói h2 + h3 giải mã), idem.txt, conns.txt (newconn/keepalive/pipeline/h2 + flights), h2wire.txt (khung, HPACK nginx 37 % vs nghttpd 92 %,
+push hủy vẫn tốn 65.449 B), web.txt (thương lượng, gzip, chunked, Vary, cache revalidate on/off), cors.txt (Edge headless trên Windows),
+grpc.txt; grades.txt 10 dự đoán (6 ✓ 4 ½ 0 ✗); src_quotes/ (nginx HPACK, cache key). Venv: `bash src/setup_py.sh DIR` (PYQ=). CÒN: doc/00…10,
+assemble → `C5.7-HTTP.md`, doccheck/blockcheck/xrefcheck/prosenums, CRLF, commit + push. Nợ: C5.6 §2 hứa C5.10 đo Happy Eyeballs. Sau đó C5.8 → C5.16, rà soát nhánh.
 <!-- /NEXT -->
 
 ## Completed
