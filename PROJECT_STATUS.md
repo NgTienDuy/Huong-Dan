@@ -6,11 +6,13 @@
 
 ## NEXT ACTION
 
-Viết C5.8 (giao thức messaging cho thiết bị: MQTT QoS 0/1/2, phiên bền, retained, LWT; MQTT-SN; CoAP observe/block-wise; AMQP khái niệm; gRPC
-sâu (streaming, deadline, interceptor); WebSocket; SSE; JSON/protobuf/CBOR/MessagePack/FlatBuffers; tiến hóa schema; Checkpoint: bốn kịch bản,
-bảo vệ bằng số — byte trên dây, số lần thức radio, năng lượng mỗi thông điệp). Dựng `.draft-C5.8/`, dự đoán trước (`date -u`). Broker MQTT: thử
-`apt download mosquitto` (+ paho-mqtt trong venv). Nợ chuyển tiếp phải trả: C5.6 §2 → C5.10 đo Happy Eyeballs; C5.7 §5.3 → C5.9 đếm RTT bắt tay TLS,
-C5.14 nhắc di chuyển kết nối QUIC; C5.7 §1.2 → C5.8 QoS 1 = trùng lặp; C5.7 §1.3 → C5.15 thử lại 503 không backoff. Sau đó C5.9 → C5.16, rồi rà soát nhánh.
+Viết tài liệu C5.8 từ `.draft-C5.8/` (2026-11-15 ~18:00 UTC): thí nghiệm XONG — mqtt.txt (gói/QoS, độ trễ Nagle vs TCP_NODELAY, wildcard,
+retained, phiên bền, LWT 6,8–10,1 s do mosquitto kiểm keepalive >5 s/lần, QoS 1 trùng, QoS 2 MẤT 7–8 tin vì hạn mức incoming 20 + PUBREC rc151 không
+tới client v3.1.1, và 1 bản trùng do lỗi paho khi kết nối lại 2 lần), coap.txt (CON/NON, observe, block-wise 64 KB 6,7 s vs HTTP 0,4 s, CON gửi lại
+2,3→… bỏ sau 70–79 s), serial.txt, wsse.txt, grpcstream.txt, scen.txt (keepalive, 1 MiB: HTTP 0,89 s / MQTT 1,44 s / CoAP 106,6 s; 1.000 mẫu/s),
+checkpoint.txt (mô hình S1–S4), esp32_power.txt, src_quotes/ (mosquitto quota/keepalive/nodelay, paho reconnect, grpc timeout); grades 12 dự đoán
+7 ✓ 5 ½. CÒN: doc/*.md, assemble → `C5.8-MessagingProtocols.md`, kiểm, CRLF, commit + push. Nợ: C5.6 §2 → C5.10 Happy Eyeballs; C5.7 §5.3 → C5.9 RTT TLS,
+C5.14 QUIC migration; C5.7 §1.3 → C5.15 thử lại 503. Sau đó C5.9 → C5.16, rồi rà soát nhánh.
 <!-- /NEXT -->
 
 ## Completed
