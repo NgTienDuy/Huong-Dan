@@ -1,19 +1,19 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.9 xong (C5.6–C5.9 2026-11-15); C5.10–C5.16 chưa bắt đầu.
-**Updated:** 2026-11-15
-**Last session:** claude-code (Opus 5.5), 2026-11-15 (phiên 9): kiểm toán nháp C5.6 do phiên 8 viết vội (~30 phút) — 6 câu sai so với chính output (TTL "→ 0", 43 lần getent, nscd "2 lần", "chỉ C1", secondary "tới expire", DoT "40 ms"); thêm dự đoán P15–P21 trước khi chạy; chạy lại resolve (bắt cả ARP), ttl (bắt gói nscd: luồng dọn 15 s của glibc), transport (giải mã TLS bằng SSLKEYLOGFILE; DoT keepopen; Unbound chỉ đặt TCP_NODELAY cho DoH), dnssec (+cd, đếm câu hỏi theo kiểu), mdns (QU/QM, known-answer), failures trace (Unbound thử lại 338 s rồi SERVFAIL); phát hiện đồng hồ WSL: MONOTONIC nhanh 4,1 % so với RAW, REALTIME bị lùi 1,3 s mỗi ~32 s; viết §7, §10, chấm 21 dự đoán (13 ✓ 8 ½ 0 ✗); C5.6 xong (121 KB); rồi C5.7 (98 KB): HOL có kiểm soát (một gói nạn nhân đánh dấu TOS + nft / bỏ datagram QUIC trong máy chủ aioquic), nginx/nghttp2/h2load thật, Edge headless trên Windows cho CORS, gRPC trên dây; 10 dự đoán 6 ✓ 4 ½; rồi C5.8 (85 KB): mosquitto/paho/aiocoap/grpcio thật — QoS 2 mất 7/40 tin im lặng (hạn mức đến 20, rc151 chỉ có ở MQTT 5) và trùng 1 (lỗi paho khôi phục phiên), Nagle mặc định ở broker+client, LWT 8–14 s, CoAP block-wise 1 MiB 106,6 s, mô hình năng lượng ESP32; 12 dự đoán 7 ✓ 5 ½. Một lần chạm giới hạn sử dụng giữa C5.8. Rồi C5.9 (101 KB): PKI thật bằng `cryptography`, bắt tay TLS 1.2/1.3/nối lại/0-RTT đo trên dây (3,1/2,1/1,0 RTT), PFS chứng minh bằng giải mã, 7 kiểu hỏng chuỗi, mTLS + ACL + CRL (chỉ có hiệu lực sau SIGHUP) + OCSP trên mosquitto, ghim + khóa dự phòng, mbedTLS 2.28 (heap 47,5–50,1 KB, 96,5 % số lệnh là ECC; Nagle + ACK trì hoãn đẩy GET lên 5,3 RTT, `TCP_NODELAY` 3,3), PSK; Checkpoint 3 lần chạy (lần 1, 2 sửa dụng cụ: thời điểm thử lại, đếm ở hai đầu, phép thử viết tay): 5 lần gia hạn 40/40 tin đếm ở broker, xoay khóa broker bằng SIGHUP, chứng chỉ hết hạn không cắt kết nối mở, offline qua hạn quay lại bằng chứng chỉ nhà máy 30/30 tin; mbedTLS trên LAN chỉ thấy 'connection reset' (10/10); 13 dự đoán 10 ✓ 3 ½.
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.10 xong (C5.10 kiểm toán và chạy lại 2026-11-19); C5.11–C5.16 chưa bắt đầu.
+**Updated:** 2026-11-19
+**Last session:** claude-code (Opus 5.5), 2026-11-19 (phiên 10): tìm thấy C5.10 do cuối phiên 9 viết vội (~47 phút, chưa commit, PROJECT_STATUS không ghi) → kiểm toán như nháp của người khác: 4 câu văn xuôi sai (client naive "treo ở recv()" — thật ra lỗi trả ngay rồi biến mất; thứ tự địa chỉ glibc phát biểu quá rộng — quy tắc 5 nhãn chạy trước độ ưu tiên; đơn vị kB/1000; Modbus/TCP xếp nhầm), một bộ đếm luôn 0 (byte slowloris), VmHWM < mẫu VmRSS (mã v6.18: cập nhật lười từ bộ đếm theo CPU xấp xỉ), một đối chứng âm chỉ đúng khi may (ABRUPT 151/0/0/8/17/0/4/0 RST) → thêm EXIT100 (193–200/200), 76–112 lần gửi lại "không mất gói" hóa ra là bỏ gói ở hàng đợi backlog theo CPU của veth (56+385+287 = softnet +728). Thêm: lịch SYN qua bánh xe hẹn giờ (khớp 8 khoảng trong 5 ms, tổng 133,3–135,3 s), cảnh báo TLS Decode Error = OpenSSL 3 khi EOF thiếu close_notify, jiffy theo CLOCK_MONOTONIC. Dự đoán P18–P23 viết trước mỗi lần chạy; 23 dự đoán 12 ✓ 8 ½ 3 ✗. C5.10 116 KB.
 
 ## NEXT ACTION
 
-Viết C5.10 (Lập trình socket & vòng lặp sự kiện, `Ad`): API socket, đọc/ghi một phần, `SO_REUSEADDR`/`TCP_NODELAY`/bộ đệm, không chặn + epoll,
-timeout ở mọi tầng, tắt duyên dáng và half-close, pool/giới hạn/thời gian sống kết nối, phân giải tên trong code, dual-stack + **Happy Eyeballs**
-(trả nợ C5.6 §2, RFC 8305 — đo trên lab có IPv6 hỏng). Checkpoint: TCP server từ socket thuần, đúng partial read/write, tắt duyên dáng, timeout,
-10.000 kết nối đồng thời. C4.5 đã có vòng lặp sự kiện 10k kết nối (bộ nhớ, CPU) — dẫn chiếu, tập trung vào phần mạng (RST vs FIN, SO_LINGER,
-TIME_WAIT, backlog, tràn accept queue, client chậm). 10k kết nối: kiểm `ulimit -n`, dải cổng nguồn, chạy trong `systemd-run --user --scope`
-(pids.max của init.scope dùng chung). Dựng `.draft-C5.10/`, dự đoán trước (`date -u`). Nợ còn lại: C5.7 §5.3 → C5.14 QUIC migration;
-C5.7 §1.3 → C5.15 thử lại 503; C5.8 §1.4 → C5.14 số thứ tự/khoảng trống; C5.9 §10.5 → C5.14 đường lui chứng chỉ nhà máy + hộp thư đi;
-C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS. Sau đó C5.11 → C5.16, rồi rà soát cả nhánh C5.
+Viết C5.11 (Hiệu năng mạng, `Ad`): độ trễ vs thông lượng; BDP và cửa sổ; MTU/phân mảnh/MSS; bufferbloat + AQM (CoDel, FQ-CoDel —
+đo trên lab netem/tbf, `tc qdisc` có sẵn trong userns); ngân sách độ trễ nhiều chặng; CDN/edge cache; nén (khi nào thắng, khi nào tốn CPU);
+gộp kết nối và chi phí bắt tay (dẫn chiếu C5.7, C5.9, C5.10 §7); đo bằng iperf3 (.deb có sẵn), ping, mtr, phân tích bắt gói. Checkpoint: ngân sách
+độ trễ cho request qua 5 tầng (thiết bị → gateway → broker → xử lý → lưu trữ) — **dự đoán p50/p99 trước khi đo** (`out/predictions.txt`, `date -u`),
+dựng 5 tầng thật trong netns (mosquitto + bộ xử lý + SQLite/fsync), đo và giải thích chênh lệch. Bẫy đã biết: hàng đợi backlog theo CPU của veth bỏ
+gói khi có đợt (C5.10 §10.2) — đọc `ip -s link`/`softnet_stat` cạnh mọi số đo thông lượng; đồng hồ WSL (C5.10 §0.3). Dựng `.draft-C5.11/`.
+Nợ còn lại: C5.7 §5.3 → C5.14 QUIC migration; C5.7 §1.3 → C5.15 thử lại 503; C5.8 §1.4 → C5.14 số thứ tự/khoảng trống; C5.9 §10.5 → C5.14
+đường lui chứng chỉ nhà máy + hộp thư đi; C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS. Sau đó C5.12 → C5.16, rồi rà soát cả nhánh C5.
 <!-- /NEXT -->
 
 ## Completed
@@ -26,6 +26,7 @@ C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS. Sau đó C5.11 → C5.16
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C5.4 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 14 khối ✅, 388 dòng, 0 lệch; xrefcheck 17/0; CRLF; 21 dự đoán 12 ✓ 6 ½ 3 ✗; nhà máy 4 router trong netns, nftables NAT, BIRD OSPF/BGP, radvd; câu hỏi mở: BIRD giữ route qua giao diện đã xóa (3/3 vs 0/4) |
 | C5.5 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 18 khối ✅, 217 dòng, 0 lệch; xrefcheck 17/0; CRLF; 12 dự đoán 7 ✓ 5 ½ 0 ✗; Checkpoint mù 4/4 ×3 lần xáo (thêm đối chứng khỏe); BBR trên runner; câu hỏi mở: phần dư 4,3 % của QUIC-1, đuôi độ trễ aioquic |
+| C5.10 | ✅ 2026-11-19 | doccheck 0/0; blockcheck 28 khối ✅, 278 dòng, 0 lệch; xrefcheck 34/0; CRLF 976 dòng; 23 dự đoán 12 ✓ 8 ½ 3 ✗; viết 2026-11-15, kiểm toán + chạy lại Checkpoint/drops/shutdown/dsorder 2026-11-19; output cũ trong `out/superseded/`; mã nguồn Linux v6.18 (timer.c, tick-sched.c, dev.c, veth.c, task_mmu.c), glibc 2.39 (nhãn + độ ưu tiên), OpenSSL 3.0.13 trong `out/src_quotes/` |
 | C5.9 | ✅ 2026-11-15 | doccheck 0/0; blockcheck 18 khối ✅, 361 dòng, 0 lệch; xrefcheck 12/0 (đối chứng âm 2/2); prosenums 55/402 đã đọc (phiên bản, RFC, năm, phép tính ghi cạnh); CRLF 922 dòng; 13 dự đoán 10 ✓ 3 ½ 0 ✗; mã nguồn mbedTLS 2.28.8, Linux v6.18 (delayed ACK), lwIP 2.1.3 (Nagle) trong `out/src_quotes/`; thiết bị Checkpoint là Python/paho + thư viện mbedTLS, không phải MCU thật |
 | C5.8 | ✅ 2026-11-15 | doccheck 0/0; blockcheck 17 khối ✅, 275 dòng, 0 lệch; xrefcheck 19/0; prosenums 23/366 đã đọc; CRLF 906 dòng; 12 dự đoán 7 ✓ 5 ½ 0 ✗; mã nguồn mosquitto 2.0.18, paho 2.1.0, grpc 1.85.1 trong `out/src_quotes/`; năng lượng là mô hình (datasheet ESP32 v5.3) |
 | C5.7 | ✅ 2026-11-15 | doccheck 0/0; blockcheck 18 khối ✅, 291 dòng, 0 lệch; xrefcheck 15/0; prosenums 85/442 đã đọc (mã trạng thái, RFC, năm, phép tính ghi cạnh); CRLF 946 dòng; 10 dự đoán 6 ✓ 4 ½ 0 ✗; mã nguồn nginx 1.24 (HPACK, khóa cache) và CPython (Nagle) trong `out/src_quotes/` |
@@ -102,3 +103,4 @@ C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS. Sau đó C5.11 → C5.16
 - 2026-11-15, C5.7: `doccheck` 0/0; `blockcheck` 18 khối ✅ / 291 dòng / 0 lệch; `xrefcheck` 15/0; `prosenums` 85/442 đã đọc; CRLF 946 dòng.
 - 2026-11-15, C5.8: `doccheck` 0/0; `blockcheck` 17 khối ✅ / 275 dòng / 0 lệch; `xrefcheck` 19/0; `prosenums` 23/366 đã đọc; CRLF 906 dòng.
 - 2026-11-15, C5.9: `doccheck` 0/0; `blockcheck` 18 khối ✅ / 361 dòng / 0 lệch; `xrefcheck` 12/0 (đối chứng âm: `C5.8 §42`, `C5.7 §1.9` bị bắt, `C5.6 §2` qua); `prosenums` 55/402 đã đọc; CRLF 922 dòng.
+- 2026-11-19, C5.10 (sau kiểm toán): `doccheck` 0/0; `blockcheck` 28 khối ✅ / 278 dòng / 0 lệch; `xrefcheck` 34/0; `prosenums` 35/576 đã đọc (khoảng mô hình, phép chia MiB, tổng ghi cạnh); CRLF 976 dòng.
