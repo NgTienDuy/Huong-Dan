@@ -1,20 +1,23 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.11 xong (C5.10 kiểm toán + C5.11 ngày 2026-11-19); C5.12–C5.16 chưa bắt đầu.
-**Updated:** 2026-11-19
-**Last session:** claude-code (Opus 5.5), 2026-11-19 (phiên 10): tìm thấy C5.10 do cuối phiên 9 viết vội (~47 phút, chưa commit, PROJECT_STATUS không ghi) → kiểm toán như nháp của người khác: 4 câu văn xuôi sai (client naive "treo ở recv()" — thật ra lỗi trả ngay rồi biến mất; thứ tự địa chỉ glibc phát biểu quá rộng — quy tắc 5 nhãn chạy trước độ ưu tiên; đơn vị kB/1000; Modbus/TCP xếp nhầm), một bộ đếm luôn 0 (byte slowloris), VmHWM < mẫu VmRSS (mã v6.18: cập nhật lười từ bộ đếm theo CPU xấp xỉ), một đối chứng âm chỉ đúng khi may (ABRUPT 151/0/0/8/17/0/4/0 RST) → thêm EXIT100 (193–200/200), 76–112 lần gửi lại "không mất gói" hóa ra là bỏ gói ở hàng đợi backlog theo CPU của veth (56+385+287 = softnet +728). Thêm: lịch SYN qua bánh xe hẹn giờ (khớp 8 khoảng trong 5 ms, tổng 133,3–135,3 s), cảnh báo TLS Decode Error = OpenSSL 3 khi EOF thiếu close_notify, jiffy theo CLOCK_MONOTONIC. Dự đoán P18–P23 viết trước mỗi lần chạy; 23 dự đoán 12 ✓ 8 ½ 3 ✗. C5.10 116 KB. Rồi C5.11 (114 KB): lab C—R1(trễ)—R2(htb+qdisc)—S; 29 dự đoán 11 ✓ 16 ½ 2 ✗. Phát hiện: phân mảnh UDP 8 KB qua 1 % mất → 67 % mất (bộ nhớ ghép mảnh 4 MiB đầy sau 4 s; trần 64 MiB → 5,85 %); bộ đệm gửi 4 MiB chặn một luồng ở 106 Mbit/s (500 Mbit/s × 200 ms; đánh thức ở 2/3 trần); cwnd sau 2 s rảnh 1459 → 22; nginx cache manager cắt max_size mỗi 10 s (trúng 59,5 % thay vì LRU 34 %); Nagle ở origin Python thêm 1 RTT mỗi lần trượt; proxy_cache_lock chờ theo nhịp 500 ms; backlog 5 của Python origin → 20 s; Checkpoint 5 tầng thật (D→G→mosquitto→P→fsync): p50 26,74 (dự đoán 27,5), p99 189,41 (dự đoán 39) — 7 publish mất + 9 PUBACK mất = 16 TLP, chặn đầu hàng + Nagle của paho; TCP_NODELAY ở gateway → p99 58,00.
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.12 xong (C5.12 viết 2026-11-19 phiên 11, kiểm toán + commit 2026-11-23); C5.13–C5.16 chưa viết.
+**Updated:** 2026-11-23
+**Last session:** claude-code (Opus 5.5), 2026-11-23 (phiên 12): tìm thấy C5.12 do phiên 11 viết (156 KB sau sửa) nhưng chưa commit, PROJECT_STATUS không ghi → kiểm toán như nháp của người khác: checkers sạch nhưng đọc lại thấy ~12 lỗi văn xuôi (iperf3 đếm nội dung 1.400 B chứ không khung 1.442 B → 7,1 datagram/ms, 14,3 khung/ms; mô tả đồ thị thời gian–số thứ tự ngược hình; "một chiều mất gấp đôi" thật là 64–72 % vs 5–13 %; 25 chứ không 30 dòng Lua; nhịp RTO "2,88 thay vì 2,82" giải thích nửa vời; quy tắc spurious và tcp_send_probe0/tcp_ack_probe được trích dẫn nhưng không có trong out/src_quotes). Mới: (1) 10 lần gửi lại thừa = một ACK vượt 49 ACK cũ (đảo thứ tự ngay trên cặp veth S→R2: hàng đợi backlog theo CPU) + RACK reo_wnd = 0 khi đang khôi phục (tcp_recovery.c v6.18); phép thử ghim CPU (P34): hai đầu cùng CPU → 0 gói vượt 3/3, tự do 0/4/26; (2) mô hình bánh xe hẹn giờ (rtomodel.py) tái tạo chính xác 5/5 khoảng gửi lại ở cả 3 lần tường lửa với RTO danh nghĩa 328–348 ms, đối chứng âm 0/30. 34 dự đoán 21 ✓ 7 ½ 6 ✗. Bẫy: `pkill -f` lại giết chính shell; `set -- $x` trong hàm ghi đè nhãn $1; prosenums quét pcap (sửa: bỏ tệp nhị phân).
 
 ## NEXT ACTION
 
-Viết C5.12 (Bắt gói & phân tích, `Ad`): tcpdump + cú pháp BPF (đo bộ lọc thật bằng `tcpdump -d`), Wireshark/tshark: theo dõi luồng, đồ thị I/O,
-đồ thị thời gian–số thứ tự (tshark `-z`, `tcp.analysis.*`); vị trí bắt (client/server/giữa đường — đo cùng một sự cố từ ba chỗ); bắt trên hệ mã hóa
-(cái còn thấy: SNI, độ dài, thời gian; SSLKEYLOGFILE như C5.6/C5.9); bắt trên thiết bị nhúng (ESP32 không nối — mô hình/hoặc port mirror ở lab);
-lấy mẫu + bắt vòng (`-C/-W`, `-s`, dumpcap ring buffer) và giá của nó (drop ở `-B`, C5.1/C5.2 bẫy tcpdump); phân tích giao thức nhị phân không mã hóa
-(Modbus/TCP tự viết, dissector Lua cho giao thức riêng). Checkpoint: kết nối bị treo — phân biệt **mất gói / tường lửa im lặng / ứng dụng không đọc**
-chỉ từ ảnh bắt (dựng cả ba + đối chứng mù, như C5.5 Checkpoint). Dựng `.draft-C5.12/` (copy lab từ `.draft-C5.11/src/lab`, topo). Dự đoán trước (`date -u`).
+Viết C5.13 (Mạng trên cloud, `In→Ad`) trong `.draft-C5.13/` (đã dựng khung: src/lab, gradecount.py). Kế hoạch: (a) runner GitHub (repo riêng,
+clone vào scratchpad: `gh repo clone NgTienDuy/c3-arm-lab`): VPC nhìn từ trong VM — IMDS Azure/AWS (subnet, IP công cộng không nằm trên giao diện,
+security group), MAC cổng 12:34:56:78:9a:bc của Azure, ARP cho IP không tồn tại, DNS 168.63.129.16 / VPC+2, MTU 1500/9001; kind v0.33.0 (3 node,
+kube-proxy iptables) + agnhost 2.59: đường gói Internet→NodePort→KUBE-SVC/SEP DNAT→veth→pod (iptables-save, conntrack, tcpdump qua nsenter),
+externalTrafficPolicy Cluster (SNAT) vs Local, ndots:5 (python:3.12-slim-bookworm, glibc), xóa pod khi đang tải (có/không --delay-shutdown=5),
+Istio 1.31.3 minimal: mTLS bắt đầu/kết thúc ở sidecar (tcpdump lo vs eth0, ALPN istio), NodePort vào pod trong mesh = rõ (PERMISSIVE) → STRICT chặn.
+Che IP công cộng/MAC/ID trước khi upload. (b) lab cục bộ: SG (stateful, conntrack) vs NACL (stateless, bẫy cổng tạm), LB L4 (nft numgen) vs L7
+(nginx/HAProxy), health check chủ động/thụ động, VXLAN overlay (MTU −50), WireGuard nếu có module, peering không bắc cầu. Dự đoán trước (`date -u`).
 Nợ còn lại: C5.7 §5.3 → C5.14 QUIC migration; C5.7 §1.3 → C5.15 thử lại 503; C5.8 §1.4 → C5.14 số thứ tự/khoảng trống; C5.9 §10.5 → C5.14
-đường lui chứng chỉ nhà máy + hộp thư đi; C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 → C5.15 đàn bò giẫm đạp/bão bắt tay.
-Sau đó C5.13 → C5.16, rồi rà soát cả nhánh C5.
+đường lui chứng chỉ nhà máy + hộp thư đi; C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 → C5.15 đàn bò giẫm đạp/bão bắt tay;
+C5.12 B.4 → đảo thứ tự ACK trong lab veth có làm sai các leaf trước không (đếm IP ID ngược, TcpExtTCPSACKReorder) — kiểm trong rà soát nhánh.
+Sau đó C5.14 → C5.16, rồi rà soát cả nhánh C5.
 <!-- /NEXT -->
 
 ## Completed
@@ -27,6 +30,7 @@ Sau đó C5.13 → C5.16, rồi rà soát cả nhánh C5.
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C5.4 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 14 khối ✅, 388 dòng, 0 lệch; xrefcheck 17/0; CRLF; 21 dự đoán 12 ✓ 6 ½ 3 ✗; nhà máy 4 router trong netns, nftables NAT, BIRD OSPF/BGP, radvd; câu hỏi mở: BIRD giữ route qua giao diện đã xóa (3/3 vs 0/4) |
 | C5.5 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 18 khối ✅, 217 dòng, 0 lệch; xrefcheck 17/0; CRLF; 12 dự đoán 7 ✓ 5 ½ 0 ✗; Checkpoint mù 4/4 ×3 lần xáo (thêm đối chứng khỏe); BBR trên runner; câu hỏi mở: phần dư 4,3 % của QUIC-1, đuôi độ trễ aioquic |
+| C5.12 | ✅ 2026-11-23 | doccheck 0/0; blockcheck 40 khối ✅, 538 dòng, 0 lệch; xrefcheck 32/0 (đối chứng âm 2/2); prosenums 39/602 đã đọc (suy ra ghi cạnh, phiên bản, năm); CRLF 1277 dòng; 34 dự đoán 21 ✓ 7 ½ 6 ✗; viết 2026-11-19 (phiên 11), kiểm toán 2026-11-23: ACK đảo thứ tự + RACK, mô hình bánh xe hẹn giờ, phép thử ghim CPU; mã nguồn libpcap 1.10.4, Wireshark 4.2.2, Linux v6.18 (RACK, veth backlog, probe0), aioquic 1.7.2 trong `out/src_quotes/` |
 | C5.11 | ✅ 2026-11-19 | doccheck 0/0; blockcheck 23 khối ✅, 338 dòng, 0 lệch; xrefcheck 40/0; prosenums 24/631 đã đọc (bảng hiệu suất tính, phép chia ghi cạnh, phiên bản, năm); CRLF 1093 dòng; 29 dự đoán 11 ✓ 16 ½ 2 ✗; mã nguồn Linux v6.18 (cwnd restart, sndbuf wakeup, frag memory, TLP), nginx 1.24.0 (cache manager, cache lock) trong `out/src_quotes/`; output cũ trong `out/superseded/` |
 | C5.10 | ✅ 2026-11-19 | doccheck 0/0; blockcheck 28 khối ✅, 278 dòng, 0 lệch; xrefcheck 34/0; CRLF 976 dòng; 23 dự đoán 12 ✓ 8 ½ 3 ✗; viết 2026-11-15, kiểm toán + chạy lại Checkpoint/drops/shutdown/dsorder 2026-11-19; output cũ trong `out/superseded/`; mã nguồn Linux v6.18 (timer.c, tick-sched.c, dev.c, veth.c, task_mmu.c), glibc 2.39 (nhãn + độ ưu tiên), OpenSSL 3.0.13 trong `out/src_quotes/` |
 | C5.9 | ✅ 2026-11-15 | doccheck 0/0; blockcheck 18 khối ✅, 361 dòng, 0 lệch; xrefcheck 12/0 (đối chứng âm 2/2); prosenums 55/402 đã đọc (phiên bản, RFC, năm, phép tính ghi cạnh); CRLF 922 dòng; 13 dự đoán 10 ✓ 3 ½ 0 ✗; mã nguồn mbedTLS 2.28.8, Linux v6.18 (delayed ACK), lwIP 2.1.3 (Nagle) trong `out/src_quotes/`; thiết bị Checkpoint là Python/paho + thư viện mbedTLS, không phải MCU thật |
@@ -108,3 +112,4 @@ Sau đó C5.13 → C5.16, rồi rà soát cả nhánh C5.
 - 2026-11-15, C5.9: `doccheck` 0/0; `blockcheck` 18 khối ✅ / 361 dòng / 0 lệch; `xrefcheck` 12/0 (đối chứng âm: `C5.8 §42`, `C5.7 §1.9` bị bắt, `C5.6 §2` qua); `prosenums` 55/402 đã đọc; CRLF 922 dòng.
 - 2026-11-19, C5.10 (sau kiểm toán): `doccheck` 0/0; `blockcheck` 28 khối ✅ / 278 dòng / 0 lệch; `xrefcheck` 34/0; `prosenums` 35/576 đã đọc (khoảng mô hình, phép chia MiB, tổng ghi cạnh); CRLF 976 dòng.
 - 2026-11-19, C5.11: `doccheck` 0/0; `blockcheck` 23 khối ✅ / 338 dòng / 0 lệch; `xrefcheck` 40/0; `prosenums` 24/631 đã đọc; CRLF 1093 dòng.
+- 2026-11-23, C5.12 (sau kiểm toán): `doccheck` 0/0; `blockcheck` 40 khối ✅ / 538 dòng / 0 lệch; `xrefcheck` 32/0 (đối chứng âm `C5.11 §42`, `C5.10 §5.9` bị bắt); `prosenums` 39/602 đã đọc; CRLF 1277 dòng.
