@@ -1,23 +1,20 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.12 xong (C5.12 viết 2026-11-19 phiên 11, kiểm toán + commit 2026-11-23); C5.13–C5.16 chưa viết.
-**Updated:** 2026-11-23
-**Last session:** claude-code (Opus 5.5), 2026-11-23 (phiên 12): tìm thấy C5.12 do phiên 11 viết (156 KB sau sửa) nhưng chưa commit, PROJECT_STATUS không ghi → kiểm toán như nháp của người khác: checkers sạch nhưng đọc lại thấy ~12 lỗi văn xuôi (iperf3 đếm nội dung 1.400 B chứ không khung 1.442 B → 7,1 datagram/ms, 14,3 khung/ms; mô tả đồ thị thời gian–số thứ tự ngược hình; "một chiều mất gấp đôi" thật là 64–72 % vs 5–13 %; 25 chứ không 30 dòng Lua; nhịp RTO "2,88 thay vì 2,82" giải thích nửa vời; quy tắc spurious và tcp_send_probe0/tcp_ack_probe được trích dẫn nhưng không có trong out/src_quotes). Mới: (1) 10 lần gửi lại thừa = một ACK vượt 49 ACK cũ (đảo thứ tự ngay trên cặp veth S→R2: hàng đợi backlog theo CPU) + RACK reo_wnd = 0 khi đang khôi phục (tcp_recovery.c v6.18); phép thử ghim CPU (P34): hai đầu cùng CPU → 0 gói vượt 3/3, tự do 0/4/26; (2) mô hình bánh xe hẹn giờ (rtomodel.py) tái tạo chính xác 5/5 khoảng gửi lại ở cả 3 lần tường lửa với RTO danh nghĩa 328–348 ms, đối chứng âm 0/30. 34 dự đoán 21 ✓ 7 ½ 6 ✗. Bẫy: `pkill -f` lại giết chính shell; `set -- $x` trong hàm ghi đè nhãn $1; prosenums quét pcap (sửa: bỏ tệp nhị phân).
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.13 xong (C5.13 viết + commit 2026-11-24, phiên 13); C5.14–C5.16 chưa viết.
+**Updated:** 2026-11-24
+**Last session:** claude-code (Opus 5.5), 2026-11-24 (phiên 13): kiểm toán nháp C5.13 của phiên 12 (thí nghiệm lab có, run49 đã chạy nhưng Istio hỏng vì hub gcr.io không có 1.31.3, và phần xóa pod 'có delay' chưa từng có delay), chạy run49b/c/d trên runner (x86 rơi vào AWS ở run49b), thêm overlay/VPN/egress, viết và commit C5.13 (196 KB). Phát hiện: HAProxy redispatch ngay lần thử đầu (stream.h) và chu kỳ kiểm tra = chờ + nghỉ (DOWN +5,72 s); kube-proxy minSyncPeriod 1 s → cửa sổ lỗi khi xóa pod 0,1 hoặc 1,2 s (0–7 lỗi không delay, 0 có delay); topology spread + taint control-plane = rollout kẹt; router Linux không dùng PMTU đã học khi chuyển tiếp (ip_forward_use_pmtu) → underlay hẹp = mọi gói phân mảnh; NAT gateway tính phí cả chiều vào. 67 dự đoán 47 ✓ 13 ½ 7 ✗.
 
 ## NEXT ACTION
 
-Viết C5.13 (Mạng trên cloud, `In→Ad`) trong `.draft-C5.13/` (đã dựng khung: src/lab, gradecount.py). Kế hoạch: (a) runner GitHub (repo riêng,
-clone vào scratchpad: `gh repo clone NgTienDuy/c3-arm-lab`): VPC nhìn từ trong VM — IMDS Azure/AWS (subnet, IP công cộng không nằm trên giao diện,
-security group), MAC cổng 12:34:56:78:9a:bc của Azure, ARP cho IP không tồn tại, DNS 168.63.129.16 / VPC+2, MTU 1500/9001; kind v0.33.0 (3 node,
-kube-proxy iptables) + agnhost 2.59: đường gói Internet→NodePort→KUBE-SVC/SEP DNAT→veth→pod (iptables-save, conntrack, tcpdump qua nsenter),
-externalTrafficPolicy Cluster (SNAT) vs Local, ndots:5 (python:3.12-slim-bookworm, glibc), xóa pod khi đang tải (có/không --delay-shutdown=5),
-Istio 1.31.3 minimal: mTLS bắt đầu/kết thúc ở sidecar (tcpdump lo vs eth0, ALPN istio), NodePort vào pod trong mesh = rõ (PERMISSIVE) → STRICT chặn.
-Che IP công cộng/MAC/ID trước khi upload. (b) lab cục bộ: SG (stateful, conntrack) vs NACL (stateless, bẫy cổng tạm), LB L4 (nft numgen) vs L7
-(nginx/HAProxy), health check chủ động/thụ động, VXLAN overlay (MTU −50), WireGuard nếu có module, peering không bắc cầu. Dự đoán trước (`date -u`).
-Nợ còn lại: C5.7 §5.3 → C5.14 QUIC migration; C5.7 §1.3 → C5.15 thử lại 503; C5.8 §1.4 → C5.14 số thứ tự/khoảng trống; C5.9 §10.5 → C5.14
-đường lui chứng chỉ nhà máy + hộp thư đi; C5.9 §3 → C5.15 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 → C5.15 đàn bò giẫm đạp/bão bắt tay;
-C5.12 B.4 → đảo thứ tự ACK trong lab veth có làm sai các leaf trước không (đếm IP ID ngược, TcpExtTCPSACKReorder) — kiểm trong rà soát nhánh.
-Sau đó C5.14 → C5.16, rồi rà soát cả nhánh C5.
+Viết C5.14 (Kết nối cho thiết bị ngoài thực địa, `In→Ad`) trong `.draft-C5.14/` (chưa có; dựng từ khuôn `.draft-C5.13/src/lab`, `common.sh`, `gradecount.py`).
+Sub-leaf theo roadmap: vượt NAT (STUN/TURN/ICE, mức khái niệm — đo được bằng NAT kiểu C5.4 §4 trong netns), kết nối khởi tạo từ thiết bị (outbound-only),
+kết nối lại: backoff + jitter + ngưỡng từ bỏ, offline-first: hàng đợi cục bộ có giới hạn + chính sách loại bỏ, đồng bộ lại: backfill/dedup/thứ tự,
+mạng kém vs mất hẳn, dự phòng nhiều đường (Wi-Fi → cellular), tiết kiệm năng lượng khi kết nối kém. Checkpoint: thiết bị mất mạng 6 GIỜ liên tục rồi
+khôi phục — không mất, không trùng, đúng thứ tự, không tăng đột biến tải lên server (đồ thị tải). Cân nhắc: chạy 6 giờ thật ở nền (tốt nhất) hoặc
+đồng hồ mô phỏng có ghi rõ. Nợ đổ vào C5.14: C5.7 §5.3 QUIC migration; C5.8 §1.4 số thứ tự/khoảng trống; C5.9 §10.5 đường lui chứng chỉ nhà máy + hộp thư đi.
+Dự đoán trước (`date -u`). Sau đó C5.15 → C5.16, rồi rà soát cả nhánh C5.
+Nợ còn lại cho C5.15: C5.7 §1.3 thử lại 503; C5.9 §3 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 đàn bò giẫm đạp/bão bắt tay. Rà soát nhánh: C5.12 B.4
+(ACK đảo thứ tự trong lab veth có làm sai các leaf trước không); C5.13 B.4 (kube-proxy trễ 1 s: kiểm bằng log -v=4).
 <!-- /NEXT -->
 
 ## Completed
@@ -30,6 +27,7 @@ Sau đó C5.14 → C5.16, rồi rà soát cả nhánh C5.
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C5.4 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 14 khối ✅, 388 dòng, 0 lệch; xrefcheck 17/0; CRLF; 21 dự đoán 12 ✓ 6 ½ 3 ✗; nhà máy 4 router trong netns, nftables NAT, BIRD OSPF/BGP, radvd; câu hỏi mở: BIRD giữ route qua giao diện đã xóa (3/3 vs 0/4) |
 | C5.5 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 18 khối ✅, 217 dòng, 0 lệch; xrefcheck 17/0; CRLF; 12 dự đoán 7 ✓ 5 ½ 0 ✗; Checkpoint mù 4/4 ×3 lần xáo (thêm đối chứng khỏe); BBR trên runner; câu hỏi mở: phần dư 4,3 % của QUIC-1, đuôi độ trễ aioquic |
+| C5.13 | ✅ 2026-11-24 | doccheck 0/0; blockcheck 32 khối ✅, 764 dòng, 0 lệch; xrefcheck 25/0 (đối chứng âm 2/2); prosenums 13/440 (phiên bản, năm, số suy ra ghi cạnh); CRLF 2067 dòng; 67 dự đoán 47 ✓ 13 ½ 7 ✗; runner run49/49b/49c/49d (Azure x86+arm, AWS x86): kind v0.33.0 + Istio 1.31.3; mã nguồn Linux v6.18, HAProxy 2.8.30, Kubernetes v1.37.0, agnhost trong `out/src_quotes/`; giá AWS Price List API trong `data/` |
 | C5.12 | ✅ 2026-11-23 | doccheck 0/0; blockcheck 40 khối ✅, 538 dòng, 0 lệch; xrefcheck 32/0 (đối chứng âm 2/2); prosenums 39/602 đã đọc (suy ra ghi cạnh, phiên bản, năm); CRLF 1277 dòng; 34 dự đoán 21 ✓ 7 ½ 6 ✗; viết 2026-11-19 (phiên 11), kiểm toán 2026-11-23: ACK đảo thứ tự + RACK, mô hình bánh xe hẹn giờ, phép thử ghim CPU; mã nguồn libpcap 1.10.4, Wireshark 4.2.2, Linux v6.18 (RACK, veth backlog, probe0), aioquic 1.7.2 trong `out/src_quotes/` |
 | C5.11 | ✅ 2026-11-19 | doccheck 0/0; blockcheck 23 khối ✅, 338 dòng, 0 lệch; xrefcheck 40/0; prosenums 24/631 đã đọc (bảng hiệu suất tính, phép chia ghi cạnh, phiên bản, năm); CRLF 1093 dòng; 29 dự đoán 11 ✓ 16 ½ 2 ✗; mã nguồn Linux v6.18 (cwnd restart, sndbuf wakeup, frag memory, TLP), nginx 1.24.0 (cache manager, cache lock) trong `out/src_quotes/`; output cũ trong `out/superseded/` |
 | C5.10 | ✅ 2026-11-19 | doccheck 0/0; blockcheck 28 khối ✅, 278 dòng, 0 lệch; xrefcheck 34/0; CRLF 976 dòng; 23 dự đoán 12 ✓ 8 ½ 3 ✗; viết 2026-11-15, kiểm toán + chạy lại Checkpoint/drops/shutdown/dsorder 2026-11-19; output cũ trong `out/superseded/`; mã nguồn Linux v6.18 (timer.c, tick-sched.c, dev.c, veth.c, task_mmu.c), glibc 2.39 (nhãn + độ ưu tiên), OpenSSL 3.0.13 trong `out/src_quotes/` |
@@ -113,3 +111,4 @@ Sau đó C5.14 → C5.16, rồi rà soát cả nhánh C5.
 - 2026-11-19, C5.10 (sau kiểm toán): `doccheck` 0/0; `blockcheck` 28 khối ✅ / 278 dòng / 0 lệch; `xrefcheck` 34/0; `prosenums` 35/576 đã đọc (khoảng mô hình, phép chia MiB, tổng ghi cạnh); CRLF 976 dòng.
 - 2026-11-19, C5.11: `doccheck` 0/0; `blockcheck` 23 khối ✅ / 338 dòng / 0 lệch; `xrefcheck` 40/0; `prosenums` 24/631 đã đọc; CRLF 1093 dòng.
 - 2026-11-23, C5.12 (sau kiểm toán): `doccheck` 0/0; `blockcheck` 40 khối ✅ / 538 dòng / 0 lệch; `xrefcheck` 32/0 (đối chứng âm `C5.11 §42`, `C5.10 §5.9` bị bắt); `prosenums` 39/602 đã đọc; CRLF 1277 dòng.
+- 2026-11-24, C5.13: `doccheck` 0/0; `blockcheck` 32 khối ✅ / 764 dòng / 0 lệch; `xrefcheck` 25/0 (đối chứng âm `C5.4 §42`, `C5.6 §5.9` bị bắt); `prosenums` 13/440 đã đọc; CRLF 2067 dòng.
