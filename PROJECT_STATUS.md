@@ -2,19 +2,22 @@
 
 **State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.13 xong (C5.13 viết + commit 2026-11-24, phiên 13); C5.14–C5.16 chưa viết.
 **Updated:** 2026-11-24
-**Last session:** claude-code (Opus 5.5), 2026-11-24 (phiên 13): kiểm toán nháp C5.13 của phiên 12 (thí nghiệm lab có, run49 đã chạy nhưng Istio hỏng vì hub gcr.io không có 1.31.3, và phần xóa pod 'có delay' chưa từng có delay), chạy run49b/c/d trên runner (x86 rơi vào AWS ở run49b), thêm overlay/VPN/egress, viết và commit C5.13 (196 KB). Phát hiện: HAProxy redispatch ngay lần thử đầu (stream.h) và chu kỳ kiểm tra = chờ + nghỉ (DOWN +5,72 s); kube-proxy minSyncPeriod 1 s → cửa sổ lỗi khi xóa pod 0,1 hoặc 1,2 s (0–7 lỗi không delay, 0 có delay); topology spread + taint control-plane = rollout kẹt; router Linux không dùng PMTU đã học khi chuyển tiếp (ip_forward_use_pmtu) → underlay hẹp = mọi gói phân mảnh; NAT gateway tính phí cả chiều vào. 67 dự đoán 47 ✓ 13 ½ 7 ✗.
+**Last session:** claude-code (Opus 5.5), 2026-11-24 (phiên 13, dừng ~18:45 UTC vì hết lượt dùng; Checkpoint C5.14 vẫn chạy nền): kiểm toán nháp C5.13 của phiên 12 (thí nghiệm lab có, run49 đã chạy nhưng Istio hỏng vì hub gcr.io không có 1.31.3, và phần xóa pod 'có delay' chưa từng có delay), chạy run49b/c/d trên runner (x86 rơi vào AWS ở run49b), thêm overlay/VPN/egress, viết và commit C5.13 (196 KB). Phát hiện: HAProxy redispatch ngay lần thử đầu (stream.h) và chu kỳ kiểm tra = chờ + nghỉ (DOWN +5,72 s); kube-proxy minSyncPeriod 1 s → cửa sổ lỗi khi xóa pod 0,1 hoặc 1,2 s (0–7 lỗi không delay, 0 có delay); topology spread + taint control-plane = rollout kẹt; router Linux không dùng PMTU đã học khi chuyển tiếp (ip_forward_use_pmtu) → underlay hẹp = mọi gói phân mảnh; NAT gateway tính phí cả chiều vào. 67 dự đoán 47 ✓ 13 ½ 7 ✗.
 
 ## NEXT ACTION
 
-Viết C5.14 (Kết nối cho thiết bị ngoài thực địa, `In→Ad`) trong `.draft-C5.14/` (chưa có; dựng từ khuôn `.draft-C5.13/src/lab`, `common.sh`, `gradecount.py`).
-Sub-leaf theo roadmap: vượt NAT (STUN/TURN/ICE, mức khái niệm — đo được bằng NAT kiểu C5.4 §4 trong netns), kết nối khởi tạo từ thiết bị (outbound-only),
-kết nối lại: backoff + jitter + ngưỡng từ bỏ, offline-first: hàng đợi cục bộ có giới hạn + chính sách loại bỏ, đồng bộ lại: backfill/dedup/thứ tự,
-mạng kém vs mất hẳn, dự phòng nhiều đường (Wi-Fi → cellular), tiết kiệm năng lượng khi kết nối kém. Checkpoint: thiết bị mất mạng 6 GIỜ liên tục rồi
-khôi phục — không mất, không trùng, đúng thứ tự, không tăng đột biến tải lên server (đồ thị tải). Cân nhắc: chạy 6 giờ thật ở nền (tốt nhất) hoặc
-đồng hồ mô phỏng có ghi rõ. Nợ đổ vào C5.14: C5.7 §5.3 QUIC migration; C5.8 §1.4 số thứ tự/khoảng trống; C5.9 §10.5 đường lui chứng chỉ nhà máy + hộp thư đi.
-Dự đoán trước (`date -u`). Sau đó C5.15 → C5.16, rồi rà soát cả nhánh C5.
-Nợ còn lại cho C5.15: C5.7 §1.3 thử lại 503; C5.9 §3 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 đàn bò giẫm đạp/bão bắt tay. Rà soát nhánh: C5.12 B.4
-(ACK đảo thứ tự trong lab veth có làm sai các leaf trước không); C5.13 B.4 (kube-proxy trễ 1 s: kiểm bằng log -v=4).
+C5.14 (phiên 13, 2026-11-24) ĐANG LÀM. Checkpoint 6 giờ thật đang chạy nền: khởi chạy 17:44:46 UTC, mất mạng từ 17:54:47 tới ~00:00 UTC ngày 25, xả
+hàng đợi xong ~00:45 UTC; kết quả tự chép vào `.draft-C5.14/out/ckpt-good/`, `ckpt-naive/` (verify.txt, load.csv, events.txt, server.db, status.log).
+Nếu các tiến trình đã chết (WSL khởi động lại): chạy lại theo `out/ckpt_launch.txt`. Đã xong: thí nghiệm §1–§7 (`out/nat.txt`, `outbound-*.txt`,
+`reconnect-*.txt`, `queue_*.txt`, `gaps-qos*.txt`, `detect*.txt`, `multipath.txt`, `clockref.txt`), dự đoán P1–P33 (P10–P33 chấm trong
+`out/grades_partial.txt`), tài liệu `doc/00b-sec0.md`, `01-nat.md`…`07-multipath.md`. Còn lại sau Checkpoint: chạy `src/energy/energy.py out/ckpt-good
+out/ckpt-naive > out/energy.txt` (§8), viết `08-energy.md`, `09-checkpoint.md` (verify.txt cả hai nhóm, chấm P1–P9), `00-head.md` (mục tiêu + phát hiện),
+`11-appendix.md`, gộp grades → `out/grades.txt`, ghép bằng assemble.py, chạy các bộ kiểm, đọc lại, commit. Trong lúc chờ: bắt đầu C5.15 trong
+`.draft-C5.15/` (Checkpoint của roadmap: retry storm → sụp đổ → jitter + circuit breaker, chứng minh bằng đồ thị). Sau đó C5.16, rồi rà soát cả nhánh C5.
+C5.15 (phiên 13, dừng vì hết lượt dùng): `.draft-C5.15/` có lab + `src/ckpt/{srv,load,ckpt.sh,graph}.py` (retry storm: 150 yêu cầu/s, máy chủ ~200/s, đóng băng 3 s ở t=22 s) và dự đoán P1–P5 trong `out/predictions.txt` — CHƯA CHẠY lần nào (chạy: `bash src/lab/inlab.sh src/ckpt/ckpt.sh out naive400 naive 400`, `naive100 naive 100`, `good400 good 400`, `deadline400 naive 400 deadline`; tránh chạy nặng lúc Checkpoint C5.14 đang xả hàng đợi). Kế hoạch các mục khác của C5.15 (chưa viết): phân vùng một chiều + idempotency, lỗi xám (HAProxy observe layer7), đàn bò (hẹn giờ đồng bộ vs lệch theo băm), DNS chết khi kết nối cũ còn sống (dnsmasq), DROP vs REJECT, rò rỉ fd (CLOSE_WAIT, ulimit), cạn cổng tạm (port range hẹp, TIME_WAIT, tw_reuse), đồng hồ lệch hỏng TLS (`openssl s_client -attime`). Nợ cho C5.15: C5.7 §1.3 thử lại 503; C5.9 §3 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 đàn bò giẫm đạp/bão bắt tay. Rà soát nhánh: C5.12 B.4
+(ACK đảo thứ tự trong lab veth có làm sai các leaf trước không); C5.13 B.4 (kube-proxy trễ 1 s: kiểm bằng log -v=4). Môi trường phiên này:
+`SP=scratchpad`, `C5T=$SP/c5t TMPDIR=$SP PYQ=$SP/venv/bin/python` (venv: paho-mqtt 2.1.0, aioquic 1.7.2). WSL lần khởi động này: CLOCK_MONOTONIC
+nhanh 8,34 % so với Windows (`out/clockref.txt` của C5.14) — mọi lịch trình dài phải lặp trên CLOCK_MONOTONIC_RAW.
 <!-- /NEXT -->
 
 ## Completed
