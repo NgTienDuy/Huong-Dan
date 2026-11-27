@@ -1,25 +1,21 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.13, C5.15, C5.16 xong; C5.14 chờ Checkpoint 6 giờ (xong ~16:20 UTC 27/11); sau đó rà soát cả nhánh.
-**Updated:** 2026-11-27 (phiên 15 đang chạy)
+**State:** C1–C4 hoàn tất. C5 (Networking): C5.1–C5.16 đã viết xong (27/11); đang rà soát cả nhánh.
+**Updated:** 2026-11-27 (phiên 15)
 **Last session:** claude-code (Opus 5.5), 2026-11-24 (phiên 13, dừng ~18:45 UTC vì hết lượt dùng; Checkpoint C5.14 vẫn chạy nền): kiểm toán nháp C5.13 của phiên 12 (thí nghiệm lab có, run49 đã chạy nhưng Istio hỏng vì hub gcr.io không có 1.31.3, và phần xóa pod 'có delay' chưa từng có delay), chạy run49b/c/d trên runner (x86 rơi vào AWS ở run49b), thêm overlay/VPN/egress, viết và commit C5.13 (196 KB). Phát hiện: HAProxy redispatch ngay lần thử đầu (stream.h) và chu kỳ kiểm tra = chờ + nghỉ (DOWN +5,72 s); kube-proxy minSyncPeriod 1 s → cửa sổ lỗi khi xóa pod 0,1 hoặc 1,2 s (0–7 lỗi không delay, 0 có delay); topology spread + taint control-plane = rollout kẹt; router Linux không dùng PMTU đã học khi chuyển tiếp (ip_forward_use_pmtu) → underlay hẹp = mọi gói phân mảnh; NAT gateway tính phí cả chiều vào. 67 dự đoán 47 ✓ 13 ½ 7 ✗.
 
 ## NEXT ACTION
 
-Phiên 15 (2026-11-27 từ 12:05 UTC, claude-code Opus 5.5) ĐANG LÀM. Chưa commit gì từ phiên 14.
-1. **C5.14 Checkpoint lần 2** vẫn chạy nền (pha mất mạng; máy ảo WSL bị dừng ~1 h 03 phút sau phiên 14 → RAW chậm hơn giờ thực 1 h).
-   Hết mất mạng ~15:42 UTC, xả hàng đợi ~37 phút → xong ~16:20 UTC → `out/ckpt-good/`, `out/ckpt-naive/` (verify.txt). Hai tiến trình
-   `timeout` đã bị giết (ghi trong `out/ckpt_launch.txt`) để chúng không cắt lượt chạy lúc 16:38:57. Sau đó: energy.py → `out/energy.txt`,
-   viết `doc/08-energy.md`, `09-checkpoint.md` (P1–P9, P34; §9.4 = thứ tự + đồng hồ nhảy lùi/nhảy tới 1 h; §9.6 giới hạn), `00-head.md`,
-   hoàn tất `11-appendix.md`, gộp grades, ghép, kiểm, đọc lại, commit.
-2. **C5.15 XONG** (commit 24d699d, đã push). Sau khi viết C5.14: chạy lại `xrefcheck` cho C5.15 (10 dẫn chiếu vào C5.14: §0.3, §3, §3.2,
-   §6, §9.4 — §9.4 phải nói về đồng hồ thực nhảy lùi/nhảy tới trong 6 giờ chạy; nếu không, sửa câu ở C5.15 §9.3).
-3. **C5.16 XONG** (commit 0a97ba4, đã push). Kiểm lại 3 dẫn chiếu vào C5.14 (§0.3, §5) sau khi viết C5.14. Bị chặn: thiết bị thật,
-   libiec61850/lib60870-C (B.4 của leaf ghi cách mở khóa).
-4. Rồi rà soát cả nhánh C5 (`.draft-tools/review_todo.txt`).
-Môi trường: `. /tmp/claude-1000/-mnt-d-Projects-Huong-Dan/777d909f-47da-41ee-9acb-f80500bbe3fa/scratchpad/env.sh` (scratchpad phiên 14 còn sống;
-nếu mất: `C5T=$SP/c5t bash .draft-tools/setup_env.sh`, venv paho/aioquic/cryptography). Bẫy: `ns()` của lab.sh ghi đè biến `n` toàn cục;
-`a && b || c` chạy c khi b thất bại; nstat in bộ đếm theo thứ tự của nó, không theo thứ tự tham số.
+Phiên 15 (2026-11-27, claude-code Opus 5.5): **C5.1–C5.16 đều đã viết và push** (C5.14 = 0904ff4). ĐANG LÀM: rà soát cả nhánh C5.
+Đã xong trong rà soát: doccheck/blockcheck/CRLF cả 16 leaf sạch; xrefcheck 332 dẫn chiếu, 0 sai, 0 treo (đối chứng âm 2/2); mọi lời hứa
+"C5.14/15/16 sẽ…" của C5.1–C5.13 đã có nơi nhận (3 chỗ thiếu ở C5.16 đã bổ sung, commit 12f779b); paho keepalive ở C5.8/C5.9 nhất quán;
+câu "rà soát sẽ kiểm" ở C5.14 §0.3 đã thay bằng kết quả kiểm. Còn lại:
+1. C5.10 §10.2: output có `TcpExtTCPDSACKRecv 56`/`SACKReorder 21` (56 lần gửi lại thừa) mà văn bản không giải thích → thêm một câu nối
+   tới C5.12 (ACK đảo thứ tự trên veth); trước đó kiểm `assemble.py` tái tạo đúng file đã commit từ `.draft-C5.10/`.
+2. Kiểm độ phủ roadmap: tiêu đề mỗi leaf so với sub-leaf của roadmap.md (script).
+3. Cập nhật `.draft-tools/review_todo.txt`, dòng C5.14 trong bảng Completed, memory; commit.
+Mục còn mở có chủ ý (ghi ở B.4 của từng leaf): C5.13 kube-proxy -v=4 (cần runner), thiết bị thật (C5.3/C5.8/C5.14/C5.16).
+Môi trường phiên 15: `. /tmp/claude-1000/-mnt-d-Projects-Huong-Dan/97a74331-ac92-4f01-bf31-20bf7a351226/scratchpad/env16.sh`.
 <!-- /NEXT -->
 
 ## Completed
@@ -32,6 +28,7 @@ nếu mất: `C5T=$SP/c5t bash .draft-tools/setup_env.sh`, venv paho/aioquic/cry
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C5.4 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 14 khối ✅, 388 dòng, 0 lệch; xrefcheck 17/0; CRLF; 21 dự đoán 12 ✓ 6 ½ 3 ✗; nhà máy 4 router trong netns, nftables NAT, BIRD OSPF/BGP, radvd; câu hỏi mở: BIRD giữ route qua giao diện đã xóa (3/3 vs 0/4) |
 | C5.5 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 18 khối ✅, 217 dòng, 0 lệch; xrefcheck 17/0; CRLF; 12 dự đoán 7 ✓ 5 ½ 0 ✗; Checkpoint mù 4/4 ×3 lần xáo (thêm đối chứng khỏe); BBR trên runner; câu hỏi mở: phần dư 4,3 % của QUIC-1, đuôi độ trễ aioquic |
+| C5.14 | ✅ 2026-11-27 | doccheck 0/0; blockcheck 31 khối ✅, 477 dòng, 0 lệch (5 khối gộp nhiều file đã tách); xrefcheck 21/0; prosenums 22/652 đã đọc (phiên bản, phép suy ra ghi cạnh); CRLF 1271 dòng; 39 dự đoán 25 ✓ 13 ½ 1 ✗; Checkpoint lần 2 đủ 6 giờ (08:18:59–16:24:19 UTC 27/11), 2 × 40 thiết bị, 0 mất/0 trùng/0 khoảng trống, máy ảo đóng băng 68 phút giữa lúc mất mạng (giờ thực nhảy 4.077,5 s); năng lượng là mô hình (ESP32 v5.3) |
 | C5.16 | ✅ 2026-11-27 | doccheck 0/0; blockcheck 37 khối ✅, 603 dòng, 0 lệch; xrefcheck 11/0 (3 vào C5.14 chưa viết — kiểm lại); prosenums 64/710 đã đọc (số hiệu chuẩn, địa chỉ thanh ghi từ PDF Eastron, năm, phép suy ra ghi cạnh); CRLF 1473 dòng; 44 dự đoán 29 ✓ 12 ½ 3 ✗; Checkpoint "thiết bị thật" BLOCKED (mô phỏng SDM630 theo tài liệu Eastron); ngăn xếp thật: pymodbus, c104/lib60870, asyncua, python-can/canopen, bacpypes3; GOOSE/SV/PROFINET/EtherCAT tự mã hóa, tshark làm trọng tài; HART, EtherCAT là mô hình |
 | C5.15 | ✅ 2026-11-27 | doccheck 0/0; blockcheck 22 khối ✅, 524 dòng, 0 lệch; xrefcheck 45/0 (10 vào C5.14 chưa viết — kiểm lại); prosenums 44/512 đã đọc (phiên bản, năm, số suy ra ghi cạnh; 3 chỗ sửa); CRLF 1430 dòng; 45 dự đoán 24 ✓ 17 ½ 4 ✗; phiên 14 thí nghiệm + §1–§3, §5, §7–§10; phiên 15: herd lần 5 (đếm đủ gói), truesize, reject v6 (nhãn bộ đếm), rtorevert (RFC 6069), §4, §6, đầu, phụ lục; mã nguồn Linux v6.18, HAProxy 2.8.30, CPython 3.12 trong `out/src_quotes/` |
 | C5.13 | ✅ 2026-11-24 | doccheck 0/0; blockcheck 32 khối ✅, 764 dòng, 0 lệch; xrefcheck 25/0 (đối chứng âm 2/2); prosenums 13/440 (phiên bản, năm, số suy ra ghi cạnh); CRLF 2067 dòng; 67 dự đoán 47 ✓ 13 ½ 7 ✗; runner run49/49b/49c/49d (Azure x86+arm, AWS x86): kind v0.33.0 + Istio 1.31.3; mã nguồn Linux v6.18, HAProxy 2.8.30, Kubernetes v1.37.0, agnhost trong `out/src_quotes/`; giá AWS Price List API trong `data/` |
