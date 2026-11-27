@@ -1,23 +1,25 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.13 xong (C5.13 viết + commit 2026-11-24, phiên 13); C5.14–C5.16 chưa viết.
-**Updated:** 2026-11-24
+**State:** C1–C4 hoàn tất. C5 (Networking) đang làm: C5.1–C5.13, C5.15, C5.16 xong; C5.14 chờ Checkpoint 6 giờ (xong ~16:20 UTC 27/11); sau đó rà soát cả nhánh.
+**Updated:** 2026-11-27 (phiên 15 đang chạy)
 **Last session:** claude-code (Opus 5.5), 2026-11-24 (phiên 13, dừng ~18:45 UTC vì hết lượt dùng; Checkpoint C5.14 vẫn chạy nền): kiểm toán nháp C5.13 của phiên 12 (thí nghiệm lab có, run49 đã chạy nhưng Istio hỏng vì hub gcr.io không có 1.31.3, và phần xóa pod 'có delay' chưa từng có delay), chạy run49b/c/d trên runner (x86 rơi vào AWS ở run49b), thêm overlay/VPN/egress, viết và commit C5.13 (196 KB). Phát hiện: HAProxy redispatch ngay lần thử đầu (stream.h) và chu kỳ kiểm tra = chờ + nghỉ (DOWN +5,72 s); kube-proxy minSyncPeriod 1 s → cửa sổ lỗi khi xóa pod 0,1 hoặc 1,2 s (0–7 lỗi không delay, 0 có delay); topology spread + taint control-plane = rollout kẹt; router Linux không dùng PMTU đã học khi chuyển tiếp (ip_forward_use_pmtu) → underlay hẹp = mọi gói phân mảnh; NAT gateway tính phí cả chiều vào. 67 dự đoán 47 ✓ 13 ½ 7 ✗.
 
 ## NEXT ACTION
 
-C5.14 (phiên 13, 2026-11-24) ĐANG LÀM. Checkpoint 6 giờ thật đang chạy nền: khởi chạy 17:44:46 UTC, mất mạng từ 17:54:47 tới ~00:00 UTC ngày 25, xả
-hàng đợi xong ~00:45 UTC; kết quả tự chép vào `.draft-C5.14/out/ckpt-good/`, `ckpt-naive/` (verify.txt, load.csv, events.txt, server.db, status.log).
-Nếu các tiến trình đã chết (WSL khởi động lại): chạy lại theo `out/ckpt_launch.txt`. Đã xong: thí nghiệm §1–§7 (`out/nat.txt`, `outbound-*.txt`,
-`reconnect-*.txt`, `queue_*.txt`, `gaps-qos*.txt`, `detect*.txt`, `multipath.txt`, `clockref.txt`), dự đoán P1–P33 (P10–P33 chấm trong
-`out/grades_partial.txt`), tài liệu `doc/00b-sec0.md`, `01-nat.md`…`07-multipath.md`. Còn lại sau Checkpoint: chạy `src/energy/energy.py out/ckpt-good
-out/ckpt-naive > out/energy.txt` (§8), viết `08-energy.md`, `09-checkpoint.md` (verify.txt cả hai nhóm, chấm P1–P9), `00-head.md` (mục tiêu + phát hiện),
-`11-appendix.md`, gộp grades → `out/grades.txt`, ghép bằng assemble.py, chạy các bộ kiểm, đọc lại, commit. Trong lúc chờ: bắt đầu C5.15 trong
-`.draft-C5.15/` (Checkpoint của roadmap: retry storm → sụp đổ → jitter + circuit breaker, chứng minh bằng đồ thị). Sau đó C5.16, rồi rà soát cả nhánh C5.
-C5.15 (phiên 13, dừng vì hết lượt dùng): `.draft-C5.15/` có lab + `src/ckpt/{srv,load,ckpt.sh,graph}.py` (retry storm: 150 yêu cầu/s, máy chủ ~200/s, đóng băng 3 s ở t=22 s) và dự đoán P1–P5 trong `out/predictions.txt` — CHƯA CHẠY lần nào (chạy: `bash src/lab/inlab.sh src/ckpt/ckpt.sh out naive400 naive 400`, `naive100 naive 100`, `good400 good 400`, `deadline400 naive 400 deadline`; tránh chạy nặng lúc Checkpoint C5.14 đang xả hàng đợi). Kế hoạch các mục khác của C5.15 (chưa viết): phân vùng một chiều + idempotency, lỗi xám (HAProxy observe layer7), đàn bò (hẹn giờ đồng bộ vs lệch theo băm), DNS chết khi kết nối cũ còn sống (dnsmasq), DROP vs REJECT, rò rỉ fd (CLOSE_WAIT, ulimit), cạn cổng tạm (port range hẹp, TIME_WAIT, tw_reuse), đồng hồ lệch hỏng TLS (`openssl s_client -attime`). Nợ cho C5.15: C5.7 §1.3 thử lại 503; C5.9 §3 đồng hồ lệch làm hỏng TLS; C5.11 §6.4/§8.2 đàn bò giẫm đạp/bão bắt tay. Rà soát nhánh: C5.12 B.4
-(ACK đảo thứ tự trong lab veth có làm sai các leaf trước không); C5.13 B.4 (kube-proxy trễ 1 s: kiểm bằng log -v=4). Môi trường phiên này:
-`SP=scratchpad`, `C5T=$SP/c5t TMPDIR=$SP PYQ=$SP/venv/bin/python` (venv: paho-mqtt 2.1.0, aioquic 1.7.2). WSL lần khởi động này: CLOCK_MONOTONIC
-nhanh 8,34 % so với Windows (`out/clockref.txt` của C5.14) — mọi lịch trình dài phải lặp trên CLOCK_MONOTONIC_RAW.
+Phiên 15 (2026-11-27 từ 12:05 UTC, claude-code Opus 5.5) ĐANG LÀM. Chưa commit gì từ phiên 14.
+1. **C5.14 Checkpoint lần 2** vẫn chạy nền (pha mất mạng; máy ảo WSL bị dừng ~1 h 03 phút sau phiên 14 → RAW chậm hơn giờ thực 1 h).
+   Hết mất mạng ~15:42 UTC, xả hàng đợi ~37 phút → xong ~16:20 UTC → `out/ckpt-good/`, `out/ckpt-naive/` (verify.txt). Hai tiến trình
+   `timeout` đã bị giết (ghi trong `out/ckpt_launch.txt`) để chúng không cắt lượt chạy lúc 16:38:57. Sau đó: energy.py → `out/energy.txt`,
+   viết `doc/08-energy.md`, `09-checkpoint.md` (P1–P9, P34; §9.4 = thứ tự + đồng hồ nhảy lùi/nhảy tới 1 h; §9.6 giới hạn), `00-head.md`,
+   hoàn tất `11-appendix.md`, gộp grades, ghép, kiểm, đọc lại, commit.
+2. **C5.15 XONG** (commit 24d699d, đã push). Sau khi viết C5.14: chạy lại `xrefcheck` cho C5.15 (10 dẫn chiếu vào C5.14: §0.3, §3, §3.2,
+   §6, §9.4 — §9.4 phải nói về đồng hồ thực nhảy lùi/nhảy tới trong 6 giờ chạy; nếu không, sửa câu ở C5.15 §9.3).
+3. **C5.16 XONG** (commit 0a97ba4, đã push). Kiểm lại 3 dẫn chiếu vào C5.14 (§0.3, §5) sau khi viết C5.14. Bị chặn: thiết bị thật,
+   libiec61850/lib60870-C (B.4 của leaf ghi cách mở khóa).
+4. Rồi rà soát cả nhánh C5 (`.draft-tools/review_todo.txt`).
+Môi trường: `. /tmp/claude-1000/-mnt-d-Projects-Huong-Dan/777d909f-47da-41ee-9acb-f80500bbe3fa/scratchpad/env.sh` (scratchpad phiên 14 còn sống;
+nếu mất: `C5T=$SP/c5t bash .draft-tools/setup_env.sh`, venv paho/aioquic/cryptography). Bẫy: `ns()` của lab.sh ghi đè biến `n` toàn cục;
+`a && b || c` chạy c khi b thất bại; nstat in bộ đếm theo thứ tự của nó, không theo thứ tự tham số.
 <!-- /NEXT -->
 
 ## Completed
@@ -30,6 +32,8 @@ nhanh 8,34 % so với Windows (`out/clockref.txt` của C5.14) — mọi lịch 
 | C5.1 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 60 khối ✅, 842 dòng, 0 lệch; xrefcheck 6/0; CRLF; nháp `.draft-C5.1/` giữ lại tới khi rà soát nhánh |
 | C5.4 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 14 khối ✅, 388 dòng, 0 lệch; xrefcheck 17/0; CRLF; 21 dự đoán 12 ✓ 6 ½ 3 ✗; nhà máy 4 router trong netns, nftables NAT, BIRD OSPF/BGP, radvd; câu hỏi mở: BIRD giữ route qua giao diện đã xóa (3/3 vs 0/4) |
 | C5.5 | ✅ 2026-11-12 | doccheck 0/0; blockcheck 18 khối ✅, 217 dòng, 0 lệch; xrefcheck 17/0; CRLF; 12 dự đoán 7 ✓ 5 ½ 0 ✗; Checkpoint mù 4/4 ×3 lần xáo (thêm đối chứng khỏe); BBR trên runner; câu hỏi mở: phần dư 4,3 % của QUIC-1, đuôi độ trễ aioquic |
+| C5.16 | ✅ 2026-11-27 | doccheck 0/0; blockcheck 37 khối ✅, 603 dòng, 0 lệch; xrefcheck 11/0 (3 vào C5.14 chưa viết — kiểm lại); prosenums 64/710 đã đọc (số hiệu chuẩn, địa chỉ thanh ghi từ PDF Eastron, năm, phép suy ra ghi cạnh); CRLF 1473 dòng; 44 dự đoán 29 ✓ 12 ½ 3 ✗; Checkpoint "thiết bị thật" BLOCKED (mô phỏng SDM630 theo tài liệu Eastron); ngăn xếp thật: pymodbus, c104/lib60870, asyncua, python-can/canopen, bacpypes3; GOOSE/SV/PROFINET/EtherCAT tự mã hóa, tshark làm trọng tài; HART, EtherCAT là mô hình |
+| C5.15 | ✅ 2026-11-27 | doccheck 0/0; blockcheck 22 khối ✅, 524 dòng, 0 lệch; xrefcheck 45/0 (10 vào C5.14 chưa viết — kiểm lại); prosenums 44/512 đã đọc (phiên bản, năm, số suy ra ghi cạnh; 3 chỗ sửa); CRLF 1430 dòng; 45 dự đoán 24 ✓ 17 ½ 4 ✗; phiên 14 thí nghiệm + §1–§3, §5, §7–§10; phiên 15: herd lần 5 (đếm đủ gói), truesize, reject v6 (nhãn bộ đếm), rtorevert (RFC 6069), §4, §6, đầu, phụ lục; mã nguồn Linux v6.18, HAProxy 2.8.30, CPython 3.12 trong `out/src_quotes/` |
 | C5.13 | ✅ 2026-11-24 | doccheck 0/0; blockcheck 32 khối ✅, 764 dòng, 0 lệch; xrefcheck 25/0 (đối chứng âm 2/2); prosenums 13/440 (phiên bản, năm, số suy ra ghi cạnh); CRLF 2067 dòng; 67 dự đoán 47 ✓ 13 ½ 7 ✗; runner run49/49b/49c/49d (Azure x86+arm, AWS x86): kind v0.33.0 + Istio 1.31.3; mã nguồn Linux v6.18, HAProxy 2.8.30, Kubernetes v1.37.0, agnhost trong `out/src_quotes/`; giá AWS Price List API trong `data/` |
 | C5.12 | ✅ 2026-11-23 | doccheck 0/0; blockcheck 40 khối ✅, 538 dòng, 0 lệch; xrefcheck 32/0 (đối chứng âm 2/2); prosenums 39/602 đã đọc (suy ra ghi cạnh, phiên bản, năm); CRLF 1277 dòng; 34 dự đoán 21 ✓ 7 ½ 6 ✗; viết 2026-11-19 (phiên 11), kiểm toán 2026-11-23: ACK đảo thứ tự + RACK, mô hình bánh xe hẹn giờ, phép thử ghim CPU; mã nguồn libpcap 1.10.4, Wireshark 4.2.2, Linux v6.18 (RACK, veth backlog, probe0), aioquic 1.7.2 trong `out/src_quotes/` |
 | C5.11 | ✅ 2026-11-19 | doccheck 0/0; blockcheck 23 khối ✅, 338 dòng, 0 lệch; xrefcheck 40/0; prosenums 24/631 đã đọc (bảng hiệu suất tính, phép chia ghi cạnh, phiên bản, năm); CRLF 1093 dòng; 29 dự đoán 11 ✓ 16 ½ 2 ✗; mã nguồn Linux v6.18 (cwnd restart, sndbuf wakeup, frag memory, TLP), nginx 1.24.0 (cache manager, cache lock) trong `out/src_quotes/`; output cũ trong `out/superseded/` |
