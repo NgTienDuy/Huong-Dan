@@ -1,12 +1,12 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C5 hoàn tất. C6 · Embedded Systems & Firmware đang làm: **C6.1 xong (2026-11-28)**; C6.2–C6.16 còn là file khung.
-**Updated:** 2026-11-28 (phiên 17)
-**Last session:** claude-code (Opus 5.5), 2026-11-28 (phiên 17): dựng lại bộ công cụ cho C6 trong `.draft-tools/` (toolchain ARM/AVR, QEMU 8.2.2, simavr 1.6 + harness, sigrok, poppler; tài liệu hãng trong `docs/`) và viết **C6.1 · Kiến trúc MCU & đọc datasheet** (238 KB, 48 dự đoán: ✓32 ½9 ✗5, 2 không chấm). Nền tảng: QEMU `lm3s6965evb` (+ `mps2-an385` đối chứng) với datasheet TI LM3S6965, simavr ATmega328P (chip của Uno), tài liệu ESP32. Phát hiện: 15 chỗ QEMU/simavr làm khác datasheet (bảng §0.5 của leaf), lỗi khóa GPIOLOCK của QEMU (còn ở master), STKALIGN reset = 0 trên LM3S6965 thật (C3.4 §3.5 chỉ thấy giá trị của QEMU), errata ATmega328P 2.4.1 dùng cho Checkpoint.
+**State:** C1–C5 hoàn tất. C6 · Embedded Systems & Firmware đang làm: **C6.1, C6.2 xong (2026-11-28)**; C6.3–C6.16 còn là file khung.
+**Updated:** 2026-11-28 (phiên 18)
+**Last session:** claude-code (Opus 5.5), 2026-11-28 (phiên 18): viết **C6.2 · GPIO, timer, PWM, ngắt** (222 KB, 53 dự đoán: ✓27 ½17 ✗7, 2 không chấm). Nền tảng: simavr ATmega328P với harness mới (kích thích chân, log sườn/vector, SP), logic analyzer mô phỏng `la.py` → sigrok `pwm`, ngspice 42 (mới thêm vào debs). Phát hiện: 14 chỗ simavr 1.6 khác datasheet (vào ngắt 0 chu kỳ, 2 lệnh sau SEI/RETI, mode 14 bỏ qua ghi OCR1A, phase-correct không chạy, ghi 1 vào EIFR đặt cờ…); Uno R3 chạy ATmega328P bằng bộ cộng hưởng gốm CSTCE16M0V53-R0 (±0,5 %+0,3 %+0,2 %) nên PWM không đạt 0,1 % nếu không hiệu chuẩn.
 
 ## NEXT ACTION
 
-Bắt đầu **C6.2 · GPIO, timer, PWM, ngắt** (roadmap §5, checkpoint: PWM sai số < 0,1 % đo bằng logic analyzer, độ trễ ngắt < 5 µs). Hướng: simavr (ATmega328P, đếm chu kỳ) cho timer/PWM/input capture/độ trễ ngắt; ghi dạng sóng chân ra VCD (`avr_vcd_*` trong libsimavr) và giải mã bằng `sigrok-cli` (logic analyzer mô phỏng); QEMU chỉ cho phần NVIC/vùng găng (không có chu kỳ). Trước khi đo: đọc lại C3.11 §3–§4 (độ trễ ngắt, đã đo trên RTL) và C4.10 §3 để không lặp. Công cụ: `source .draft-tools/setup_env.sh` (scratchpad mất thì nó tự giải nén lại từ `debs/`); harness AVR và script build/run nằm trong `.draft-C6.1/src/avr/` — chép sang `.draft-C6.2/`. Nếu người dùng nối Uno/ESP32 qua `usbipd`, dùng board thật cho checkpoint (xem Blockers).
+Bắt đầu **C6.3 · Bus & giao tiếp ngoại vi** (roadmap §5; checkpoint: debug một bus I²C "câm" bằng logic analyzer, ba nguyên nhân: sai địa chỉ, thiếu điện trở kéo lên, clock stretching không được hỗ trợ). Hướng: simavr ATmega328P có TWI/SPI/UART (kiểm trước mô hình của simavr: `avr_twi.c`, `avr_spi.c`, `avr_uart.c` — C6.2 tìm 14 chỗ simavr khác datasheet, đọc mã trước khi dự đoán); thiết bị I²C/SPI phía kia viết trong harness (C6.2 harness: `-s` kích thích, `-w` log sườn, `-I` vector, `-S` SP); "logic analyzer" = `la.py` (16/24 MS/s, ppm) → `sigrok-cli` với bộ giải mã `i2c`, `spi`, `uart` (có sẵn trong libsigrokdecode); điện của I²C (kéo lên, thời gian lên) bằng ngspice (đã có trong `.draft-tools/debs`). Đọc trước C3.11 §7 (UART/SPI/I²C tầng vật lý, đã đo thời gian lên I²C) để không lặp. Công cụ: `source .draft-tools/setup_env.sh`; chép `src/{rec.sh,dsq.sh,srcq.sh,gradecount.py,la.py,edges.py}` và `src/avr/{harness.c,build.sh,run.sh,uart.h,gen_stim.py}` từ `.draft-C6.2/`.
 <!-- /NEXT -->
 
 ## Completed
@@ -19,6 +19,7 @@ Bắt đầu **C6.2 · GPIO, timer, PWM, ngắt** (roadmap §5, checkpoint: PWM 
 | C4 (C4.1–C4.13) | ✅ 2026-11-10 | doccheck 13/13 leaf 0/0; blockcheck 611 khối ✅, 7.838 dòng, 0 lệch; 361 dẫn chiếu `C4.N §X`, 0 sai; trước khi xóa nháp |
 | C5 (C5.1–C5.16) | ✅ 2026-11-27 | doccheck 16/16 leaf 0/0; blockcheck 428 khối ✅, 7.491 dòng, 0 lệch; 342 dẫn chiếu, 0 sai, chủ đề đích khớp (đối chứng âm 2/2); CRLF 16/16; 473 dự đoán chấm nghiêm: 292 ✓ 141 ½ 40 ✗; trước khi xóa nháp |
 | C6.1 | ✅ 2026-11-28 | doccheck 0/0; blockcheck 83 khối ✅, 1.330 dòng, 0 lệch (đối chứng âm bắt được); xrefcheck 31 dẫn chiếu, 0 sai; errscan 12 điểm, đều là nội dung hợp lệ |
+| C6.2 | ✅ 2026-11-28 | doccheck 0/0; blockcheck 69 khối ✅, 999 dòng, 0 lệch (đối chứng âm bắt được); xrefcheck 33 dẫn chiếu, 0 sai, chủ đề khớp; errscan 17 điểm, đều là nội dung hợp lệ (đối chứng âm 17→18); prosenums 35 số suy ra, đã soát; CRLF |
 
 ## Quy ước viết leaf (giữ cho mọi nhánh)
 
@@ -56,6 +57,7 @@ Bắt đầu **C6.2 · GPIO, timer, PWM, ngắt** (roadmap §5, checkpoint: PWM 
 - GPU RTX 4060 Laptop, CUDA 13.3 redist; `ncu` bị chặn quyền bộ đếm.
 
 - **C6 (2026-11-28):** `.draft-tools/debs/` chứa mọi `.deb` (gcc-arm-none-eabi 13.2.1, qemu-system-arm 8.2.2, gdb-multiarch 15.1, gcc-avr 7.3.0, avr-libc 2.0.0, simavr/libsimavr 1.6, sigrok-cli 0.7.2, poppler 24.02.0 + thư viện phụ); `setup_env.sh` giải nén vào scratchpad. Tài liệu hãng trong `.draft-tools/docs/` (+ `txt/` = pdftotext): TI SPMS144I, SPMZ860, SPMZ092, SPMZ637, TM4C123+SPMZ849; Microchip DS40002061B (errata DS80000855C chỉ lấy được từ onlinedocs.microchip.com, `docs/mcerr/`; www.microchip.com trả Access Denied); Espressif ESP32 DS v5.3, TRM v5.9, errata v3.1, WROOM-32E v2.1. **ST chặn tải tự động — không vượt rào** (bộ phân loại an toàn từ chối đổi User-Agent). `pdftotext` mất dấu trừ trong PDF của Espressif (font CID Adobe-GB1) → kiểm số âm bằng pdfminer.six (venv scratchpad).
+- **simavr 1.6 trong C6.2** (bảng §0.5 của leaf): vào ngắt 0 chu kỳ (DS 4); 2 lệnh sau SEI/RETI (DS 1); không bộ đồng bộ PIN; pull-up nội đè driver ngoài mỗi lần ghi PORT/DDR (→ không bật pull-up nội trong bài, kích thích tự giữ mức nghỉ = dòng `1 1`); sự kiện timer/capture ở cuối lệnh đang chạy (hạt 0–3 chu kỳ); mode 8/9/14/15 = loại `pwm`, ghi OCR bị bỏ qua; mode 1–3/10/11 không có; OCR=TOP → mức thấp; mode 5–7 không đệm kép + so giá trị cũ sau byte cao; không ICNC1; ghi 1 vào EIFR/PCIFR đặt cờ. ngspice: spinit cần sửa đường dẫn code model (setup_env.sh làm).
 - **QEMU lm3s6965evb**: `ignore_memory_transaction_failures` (lỗi bus bị nuốt → dùng `mps2-an385` làm đối chứng), 8 bit ưu tiên (chip 3), RCC = 200/(SYSDIV+1), không gate RCGCn, CCR.STKALIGN bật sẵn (chip: 0), CPUID r0p1 (chip r1p1), GPIOLOCK so với 0x0ACCE551; 64 IRQ (chip 38). `-icount shift=3` = 8 ns/lệnh; SysTick đếm SYSCLK của model → đo được tần số firmware cấu hình. **simavr 1.6**: không CLKPR, không FOC, PRR không dừng timer, OC1A bị xóa mỗi lần tràn ở Normal mode, điện áp analog là mV nguyên (ngưỡng 1,1 V thành 1099,5 mV); SRAM giữ qua reset; WDRF→WDE đúng.
 
 ## Known problems
