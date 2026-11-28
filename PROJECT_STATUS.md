@@ -1,12 +1,12 @@
 # Project Status — Huong-Dan / E2E-SYSTEM
 
-**State:** C1–C5 hoàn tất. C5 (Networking, 16 leaf) đã rà soát cả nhánh và xóa nháp ngày 2026-11-27. Nhánh kế tiếp theo roadmap: C6 · Embedded Systems & Firmware (mọi leaf còn là file khung).
-**Updated:** 2026-11-27 (phiên 16)
-**Last session:** claude-code (Opus 5.5), 2026-11-27 (phiên 16): rà soát và đóng nhánh C5. Kiểm bằng script cả 16 leaf — ghép lại từ nháp trùng từng byte, cấu trúc, khối ✅ so với `out/`, dẫn chiếu giữa leaf *và* chủ đề của mục đích, phiên bản công cụ, số trong văn xuôi chỉ có ở file tự viết (grades/predictions), khối ✅ chứa traceback / mục rỗng / giá trị rỗng (mỗi phép quét có đối chứng âm) — rồi đọc kỹ C5.15 và C5.16 so với `out/`. Sửa: C5.2 §6.1 (khối ✅ là một lần chạy hỏng suốt hai tuần, lần chạy tốt đã bị ghi đè → chạy lại `mtu.sh speed`); C5.16 §5.3 (RTU IEC 104 đóng kết nối bởi t1 tính từ khung chưa xác nhận cũ nhất, không bởi `TCP_USER_TIMEOUT` — phép thử mới `utoprobe.sh`, P45–P46 ✓, mã lib60870 và `tcp_probe_timer` v6.18); C5.16 §8.3 (bảng stream 3 rỗng do bẫy `awk 'NR == FNR'` → giải mã lại pcap); C5.15 (131 s danh nghĩa vs 133,3–135,3 s đã đo ở C5.10; số lần chạy hỏng; biên lease chưa được thử; 3 chỗ chính xác khác); C5.1 §8.2 (D-SACK chưa giải thích); C5.12 B.4; C5.16 (đếm yêu cầu, OPN 1.622 byte, tỉ lệ tự mô tả/byte). Rồi xóa mọi `.draft-*` (kể cả `.draft-tools`).
+**State:** C1–C5 hoàn tất. C6 · Embedded Systems & Firmware đang làm: **C6.1 xong (2026-11-28)**; C6.2–C6.16 còn là file khung.
+**Updated:** 2026-11-28 (phiên 17)
+**Last session:** claude-code (Opus 5.5), 2026-11-28 (phiên 17): dựng lại bộ công cụ cho C6 trong `.draft-tools/` (toolchain ARM/AVR, QEMU 8.2.2, simavr 1.6 + harness, sigrok, poppler; tài liệu hãng trong `docs/`) và viết **C6.1 · Kiến trúc MCU & đọc datasheet** (238 KB, 48 dự đoán: ✓32 ½9 ✗5, 2 không chấm). Nền tảng: QEMU `lm3s6965evb` (+ `mps2-an385` đối chứng) với datasheet TI LM3S6965, simavr ATmega328P (chip của Uno), tài liệu ESP32. Phát hiện: 15 chỗ QEMU/simavr làm khác datasheet (bảng §0.5 của leaf), lỗi khóa GPIOLOCK của QEMU (còn ở master), STKALIGN reset = 0 trên LM3S6965 thật (C3.4 §3.5 chỉ thấy giá trị của QEMU), errata ATmega328P 2.4.1 dùng cho Checkpoint.
 
 ## NEXT ACTION
 
-Khi người dùng giao nhánh mới: bắt đầu **C6.1 · Kiến trúc MCU & đọc datasheet** (thứ tự roadmap §5). Trước khi lập kế hoạch thí nghiệm: (1) dựng lại bộ công cụ trong `E2E-SYSTEM/C6-EmbeddedSystems&Firmware/.draft-tools/` theo công thức ở "Quy ước viết leaf" (bộ của C5 đã xóa cùng nháp); (2) hỏi người dùng một lần có nối ESP32 DevKit / Arduino Uno vào WSL qua `usbipd` không (xem Blockers) — C6 là nhánh đầu tiên mà thiết bị thật là trọng tâm; nếu không, dùng QEMU (FreeRTOS trong `qemu-system-arm` đã được phép ở C4.10) và ghi rõ phần nào là mô phỏng.
+Bắt đầu **C6.2 · GPIO, timer, PWM, ngắt** (roadmap §5, checkpoint: PWM sai số < 0,1 % đo bằng logic analyzer, độ trễ ngắt < 5 µs). Hướng: simavr (ATmega328P, đếm chu kỳ) cho timer/PWM/input capture/độ trễ ngắt; ghi dạng sóng chân ra VCD (`avr_vcd_*` trong libsimavr) và giải mã bằng `sigrok-cli` (logic analyzer mô phỏng); QEMU chỉ cho phần NVIC/vùng găng (không có chu kỳ). Trước khi đo: đọc lại C3.11 §3–§4 (độ trễ ngắt, đã đo trên RTL) và C4.10 §3 để không lặp. Công cụ: `source .draft-tools/setup_env.sh` (scratchpad mất thì nó tự giải nén lại từ `debs/`); harness AVR và script build/run nằm trong `.draft-C6.1/src/avr/` — chép sang `.draft-C6.2/`. Nếu người dùng nối Uno/ESP32 qua `usbipd`, dùng board thật cho checkpoint (xem Blockers).
 <!-- /NEXT -->
 
 ## Completed
@@ -18,6 +18,7 @@ Khi người dùng giao nhánh mới: bắt đầu **C6.1 · Kiến trúc MCU & 
 | C3 (C3.1–C3.14) | ✅ 2026-10-09 | doccheck 14/14 file 0/0; blockcheck C3.7–C3.14: 2.834 dòng, 0 lệch, trước khi xóa nháp |
 | C4 (C4.1–C4.13) | ✅ 2026-11-10 | doccheck 13/13 leaf 0/0; blockcheck 611 khối ✅, 7.838 dòng, 0 lệch; 361 dẫn chiếu `C4.N §X`, 0 sai; trước khi xóa nháp |
 | C5 (C5.1–C5.16) | ✅ 2026-11-27 | doccheck 16/16 leaf 0/0; blockcheck 428 khối ✅, 7.491 dòng, 0 lệch; 342 dẫn chiếu, 0 sai, chủ đề đích khớp (đối chứng âm 2/2); CRLF 16/16; 473 dự đoán chấm nghiêm: 292 ✓ 141 ½ 40 ✗; trước khi xóa nháp |
+| C6.1 | ✅ 2026-11-28 | doccheck 0/0; blockcheck 83 khối ✅, 1.330 dòng, 0 lệch (đối chứng âm bắt được); xrefcheck 31 dẫn chiếu, 0 sai; errscan 12 điểm, đều là nội dung hợp lệ |
 
 ## Quy ước viết leaf (giữ cho mọi nhánh)
 
@@ -28,6 +29,7 @@ Khi người dùng giao nhánh mới: bắt đầu **C6.1 · Kiến trúc MCU & 
   chấm nghiêm ở Phụ lục B.3 (đúng cơ chế nhưng sai con số là ½; dự đoán viết sau khi đã thấy output thì không chấm) bằng `out/grades.txt` + script đếm.
   Lần chạy hỏng giữ ở `out/superseded/` kèm README; không bao giờ để một lần chạy ghi đè output đã được trích.
 - Tiếng Việt, code/identifier tiếng Anh; leaf CRLF. Nháp ở `<nhánh>/.draft-Cx.y/` (không commit), xóa khi xong nhánh.
+- C6: `assemble.py` tự chèn `…` khi regex chọn các dòng không liền nhau; trích datasheet bằng `src/dsq.sh` (đầu đề ghi dòng + trang PDF) vào `out/ds_quotes/`, mã nguồn trình mô phỏng vào `out/src_quotes/`; `errscan.py` (traceback, `key=` rỗng, tiêu đề không nội dung) có đối chứng âm.
 - Bộ công cụ (dựng lại mỗi nhánh trong `<nhánh>/.draft-tools/`): `assemble.py` (ghép `doc/NN-*.md`, `{{out:FILE[:A-B|:/RE/][:cut=N]}}`, regex không chứa `:`,
   `<!--TOC-->`, ghi CRLF); `doccheck.py` (cấu trúc, anchor, mọi §, chân trang); `blockcheck.py` (mỗi dòng khối ✅ có trong một file `out/`, theo thứ tự, ranh giới `…`);
   `prosenums.py` (số trong văn xuôi không có nguyên văn trong `out/`; **loại trừ file tự viết** grades/predictions/README; bỏ pcap); `xrefcheck.py` (dẫn chiếu
@@ -53,6 +55,9 @@ Khi người dùng giao nhánh mới: bắt đầu **C6.1 · Kiến trúc MCU & 
   Datasheet: TI, Espressif, Adafruit tải được; Nordic, SiLabs, u-blox chặn.
 - GPU RTX 4060 Laptop, CUDA 13.3 redist; `ncu` bị chặn quyền bộ đếm.
 
+- **C6 (2026-11-28):** `.draft-tools/debs/` chứa mọi `.deb` (gcc-arm-none-eabi 13.2.1, qemu-system-arm 8.2.2, gdb-multiarch 15.1, gcc-avr 7.3.0, avr-libc 2.0.0, simavr/libsimavr 1.6, sigrok-cli 0.7.2, poppler 24.02.0 + thư viện phụ); `setup_env.sh` giải nén vào scratchpad. Tài liệu hãng trong `.draft-tools/docs/` (+ `txt/` = pdftotext): TI SPMS144I, SPMZ860, SPMZ092, SPMZ637, TM4C123+SPMZ849; Microchip DS40002061B (errata DS80000855C chỉ lấy được từ onlinedocs.microchip.com, `docs/mcerr/`; www.microchip.com trả Access Denied); Espressif ESP32 DS v5.3, TRM v5.9, errata v3.1, WROOM-32E v2.1. **ST chặn tải tự động — không vượt rào** (bộ phân loại an toàn từ chối đổi User-Agent). `pdftotext` mất dấu trừ trong PDF của Espressif (font CID Adobe-GB1) → kiểm số âm bằng pdfminer.six (venv scratchpad).
+- **QEMU lm3s6965evb**: `ignore_memory_transaction_failures` (lỗi bus bị nuốt → dùng `mps2-an385` làm đối chứng), 8 bit ưu tiên (chip 3), RCC = 200/(SYSDIV+1), không gate RCGCn, CCR.STKALIGN bật sẵn (chip: 0), CPUID r0p1 (chip r1p1), GPIOLOCK so với 0x0ACCE551; 64 IRQ (chip 38). `-icount shift=3` = 8 ns/lệnh; SysTick đếm SYSCLK của model → đo được tần số firmware cấu hình. **simavr 1.6**: không CLKPR, không FOC, PRR không dừng timer, OC1A bị xóa mỗi lần tràn ở Normal mode, điện áp analog là mV nguyên (ngưỡng 1,1 V thành 1099,5 mV); SRAM giữ qua reset; WDRF→WDE đúng.
+
 ## Known problems
 
 - Git: Windows `autocrlf=true`, WSL thì không → mọi file hiện "modified". Xem thật: `git -c core.autocrlf=true status`; add: `git -c core.autocrlf=true add <file>`.
@@ -65,6 +70,8 @@ Khi người dùng giao nhánh mới: bắt đầu **C6.1 · Kiến trúc MCU & 
 - Thư mục crash dump của WSL phía Windows (`%LOCALAPPDATA%\Temp\wsl-crashes`) giữ ~5,7 GiB file `.dmp` từ các phiên trước. Nằm ngoài dự án → không tự xóa.
 - Mã nguồn tải về không biên dịch được: LittleFS v2.11.3 (C4.4 §10 dùng mô hình `mpsim.py`, ghi ở §11.8 mục 3 và B.4), libiec61850 v1.6.2.1 và lib60870-C v2.4.1
   (C5.16 §4.4 không đo MMS; B.4 mục 2). Nếu người dùng cho phép, tải lại, chạy thật và thay phần mô hình.
+
+- QEMU `hw/gpio/pl061.c` so khóa GPIOLOCK với `0xacce551` (datasheet TI: 0x1ACC.E551), vẫn còn ở master ngày 2026-11-28 — có thể báo cho dự án QEMU; chưa gửi (hành động ra ngoài cần người dùng quyết). Bằng chứng: `C6.1` §10.2.
 
 ## Blockers
 
